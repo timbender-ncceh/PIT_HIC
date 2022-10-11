@@ -1,0 +1,21 @@
+---
+title: "Annual PIT/HIC Pivots Work Process"
+output: html_notebook
+---
+
+### Purpose / Description
+```{r}
+print("Ctrl+Alt+I")
+```
+
+### Output, Visualized
+
+### Directories
+
+### Files
+
+### Resources
+
+
+
+
