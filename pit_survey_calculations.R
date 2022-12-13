@@ -35,7 +35,7 @@ fun_gender <- function(male = c(0,1),
                        trans = c(0,1),
                        gendernone=c(9,99,NA)){
   
-  if(trans == 1){
+  if(trans == 1 & !is.na(trans)){
     out <- "Transgender"
   }else if((male == 1 & female == 1)|
            nosingle == 1 ){
@@ -77,6 +77,14 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
                                          dt0 = c.disabilities$DisabilityType, 
                                          dis_df = c.disabilities) {
   require(data.table)
+  
+  # To Do----
+  
+  # add the non-disabled clients back into the output table
+  
+  # there is a problem in the logic of the output table - there should not be
+  # multiple of any one disability type per each enrollment_ID
+  
   "https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf"
   "Working with Ncceh Data report.docx"
   
@@ -151,7 +159,7 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
     as.data.table() %>%
     dcast(., PersonalID + EnrollmentID ~ DisabilityTypeName, fun.aggregate = length) %>%
     mutate(., 
-           t_disabilities = chronic_health_cond + 
+           total_disabilities = chronic_health_cond + 
              developmental_disab + 
              hiv_aids + 
              mental_health_disord + 
