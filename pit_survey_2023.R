@@ -11,6 +11,8 @@ rm(list=ls())
 cat('\f')
 gc()
 
+
+
 # resources----
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
@@ -19,7 +21,7 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/data/coc_by_ffy/bos_2022"
 
 # Functions----
 #devtools::source_url(url = "https://github.com/timbender-ncceh/R-scripts/blob/main/format_phone_email.R?raw=TRUE")
-
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
 const_nchar <- function(x = 1:130){
   #formats numbers for use in column fields so that they can be sorted as
   #strings and remain in order
@@ -154,46 +156,48 @@ find_cols <- function(patrn = "ID$", ic = T,
   return(out)
 }
 
-find_cols("RelationshipToHoH")
-find_cols("PersonalID")
-find_cols("HouseholdID")
-find_cols("VeteranStatus")
-#find_cols("age[!stage][!manage]")
-find_cols("gender")
-find_cols("sexualorientation")
-find_cols("category")
-find_cols("racenone")
-find_cols("white|black|african|asian|paci|chin")
-find_cols("primary|secondary")
-find_cols("multi")
-find_cols("Ethnicity")
-find_cols("DisablingCondition")
-find_cols("DisabilityType")
-find_cols("projectname")
-find_cols("provider")
-find_cols("CoC")
-find_cols("County")
-find_cols("CH", ic = F)
-find_cols("DV")
-find_cols("Violence")
-find_cols("Fleeing")
-find_cols("history")
-find_cols("HouseholdType")
-find_cols("HoH")
-find_cols("Alcohol|Drug")
-find_cols("Disorder")
-find_cols("Mental|MentalHealth")
-find_cols("CurrentLivingSituation")
-find_cols("InformationDate")
-find_cols("LivingSituation")
-find_cols("DOB")
-find_cols("ID$")
-find_cols("male")
-find_cols("entrydate")
+# find_cols("RelationshipToHoH")
+# find_cols("PersonalID")
+# find_cols("HouseholdID")
+# find_cols("VeteranStatus")
+# #find_cols("age[!stage][!manage]")
+# find_cols("gender")
+# find_cols("sexualorientation")
+# find_cols("category")
+# find_cols("racenone")
+# find_cols("white|black|african|asian|paci|chin")
+# find_cols("primary|secondary")
+# find_cols("multi")
+# find_cols("Ethnicity")
+# find_cols("DisablingCondition")
+# find_cols("DisabilityType")
+# find_cols("projectname")
+# find_cols("provider")
+# find_cols("CoC")
+# find_cols("County")
+# find_cols("CH", ic = F)
+# find_cols("DV")
+# find_cols("Violence")
+# find_cols("Fleeing")
+# find_cols("history")
+# find_cols("HouseholdType")
+# find_cols("HoH")
+# find_cols("Alcohol|Drug")
+# find_cols("Disorder")
+# find_cols("Mental|MentalHealth")
+# find_cols("CurrentLivingSituation")
+# find_cols("InformationDate")
+# find_cols("LivingSituation")
+# find_cols("DOB")
+# find_cols("ID$")
+# find_cols("male")
+# find_cols("entrydate")
 
 
 
 is_hashed(read_csv("Client.csv")) %>% as.data.frame()
+
+
 
 # Needed Data----
 
@@ -239,18 +243,37 @@ c.inventory <- read_csv("Inventory.csv") %>%
 some.date <- ymd(20220501)
 
 temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
-  .[.$EntryDate <= some.date & .$ExitDate >= some.date ,]
-
-
-
-
-hmis_join(c.enrollment, c.enrollmentcoc, 
+  .[.$EntryDate <= some.date & .$ExitDate >= some.date ,] %>%
+  hmis_join(., c.enrollmentcoc, 
           jtype = "left") %>%
   hmis_join(., c.client, jtype = "left") %>%
   hmis_join(., c.project, jtype = "left") %>%
   hmis_join(., c.projectcoc, jtype = "left") %>%
   hmis_join(., c.inventory, jtype = "left") %>%
   hmis_join(., c.curlivingsit, jtype = "left") %>%
-  hmis_join(., c.disabilities, jtype = "left") %>%
+  #hmis_join(., c.disabilities, jtype = "left") %>%
   hmis_join(., c.healthanddv, jtype = "left")
+
+gc()
+
+temp$age_calc <- calc_age(temp$DOB, age_on_date = ymd(20220105))
+temp$is_HoH_calc <- temp$RelationshipToHoH == 1
+temp$hud_agegrp_cal <- unlist(lapply(temp$age_calc, 
+                              hud_age_category))
+
+temp$gender <- NA
+
+for(i in 1:nrow(temp)){
+   if(!is.na(temp$EnrollmentID[i])){
+    print(i)
+    temp$gender[i] <- fun_gender(male = temp$Male[i], 
+                                 female = temp$Female[i], 
+                                 nosingle = temp$NoSingleGender[i], 
+                                 questioning = temp$Questioning[i], 
+                                 trans = temp$Transgender[i], 
+                                 gendernone = temp$GenderNone[i])
+  }
+  
+  
+}
   
