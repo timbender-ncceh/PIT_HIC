@@ -1,5 +1,44 @@
 
+c.client %>%
+  group_by(RaceNone, AmIndAKNative, 
+           Asian, BlackAfAmerican, 
+           NativeHIPacific, White) %>%
+  summarise(n = n()) %>%
+  .[order(.$n, decreasing = T),] %>%
+  .[!is.na(.$RaceNone) & 
+      .$RaceNone != 99,]
 
+colnames(c.client)
+
+fun_race <- function(racenone=c(8,9,99,NA),
+                     amindaknative=c(0,1,99),
+                     asian=c(0,1,99),
+                     blackafamerican=c(0,1,99),
+                     nativehipacific=c(0,1,99),
+                     white=c(0,1,99)){
+  if(racenone %in% c(8,9)){
+    out <- ifelse(racenone == 8, "Client doesn't know", "Client refused")
+  }else if((amindaknative + asian + blackafamerican + 
+           nativehipacific + white) > 1 ){
+    out <- "Multiple Races"
+  }else if(amindaknative == 1){
+    out <- "American Indian, Alaska Native, or Indigenous"
+  }else if(asian == 1){
+    out <- "Asian or Asian American"
+  }else if(blackafamerican == 1){
+    out <- "Black, African American, or African"
+  }else if(nativehipacific == 1){
+    out <- "Native Hawaiian or Pacific Islander"
+  }else if(white == 1){
+    out <- "White"
+  }else{
+    out <- "[unknown]"
+  }
+}
+
+# fun_ethnicity <- function(ethnicity=c(0,1,8,9,99)){
+#   
+# }
 
 
 fun_gender <- function(male = c(0,1),
@@ -48,10 +87,11 @@ fun_gender <- function(male = c(0,1),
 
 screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse,
                                          ii0 = c.disabilities$IndefiniteAndImpairs, 
-                                         dt0 = c.disabilities$DisabilityType ) {
-  
+                                         dt0 = c.disabilities$DisabilityType, 
+                                         dis_df = c.disabilities) {
+  require(data.table)
   "https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf"
-"Working with Ncceh Data report.docx"
+  "Working with Ncceh Data report.docx"
   
     # DisabilityResponse (0,1,2,8,9,99,NA)----
   # 1 = yes
@@ -107,20 +147,37 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
   # Logic:
   # DisabiltyResponse & IndefiniteAndImpairs 
   
-  return(dr1 & ii1)
-  
-  
-  
-  # 1 = "YES"
-  # 0 = "NO"
-  # NA = "UNKNOWN" 
+  dis_df$spd <- dr1 & ii1
   
   # DisabilityType----
   
-  
+  dis_df <- dis_df %>%
+    .[.$spd == T & !is.na(.$spd),] %>%
+    left_join(., 
+              data.frame(DisabilityType = c(5:10), 
+                         DisabilityTypeName = c("physical_disab", 
+                                                "developmental_disab", 
+                                                "chronic_health_cond", 
+                                                "hiv_aids", 
+                                                "mental_health_disord", 
+                                                "substance_use_disord"))) %>%
+    as.data.table() %>%
+    dcast(., PersonalID + EnrollmentID ~ DisabilityTypeName, fun.aggregate = length) %>%
+    mutate(., 
+           t_disabilities = chronic_health_cond + 
+             developmental_disab + 
+             hiv_aids + 
+             mental_health_disord + 
+             physical_disab +
+             substance_use_disord)
+  return(dis_df)
 }
 
-screened_positive_disability() %>% table(., useNA = "ifany")
+
+
+
+
+
 
 
 calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
