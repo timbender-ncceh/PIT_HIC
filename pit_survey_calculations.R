@@ -1,20 +1,108 @@
 
 
+
+
+fun_gender <- function(male = c(0,1),
+                       female = c(0,1),
+                       nosingle = c(0,1),
+                       questioning = c(0,1),
+                       trans = c(0,1),
+                       gendernone=c(9,99,NA)){
+  #out <- NA
+  if(trans == 1){
+    out <- "Transgender"
+  }else if((male == 1 & female == 1)|
+           nosingle == 1 ){
+    out <- "NoSingleGender"
+  }else if(!is.na(gendernone) & gendernone > 1){
+    out <- "GenderNone"
+  }else if(questioning == 1){
+    out <- "Questioning"
+  }else if(male == 1){
+    out <- "Male"
+  }else if(female == 1){
+    out <- "Female"
+  }else {
+    out <- "[unknown]"
+  }
+  return(out)
+}
+
+# all possible permutations found in data: 
+# fun_gender(1,0,0,0,0,NA)
+# fun_gender(0,1,0,0,0,NA)
+# fun_gender(0,0,0,0,0,99)
+# fun_gender(0,0,1,0,0,NA)
+# fun_gender(0,0,0,0,1,NA)
+# fun_gender(0,0,0,1,0,NA)
+# fun_gender(0,1,0,0,1,NA)
+# fun_gender(0,0,0,0,0,9)
+# fun_gender(1,0,0,0,1,NA)
+# fun_gender(1,1,0,0,0,NA)
+
+
 # calculated fields----
 
-screened_positive_disability <- function(dr = c.disabilities$DisabilityResponse,
-                                         ii=c.disabilities$IndefiniteAndImpairs) {
-  # DisabilityResponse (0,1,2,8,9,99,NA)----
+# cast down to 1 row per enrolllment with 8 columns (1 per disability)
+# sometimes there might be 2+ enrollments on 1 date for 1 person (service + shelter) so we need to look at those and see how to handle them.  
+
+screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse,
+                                         ii0 = c.disabilities$IndefiniteAndImpairs, 
+                                         dt0 = c.disabilities$DisabilityType ) {
+  
+  "https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf"
+"Working with Ncceh Data report.docx"
+  
+    # DisabilityResponse (0,1,2,8,9,99,NA)----
   # 1 = yes
   # 0 = no
   # 2,8,9,99,NA = "unknown or cannot tell"
-  dr1 <- (dr == 1)
+  
+  # dr1 <- ifelse(dr0 %in% c(0,1), dr0, "unknown or cannot tell") %>%
+  #   ifelse(. %in% "1", "yes", .) %>%
+  #   ifelse(. %in% "0", "no", .)
+  
+  dr1 <- ifelse(dr0 %in% c(0,1), dr0, NA) %>%
+    as.logical()
   
   # IndefiniteAndImpairs (0,1,2,8,9,99,NA)
   # 1 = yes
   # 0 = no
   # 2,8,9,99,NA = "unknown or cannot tell"
-  ii1 <- (ii == 1)
+  
+  ii1 <- ifelse(ii0 %in% c(0,1), ii0, NA) %>%
+    as.logical()
+  
+  # expand.grid(DisabResp = c(T,F,NA), IndefAndImpairs = c(T,F,NA)) %>%
+  #   mutate(.,
+  #          dr_AND_ii = DisabResp & IndefAndImpairs,
+  #          tims_conclusions = c("DISABLED", 
+  #                          "[not logically possible]",
+  #                          "[not logically possible]", 
+  #                          "NOT DISABLED",
+  #                          toupper("unknown or cannot tell"), 
+  #                          "[not logically possible]", 
+  #                          toupper("unknown or cannot tell"),
+  #                          toupper("unknown or cannot tell"), 
+  #                          toupper("unknown or cannot tell")))
+  
+  
+  # step1: if either DR or II = NA then that record is "unknwon or cannot tell" ---- 
+  
+  
+  expand.grid(DR = c(T,F,NA), 
+              II = c(T,F,NA)) %>%
+    mutate(., 
+           unknown = is.na(DR) | is.na(II), # either is.na() = unknown
+           disabled = DR & II,  # both.true = "disabled"
+           not_disabled = DR & !II, 
+           sum = unknown + disabled + not_disabled) #DR True II False = "not disabled"
+  
+ 
+  # (dr1 == T & 
+  #   !is.na(ii1)) %>% table(., useNA = "always") # 24,766 true
+  
+  is.na(dr1) |  is.na(ii1)
   
   # Logic:
   # DisabiltyResponse & IndefiniteAndImpairs 
@@ -28,6 +116,8 @@ screened_positive_disability <- function(dr = c.disabilities$DisabilityResponse,
   # NA = "UNKNOWN" 
   
   # DisabilityType----
+  
+  
 }
 
 screened_positive_disability() %>% table(., useNA = "ifany")
