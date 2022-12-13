@@ -1,14 +1,4 @@
 
-c.client %>%
-  group_by(RaceNone, AmIndAKNative, 
-           Asian, BlackAfAmerican, 
-           NativeHIPacific, White) %>%
-  summarise(n = n()) %>%
-  .[order(.$n, decreasing = T),] %>%
-  .[!is.na(.$RaceNone) & 
-      .$RaceNone != 99,]
-
-colnames(c.client)
 
 fun_race <- function(racenone=c(8,9,99,NA),
                      amindaknative=c(0,1,99),
@@ -36,9 +26,6 @@ fun_race <- function(racenone=c(8,9,99,NA),
   }
 }
 
-# fun_ethnicity <- function(ethnicity=c(0,1,8,9,99)){
-#   
-# }
 
 
 fun_gender <- function(male = c(0,1),
@@ -47,7 +34,7 @@ fun_gender <- function(male = c(0,1),
                        questioning = c(0,1),
                        trans = c(0,1),
                        gendernone=c(9,99,NA)){
-  #out <- NA
+  
   if(trans == 1){
     out <- "Transgender"
   }else if((male == 1 & female == 1)|
@@ -113,36 +100,36 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
   ii1 <- ifelse(ii0 %in% c(0,1), ii0, NA) %>%
     as.logical()
   
-  # expand.grid(DisabResp = c(T,F,NA), IndefAndImpairs = c(T,F,NA)) %>%
-  #   mutate(.,
-  #          dr_AND_ii = DisabResp & IndefAndImpairs,
-  #          tims_conclusions = c("DISABLED", 
-  #                          "[not logically possible]",
-  #                          "[not logically possible]", 
-  #                          "NOT DISABLED",
-  #                          toupper("unknown or cannot tell"), 
-  #                          "[not logically possible]", 
-  #                          toupper("unknown or cannot tell"),
-  #                          toupper("unknown or cannot tell"), 
-  #                          toupper("unknown or cannot tell")))
-  
-  
-  # step1: if either DR or II = NA then that record is "unknwon or cannot tell" ---- 
-  
-  
-  expand.grid(DR = c(T,F,NA), 
-              II = c(T,F,NA)) %>%
-    mutate(., 
-           unknown = is.na(DR) | is.na(II), # either is.na() = unknown
-           disabled = DR & II,  # both.true = "disabled"
-           not_disabled = DR & !II, 
-           sum = unknown + disabled + not_disabled) #DR True II False = "not disabled"
-  
- 
-  # (dr1 == T & 
-  #   !is.na(ii1)) %>% table(., useNA = "always") # 24,766 true
-  
-  is.na(dr1) |  is.na(ii1)
+  # # expand.grid(DisabResp = c(T,F,NA), IndefAndImpairs = c(T,F,NA)) %>%
+  # #   mutate(.,
+  # #          dr_AND_ii = DisabResp & IndefAndImpairs,
+  # #          tims_conclusions = c("DISABLED", 
+  # #                          "[not logically possible]",
+  # #                          "[not logically possible]", 
+  # #                          "NOT DISABLED",
+  # #                          toupper("unknown or cannot tell"), 
+  # #                          "[not logically possible]", 
+  # #                          toupper("unknown or cannot tell"),
+  # #                          toupper("unknown or cannot tell"), 
+  # #                          toupper("unknown or cannot tell")))
+  # 
+  # 
+  # # step1: if either DR or II = NA then that record is "unknwon or cannot tell" ---- 
+  # 
+  # 
+  # expand.grid(DR = c(T,F,NA), 
+  #             II = c(T,F,NA)) %>%
+  #   mutate(., 
+  #          unknown = is.na(DR) | is.na(II), # either is.na() = unknown
+  #          disabled = DR & II,  # both.true = "disabled"
+  #          not_disabled = DR & !II, 
+  #          sum = unknown + disabled + not_disabled) #DR True II False = "not disabled"
+  # 
+  # 
+  # # (dr1 == T & 
+  # #   !is.na(ii1)) %>% table(., useNA = "always") # 24,766 true
+  # 
+  # is.na(dr1) |  is.na(ii1)
   
   # Logic:
   # DisabiltyResponse & IndefiniteAndImpairs 
