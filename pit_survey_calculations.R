@@ -205,7 +205,7 @@ hud_age_category <- function(age_yrs,
   require(dplyr)
   require(data.table)
   
-  if(is.na(age_years)){
+  if(is.na(age_yrs)){
     out <- NA
   }else{
     bac <- data.frame(lower = 0, upper = breaks_upper[1])
@@ -226,7 +226,8 @@ hud_age_category <- function(age_yrs,
   return(out)
 }
 
-hud_age_category(41)
+hud_age_category(NA)
+
 
 coc_region <- function(co_name){
   require(readr)
