@@ -205,20 +205,24 @@ hud_age_category <- function(age_yrs,
   require(dplyr)
   require(data.table)
   
-  bac <- data.frame(lower = 0, upper = breaks_upper[1])
-  for(i in 2:length(breaks_upper)){
-    bac <- rbind(bac, 
-                 data.frame(lower = breaks_upper[i-1]+1, 
-                            upper = breaks_upper[i]))
+  if(is.na(age_years)){
+    out <- NA
+  }else{
+    bac <- data.frame(lower = 0, upper = breaks_upper[1])
+    for(i in 2:length(breaks_upper)){
+      bac <- rbind(bac, 
+                   data.frame(lower = breaks_upper[i-1]+1, 
+                              upper = breaks_upper[i]))
+    }
+    
+    bac <- mutate(bac, 
+                  name = paste(lower, upper, sep = "-"))
+    
+    bac$in_cat <- between(x = rep(age_yrs, nrow(bac)), 
+                          lower = bac$lower, upper = bac$upper)
+    
+    out <- bac[bac$in_cat,]$name
   }
-  
-  bac <- mutate(bac, 
-                name = paste(lower, upper, sep = "-"))
-  
-  bac$in_cat <- between(x = rep(age_yrs, nrow(bac)), 
-                        lower = bac$lower, upper = bac$upper)
-  
-  out <- bac[bac$in_cat,]$name
   return(out)
 }
 
