@@ -165,7 +165,8 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
              hiv_aids + 
              mental_health_disord + 
              physical_disab +
-             substance_use_disord)
+             substance_use_disord) %>% 
+    as.data.frame()
   return(dis_df)
 }
 
