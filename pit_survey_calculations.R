@@ -24,6 +24,7 @@ fun_race <- function(racenone=c(8,9,99,NA),
   }else{
     out <- "[unknown]"
   }
+  return(out)
 }
 
 
