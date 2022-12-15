@@ -202,10 +202,17 @@ is_hashed(read_csv("Client.csv")) %>% as.data.frame()
 # Needed Data----
 
 c.curlivingsit <- read_csv("CurrentLivingSituation.csv") %>%
-  .[,c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation")]
+  .[,c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation", 
+       "InformationDate")]
+colnames(c.curlivingsit) <- c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation", 
+                              "InformationDate_cls")
+
 
 c.healthanddv <- read_csv("HealthAndDV.csv") %>%
-  .[,c("HealthAndDVID", "EnrollmentID",  "PersonalID", "CurrentlyFleeing")]
+  .[,c("HealthAndDVID", "EnrollmentID",  "PersonalID", "CurrentlyFleeing", 
+       "InformationDate")]
+colnames(c.healthanddv) <- c("HealthAndDVID", "EnrollmentID",  "PersonalID", "CurrentlyFleeing", 
+                         "InformationDate_hdv")
 
 c.client <- read_csv("Client.csv") %>%
   .[,c("PersonalID", "DOB", "NoSingleGender", "Transgender", "GenderNone", 
@@ -219,17 +226,26 @@ c.enrollment <- read_csv("Enrollment.csv") %>%
        "LiteralHomelessHistory", "LivingSituation",
        "MentalHealthDisorderFam", "AlcoholDrugUseDisorderFam", 
        "EntryDate")]
+
 c.exit <- read_csv("Exit.csv") %>%
   .[,c("ExitID"  ,     "EnrollmentID" ,"PersonalID", "ExitDate")]
   
 
 c.enrollmentcoc <- read_csv("EnrollmentCoC.csv") %>%
   .[,c("EnrollmentCoCID", "EnrollmentID", "HouseholdID", "ProjectID", "PersonalID", 
-       "CoCCode")]
+       "CoCCode", 
+       "InformationDate")]
+colnames(c.enrollmentcoc) <- c("EnrollmentCoCID", "EnrollmentID", "HouseholdID", "ProjectID", "PersonalID", 
+                               "CoCCode", 
+                               "InformationDate_enr")
   
 c.disabilities <- read_csv("Disabilities.csv") %>%
   .[,c("DisabilitiesID", "EnrollmentID", "PersonalID", "DisabilityType", 
-       "DisabilityResponse", "IndefiniteAndImpairs")]
+       "DisabilityResponse", "IndefiniteAndImpairs", 
+       "InformationDate")]
+colnames(c.disabilities) <- c("DisabilitiesID", "EnrollmentID", "PersonalID", "DisabilityType", 
+                              "DisabilityResponse", "IndefiniteAndImpairs", 
+                              "InformationDate_disab")
 
 c.project <- read_csv("Project.csv") %>% 
   .[,c("ProjectID", "OrganizationID", "ProjectName")]
@@ -240,7 +256,7 @@ c.projectcoc <- read_csv("ProjectCoC.csv") %>%
 c.inventory <- read_csv("Inventory.csv") %>%
   .[,c("InventoryID", "ProjectID","HouseholdType")]
 
-some.date <- ymd(20220501)
+some.date <- ymd(20220125)
 
 temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
   .[.$EntryDate <= some.date & .$ExitDate >= some.date ,] %>%
@@ -254,12 +270,35 @@ temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
   #hmis_join(., c.disabilities, jtype = "left") %>%
   hmis_join(., c.healthanddv, jtype = "left")
 
+temp <- temp[!(is.na(temp$EnrollmentID) & is.na(temp$PersonalID)),]
+
 gc()
+
+
+#disabilities
+
+temp$disab_calc <- NA
+
+args(screened_positive_disability)
+
+disab_out <- screened_positive_disability(dr0 = c.disabilities$DisabilityResponse, 
+                                          ii0 = c.disabilities$IndefiniteAndImpairs, 
+                                          dt0 = c.disabilities$DisabilityType, 
+                                          dis_df = c.disabilities) %>% as_tibble()
+
 
 temp$age_calc <- calc_age(temp$DOB, age_on_date = ymd(20220105))
 temp$is_HoH_calc <- temp$RelationshipToHoH == 1
-temp$hud_agegrp_cal <- unlist(lapply(temp$age_calc, 
-                              hud_age_category))
+
+#temp$hud_agegrp_cal <- unlist(lapply(temp$age_calc, hud_age_category))
+
+temp$hud_agegrp_cal <- NA
+for(i in 1:nrow(temp)){
+  temp$hud_agegrp_cal[i] <- hud_age_category(temp$age_calc[i])
+}
+
+cat(crayon::bgRed(crayon::bold("DONE")))
+
 
 temp$gender <- NA
 
@@ -273,7 +312,61 @@ for(i in 1:nrow(temp)){
                                  trans = temp$Transgender[i], 
                                  gendernone = temp$GenderNone[i])
   }
-  
-  
 }
   
+
+
+
+temp$race <- NA
+
+for(i in 1:nrow(temp)){
+  temp$race[i] <- fun_race(racenone = temp$RaceNone[i], 
+           amindaknative = temp$AmIndAKNative[i], 
+           asian = temp$Asian[i], 
+           blackafamerican = temp$BlackAfAmerican[i], 
+           nativehipacific = temp$NativeHIPacific[i], 
+           white = temp$White[i])
+}
+
+
+temp$region <- NA
+for(i in 1:nrow(temp)){
+  temp$region[i] <- coc_region(temp$NCCounty[i])
+}
+
+
+
+
+
+colnames(temp)
+des.cols[,c(1,2)]$desc
+
+des.cols$abbr
+
+# missing cols
+
+missing.cols <- c(#"race", 
+                  "disability stuff", 
+                  #"region", 
+                  #"place not meant for human habitation", 
+                  "chronic homelessness", 
+                  #"fleeing domestic violence", 
+                  "youth HH type", "vet HH type", 
+                  #"current living situation date", 
+                  "hoh current living situation date", 
+                 # "client current living situation", 
+                  "hoh current living situation", 
+                  "Notes/manual notes for context")
+
+
+
+
+#remove cols
+
+temp$curr
+
+keep.cols <- c("PersonalID", "HouseholdID", "EnrollmentID", 
+               "RelationshipToHoH", "VeteranStatus", 
+               "age_calc", "gender", "Ethnicity", "LivingSituation",
+               "NCCounty", "HouseholdType", "CurrentLivingSituation",
+               "CurLivingSitDate", "CurrentlyFleeing", "race")
