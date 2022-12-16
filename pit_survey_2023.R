@@ -11,8 +11,10 @@ rm(list=ls())
 cat('\f')
 gc()
 
+library(tictoc)
 
 
+tic()
 # resources----
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
@@ -256,12 +258,32 @@ c.projectcoc <- read_csv("ProjectCoC.csv") %>%
 c.inventory <- read_csv("Inventory.csv") %>%
   .[,c("InventoryID", "ProjectID","HouseholdType")]
 
-some.date <- ymd(20220125)
+some.date <- ymd(20220126)
+
 
 temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
-  .[.$EntryDate <= some.date & .$ExitDate >= some.date ,] %>%
   hmis_join(., c.enrollmentcoc, 
-          jtype = "left") %>%
+            jtype = "left") 
+
+temp$enrollment_open <- is.na(temp$ExitDate)
+
+temp$somedate_between_enrollment <- NA
+for(i in 1:nrow(temp)){
+  
+  if(!temp$enrollment_open[i]){
+    temp$somedate_between_enrollment[i] <- between(x = some.date, 
+            lower = temp$EntryDate[i], upper = temp$ExitDate[i])
+  }
+  
+}
+
+temp <- temp[temp$somedate_between_enrollment | 
+  temp$enrollment_open,]
+
+
+temp <- temp %>%
+  #.[.$EntryDate <= some.date & .$ExitDate >= some.date ,] %>%
+  
   hmis_join(., c.client, jtype = "left") %>%
   hmis_join(., c.project, jtype = "left") %>%
   hmis_join(., c.projectcoc, jtype = "left") %>%
@@ -293,6 +315,7 @@ temp$is_HoH_calc <- temp$RelationshipToHoH == 1
 #temp$hud_agegrp_cal <- unlist(lapply(temp$age_calc, hud_age_category))
 
 temp$hud_agegrp_cal <- NA
+gc()
 for(i in 1:nrow(temp)){
   temp$hud_agegrp_cal[i] <- hud_age_category(temp$age_calc[i])
 }
@@ -304,7 +327,10 @@ temp$gender <- NA
 
 for(i in 1:nrow(temp)){
    if(!is.na(temp$EnrollmentID[i])){
-    print(i)
+    if(i %% 1000 == 0){
+      print(i) 
+    }
+     
     temp$gender[i] <- fun_gender(male = temp$Male[i], 
                                  female = temp$Female[i], 
                                  nosingle = temp$NoSingleGender[i], 
@@ -331,7 +357,7 @@ for(i in 1:nrow(temp)){
 
 temp$region <- NA
 for(i in 1:nrow(temp)){
-  temp$region[i] <- coc_region(temp$NCCounty[i])
+  try(temp$region[i] <- coc_region(temp$NCCounty[i]))
 }
 
 
@@ -370,3 +396,28 @@ keep.cols <- c("PersonalID", "HouseholdID", "EnrollmentID",
                "age_calc", "gender", "Ethnicity", "LivingSituation",
                "NCCounty", "HouseholdType", "CurrentLivingSituation",
                "CurLivingSitDate", "CurrentlyFleeing", "race")
+
+
+# Output----
+
+# check if hashed
+library(openssl)
+
+
+
+hash.key <- paste(sample(c(letters,LETTERS,0:9), size = sample(c(3:100), 1), replace = T), 
+                  sep = "", collapse = "")
+
+if(!all(is_hashed(temp$DOB))){
+  temp$DOB <- openssl::sha256(x = as.character(temp$DOB), key = hash.key)
+}
+
+library(readr)
+write_csv(x = temp, 
+          file = "master_PIT_draft1.csv")
+
+openxlsx::write.xlsx(x = temp, 
+                     file = "master_PIT_draft1.xlsx")
+
+
+toc(log = T)
