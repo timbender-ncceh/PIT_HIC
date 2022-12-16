@@ -19,7 +19,8 @@ tic()
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
 # Setup----
-csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/data/coc_by_ffy/bos_2022"
+#csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/data/coc_by_ffy/bos_2022"
+csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/test_data"
 
 # Functions----
 #devtools::source_url(url = "https://github.com/timbender-ncceh/R-scripts/blob/main/format_phone_email.R?raw=TRUE")
@@ -286,6 +287,33 @@ temp$los_calculated <- some.date - temp$EntryDate
 temp <- temp[temp$somedate_between_enrollment | 
   temp$enrollment_open,]
 
+# QA enrollment lengths----
+
+library(ggplot2)
+temp %>%
+  group_by(ent_yearFrac = year(EntryDate) + 
+             (month(EntryDate)/12), 
+           ex_yearFrac = year(ExitDate) + 
+             (month(ExitDate)/12)) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  mutate(., 
+         rid = 1:length(ex_yearFrac)) %>%
+  ggplot(data = .) +
+  geom_segment(aes(x = ent_yearFrac, xend = ex_yearFrac, 
+                   y = rid, yend = rid,
+                 color = n))
+
+
+mutate(ungroup(temp), 
+       rid = sample(1:length(EntryDate), size = length(EntryDate), replace = F)) %>%
+  ggplot(data = ., 
+         aes(x = EntryDate, xend = ExitDate, y = rid, yend = rid)) + 
+  geom_segment()
+
+# /QA enrollment lengths----
+
+
 temp <- temp %>%
   hmis_join(., c.client, jtype = "left") %>%
   hmis_join(., c.project, jtype = "left") %>%
@@ -349,6 +377,9 @@ for(i in 1:nrow(temp)){
 temp$race <- NA
 
 for(i in 1:nrow(temp)){
+  if(i %% 1000 == 0){
+    print(i) 
+  }
   temp$race[i] <- fun_race(racenone = temp$RaceNone[i], 
            amindaknative = temp$AmIndAKNative[i], 
            asian = temp$Asian[i], 
@@ -357,14 +388,23 @@ for(i in 1:nrow(temp)){
            white = temp$White[i])
 }
 
+# Region----
 
-temp$region <- NA
-for(i in 1:nrow(temp)){
-  try(temp$region[i] <- coc_region(temp$NCCounty[i]))
-}
+cocreg_cw <- get_coc_region()
+
+temp <- left_join(x = temp, 
+          y = cocreg_cw, 
+          by = c("NCCounty" = "County"))
 
 
-
+# temp$region <- NA
+# for(i in 1:nrow(temp)){
+#   if(i %% 1000 == 0){
+#     cat('\f')
+#     print(i) 
+#   }
+#   try(temp$region[i] <- coc_region(temp$NCCounty[i]))
+# }
 
 
 colnames(temp)
@@ -392,7 +432,7 @@ missing.cols <- c(#"race",
 
 #remove cols
 
-temp$curr
+#temp$curr
 
 keep.cols <- c("PersonalID", "HouseholdID", "EnrollmentID", 
                "RelationshipToHoH", "VeteranStatus", 
