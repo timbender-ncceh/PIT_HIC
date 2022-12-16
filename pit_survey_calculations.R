@@ -75,9 +75,10 @@ fun_gender <- function(male = c(0,1),
 
 
 
-screened_positive_disability2 <- function(dis_df = c.disabilities, 
+screened_positive_disability <- function(dis_df = c.disabilities, 
                                           enr_df = c.enrollment, 
-                                          exit_df = c.exit){
+                                          exit_df = c.exit, 
+                                          pit_date = ymd(20220126)){
   
   
   # final score:----
@@ -113,7 +114,81 @@ screened_positive_disability2 <- function(dis_df = c.disabilities,
    dis_df %>%
    group_by(is_disab) %>%
     summarise(count_disabilities = n()) 
-  
+   
+   # identify most recent informationDate for each client-enrollment----
+   
+   join_dates <- hmis_join(dis_df,  
+             enr_df[colnames(enr_df) %in% c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
+                                            #"DisablingCondition", "RelationshipToHoH", 
+                                            "EntryDate")], 
+             jtype = "left") %>%
+     hmis_join(., 
+               exit_df, jtype = "left") 
+   
+   
+   # join_dates$enr_during_surv <- NA
+   # join_dates$enr_during_surv[(join_dates$EntryDate > pit_date | 
+   #   join_dates$ExitDate < pit_date) | !is.na(join_dates$EntryDate > pit_date | 
+   #                                              join_dates$ExitDate < pit_date)] <- F
+   # 
+   # 
+   # table(join_dates$enr_during_surv, useNA = "always")
+   # join_dates[is.na(join_dates$enr_during_surv),]
+   # 
+   # table(join_dates$EntryDate > pit_date, useNA = "always")
+   # table(join_dates$EntryDate == pit_date, useNA = "always")
+   # table(join_dates$EntryDate < pit_date, useNA = "always")
+   
+   # filter out all information dates that occur after the PIT survey date and
+   # then find the latest InformationDate for each enrollment - that becomes
+   # your most recent and thus most applicable date for disability inventory
+   join_dates <- join_dates %>%
+     .[.$InformationDate_disab <= pit_date,] %>%
+     group_by(PersonalID, EnrollmentID) %>%
+     slice_max(., 
+               order_by = InformationDate_disab, 
+               n = 1)
+   
+  #  library(ggplot2)
+  #  
+  #  plot.this <- mutate(join_dates[sample(1:nrow(join_dates), size = 200, replace = F),], 
+  #                      rid = 1:length(EntryDate), 
+  #                      color = "normal")
+  #  
+  #  plot.this[is.na(plot.this$ExitDate),]$color <- "NA - exit"
+  #  
+  # ggplot() + 
+  #   geom_segment(data = plot.this, 
+  #                aes(x = EntryDate, xend = ExitDate, 
+  #                    y = rid, yend = rid, 
+  #                    color = color))+
+  #   geom_point(data = plot.this[is.na(plot.this$ExitDate),], 
+  #              aes(x = EntryDate, y = rid, color = color), 
+  #              size = 0.8) + 
+  #   geom_vline(aes(xintercept = Sys.Date()), 
+  #              color = "blue")+
+  #   geom_vline(aes(xintercept = pit_date), 
+  #              linetype = 2232, color = "red")
+   
+   
+   jd <- join_dates %>%
+     left_join(., 
+               data.frame(DisabilityType = 5:10, 
+                          dt_name = c("physical_D", 
+                                      "developmental_D", 
+                                      "chronic_hlth_C", 
+                                      "HIV.AIDS", 
+                                      "mental_health_D", 
+                                      "substance_use_D"))) %>%
+     as.data.table() %>%
+   dcast(., 
+         PersonalID + EnrollmentID + #is_disab +
+         InformationDate_disab ~ dt_name, 
+         #fun.aggregate = length
+         value.var = "is_disab") 
+   
+   return(jd)
+   
 }
 
 
