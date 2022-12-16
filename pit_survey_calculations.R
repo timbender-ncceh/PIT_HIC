@@ -143,12 +143,76 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
   # Logic:
   # DisabiltyResponse & IndefiniteAndImpairs 
   
+  
+  is_disab <- dr1 & ii1
+  is_disab <- ifelse(is_disab, "Disabled", 
+         "Not Disabled") 
+  
+  is_disab <- ifelse(is.na(is_disab), 
+                     "Unknown or Cannot Tell", 
+                     is_disab)
+  
+ 
+  
   dis_df$spd <- dr1 & ii1
+  dis_df$disab_status_calc <- is_disab
+  
+  dis_df$disab_count <- ifelse(dis_df$disab_status_calc == "Disabled", 1, 0)
+  
+  
+  
   
   # DisabilityType----
   
+  read_csv("Disabilities.csv") %>%
+    #c.disabilities %>%
+    .[.$PersonalID %in% 713 & 
+        .$EnrollmentID %in% 1155687 & 
+        .$DisabilityType == 7,] %>%
+    group_by(PersonalID,EnrollmentID,DisabilitiesID, 
+             InformationDate) %>%
+    summarise(n = n())
+  
+  
+  read_csv("Disabilities.csv") %>%
+  #c.disabilities %>%
+    .[.$PersonalID %in% 713 & 
+        .$EnrollmentID %in% 1155687 & 
+        .$DisabilityType == 7,] %>%
+    group_by(PersonalID, EnrollmentID, 
+             InformationDate,
+             DataCollectionStage,
+             DisabilityType,
+             DisabilityResponse, IndefiniteAndImpairs) %>%
+    summarise()
+  
+  library(ggplot2)
+  
+  x <- read_csv("Disabilities.csv") %>%
+    #c.disabilities %>%
+    .[.$PersonalID %in% 713 & 
+        .$EnrollmentID %in% 1155687,]
+  
+  x <- x[,!grepl(pattern = "^TCell|^Viral|^Anti|^UserID$|^ExportID$|^Date", x = colnames(x))] 
+  x %>%
+    group_by(PersonalID, 
+             EnrollmentID, 
+             #InformationDate, 
+             DataCollectionStage, 
+             DisabilityType, 
+             DisabilityResponse, 
+             IndefiniteAndImpairs) %>%
+    summarise() %>%
+    mutate(., 
+           dr_plus_ii = paste(DisabilityResponse, IndefiniteAndImpairs, sep = "-")) %>%
+    as.data.table() %>%
+    dcast(., 
+          PersonalID + EnrollmentID + DisabilityType ~ DataCollectionStage, value.var = "dr_plus_ii")
+  
+  
+  
   dis_df <- dis_df %>%
-    .[.$spd == T & !is.na(.$spd),] %>%
+    #.[.$spd == T & !is.na(.$spd),] %>%
     left_join(., 
               data.frame(DisabilityType = c(5:10), 
                          DisabilityTypeName = c("physical_disab", 
@@ -158,7 +222,11 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
                                                 "mental_health_disord", 
                                                 "substance_use_disord"))) %>%
     as.data.table() %>%
-    dcast(., PersonalID + EnrollmentID ~ DisabilityTypeName, fun.aggregate = length) %>%
+    dcast(., 
+          PersonalID + EnrollmentID + disab_status_calc ~ DisabilityTypeName, 
+          fun.aggregate = sum, 
+          value.var = "disab_count")
+    #dcast(., PersonalID + EnrollmentID ~ DisabilityTypeName, fun.aggregate = length) %>%
     mutate(., 
            total_disabilities = chronic_health_cond + 
              developmental_disab + 
@@ -169,13 +237,6 @@ screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse
     as.data.frame()
   return(dis_df)
 }
-
-
-
-
-
-
-
 
 calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
   require(lubridate)
@@ -230,10 +291,9 @@ hud_age_category <- function(age_yrs,
 
 hud_age_category(18)
 
-
-coc_region <- function(co_name){
+get_coc_region <- function(){
   require(readr)
-  cr_crosswalk <- read_tsv("County	Region
+  return(read_tsv("County	Region
 Alamance	Region 6
 Alexander	Region 3
 Anson	Region 7
@@ -312,9 +372,94 @@ Warren	Region 9
 Washington	Region 12
 Wayne	Region 10
 Wilson	Region 10
-Yadkin	Region 4")
-  out <- cr_crosswalk[cr_crosswalk$County == co_name,]$Region
-  return(out)
+Yadkin	Region 4"))
 }
+
+
+# coc_region <- function(co_name){
+#   require(readr)
+#   cr_crosswalk <- read_tsv("County	Region
+# Alamance	Region 6
+# Alexander	Region 3
+# Anson	Region 7
+# Beaufort	Region 12
+# Bertie	Region 12
+# Bladen	Region 8
+# Burke	Region 3
+# Cabarrus	Region 5
+# Caldwell	Region 3
+# Camden	Region 11
+# Carteret	Region 13
+# Caswell	Region 6
+# Catawba	Region 3
+# Chatham	Region 6
+# Cherokee	Region 1
+# Chowan	Region 11
+# Clay	Region 1
+# Columbus	Region 8
+# Craven	Region 13
+# Currituck	Region 11
+# Dare	Region 11
+# Davidson	Region 5
+# Davie	Region 4
+# Duplin	Region 10
+# Edgecombe	Region 9
+# Franklin	Region 9
+# Gates	Region 11
+# Graham	Region 1
+# Granville	Region 9
+# Greene	Region 10
+# Halifax	Region 9
+# Harnett	Region 7
+# Haywood	Region 1
+# Henderson	Region 2
+# Hertford	Region 11
+# Hoke	Region 7
+# Hyde	Region 12
+# Iredell	Region 4
+# Jackson	Region 1
+# Johnston	Region 7
+# Jones	Region 13
+# Lee	Region 7
+# Lenoir	Region 10
+# Macon	Region 1
+# Madison	Region 1
+# Martin	Region 12
+# Mcdowell	Region 3
+# Montgomery	Region 7
+# Moore	Region 7
+# Nash	Region 9
+# Northampton	Region 9
+# Onslow	Region 13
+# Pamlico	Region 13
+# Pasquotank	Region 11
+# Perquimans	Region 11
+# Person	Region 6
+# Pitt	Region 12
+# Polk	Region 2
+# Randolph	Region 7
+# Richmond	Region 7
+# Robeson	Region 8
+# Rockingham	Region 6
+# Rowan	Region 5
+# Rutherford	Region 2
+# Sampson	Region 10
+# Scotland	Region 8
+# Stanly	Region 5
+# Stokes	Region 4
+# Surry	Region 4
+# Swain	Region 1
+# Transylvania	Region 2
+# Tyrrell	Region 11
+# Union	Region 5
+# Vance	Region 9
+# Warren	Region 9
+# Washington	Region 12
+# Wayne	Region 10
+# Wilson	Region 10
+# Yadkin	Region 4")
+#   out <- cr_crosswalk[cr_crosswalk$County == co_name,]$Region
+#   return(out)
+# }
 
 coc_region("Yadkin")
