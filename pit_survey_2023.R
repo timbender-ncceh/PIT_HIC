@@ -245,10 +245,10 @@ colnames(c.enrollmentcoc) <- c("EnrollmentCoCID", "EnrollmentID", "HouseholdID",
   
 c.disabilities <- read_csv("Disabilities.csv") %>%
   .[,c("DisabilitiesID", "EnrollmentID", "PersonalID", "DisabilityType", 
-       "DisabilityResponse", "IndefiniteAndImpairs", 
+       "DisabilityResponse", "IndefiniteAndImpairs", "DataCollectionStage",
        "InformationDate")]
 colnames(c.disabilities) <- c("DisabilitiesID", "EnrollmentID", "PersonalID", "DisabilityType", 
-                              "DisabilityResponse", "IndefiniteAndImpairs", 
+                              "DisabilityResponse", "IndefiniteAndImpairs", "DataCollectionStage",
                               "InformationDate_disab")
 
 c.project <- read_csv("Project.csv") %>% 
@@ -265,8 +265,6 @@ some.date <- ymd(20220126)
 temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
   hmis_join(., c.enrollmentcoc, 
             jtype = "left") 
-
-
 
 temp$enrollment_open <- is.na(temp$ExitDate) & temp$EntryDate >= some.date
 
@@ -290,28 +288,28 @@ temp <- temp[temp$somedate_between_enrollment |
 # QA enrollment lengths----
 
 library(ggplot2)
-temp %>%
-  group_by(ent_yearFrac = year(EntryDate) + 
-             (month(EntryDate)/12), 
-           ex_yearFrac = year(ExitDate) + 
-             (month(ExitDate)/12)) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  mutate(., 
-         rid = 1:length(ex_yearFrac)) %>%
-  ggplot(data = .) +
-  geom_segment(aes(x = ent_yearFrac, xend = ex_yearFrac, 
-                   y = rid, yend = rid,
-                 color = n))
+# temp %>%
+#   group_by(ent_yearFrac = year(EntryDate) + 
+#              (month(EntryDate)/12), 
+#            ex_yearFrac = year(ExitDate) + 
+#              (month(ExitDate)/12)) %>%
+#   summarise(n = n()) %>%
+#   ungroup() %>%
+#   mutate(., 
+#          rid = 1:length(ex_yearFrac)) %>%
+#   ggplot(data = .) +
+#   geom_segment(aes(x = ent_yearFrac, xend = ex_yearFrac, 
+#                    y = rid, yend = rid,
+#                  color = n))
 
 
-mutate(ungroup(temp), 
-       rid = sample(1:length(EntryDate), size = length(EntryDate), replace = F)) %>%
-  ggplot(data = ., 
-         aes(x = EntryDate, xend = ExitDate, y = rid, yend = rid)) + 
-  geom_segment()
+# mutate(ungroup(temp), 
+#        rid = sample(1:length(EntryDate), size = length(EntryDate), replace = F)) %>%
+#   ggplot(data = ., 
+#          aes(x = EntryDate, xend = ExitDate, y = rid, yend = rid)) + 
+#   geom_segment()
 
-# /QA enrollment lengths----
+.# /QA enrollment lengths----
 
 
 temp <- temp %>%
@@ -330,14 +328,23 @@ gc()
 
 #disabilities
 
-temp$disab_calc <- NA
+temp.disab <- screened_positive_disability(dis_df = c.disabilities, 
+                                           enr_df = c.enrollment, 
+                                           exit_df = c.exit, 
+                                           pit_date = some.date)
 
-args(screened_positive_disability)
+temp <- left_join(temp, temp.disab)
 
-disab_out <- screened_positive_disability(dr0 = c.disabilities$DisabilityResponse, 
-                                          ii0 = c.disabilities$IndefiniteAndImpairs, 
-                                          dt0 = c.disabilities$DisabilityType, 
-                                          dis_df = c.disabilities) %>% as_tibble()
+
+
+#temp$disab_calc <- NA
+
+# args(screened_positive_disability)
+# 
+# disab_out <- screened_positive_disability(dr0 = c.disabilities$DisabilityResponse, 
+#                                           ii0 = c.disabilities$IndefiniteAndImpairs, 
+#                                           dt0 = c.disabilities$DisabilityType, 
+#                                           dis_df = c.disabilities) %>% as_tibble()
 
 
 temp$age_calc <- calc_age(temp$DOB, age_on_date = ymd(20220105))
@@ -457,10 +464,10 @@ if(!all(is_hashed(temp$DOB))){
 
 library(readr)
 write_csv(x = temp, 
-          file = "master_PIT_draft1.csv")
+          file = "master_PIT_draft2.csv")
 
 openxlsx::write.xlsx(x = temp, 
-                     file = "master_PIT_draft1.xlsx")
+                     file = "master_PIT_draft2.xlsx")
 
 
 toc(log = T)
