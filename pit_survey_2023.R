@@ -89,12 +89,12 @@ getwd()
 csv.files <- list.files(pattern = "\\.csv$") 
 csv.files <- csv.files[!csv.files %in% c("Client2.csv", "report_phoneemail.csv")]
 
-
-# build list of colnames
-file.colnames <- list()
-for(i in csv.files){
-  file.colnames[[i]] <- colnames(read_csv(i))
-}
+# 
+# # build list of colnames
+# file.colnames <- list()
+# for(i in csv.files){
+#   file.colnames[[i]] <- colnames(read_csv(i))
+# }
 
 # desired cols 
 des.cols <- read_tsv("var1	Description	Calculated	Type	Option 1	Option 2	Option 3	Option 4	Option 5	Option 6	Option 7	var2	var3	var4	var5	var6	var7
@@ -142,21 +142,21 @@ des.cols[,c(1,2)]
 
 
 
-# create function for finding colnames in hmis.csv dataset
-
-find_cols <- function(patrn = "ID$", ic = T,
-                      l = file.colnames){
-  out <- list()
-  for(i in 1:length(l)){
-    out[[names(l[i])]] <- grep(pattern = patrn, 
-                               x = l[[i]], 
-                               ignore.case = ic, 
-                               value = T)
-  }
-  # remove files with no results returned
-  out <- out[lapply(out, length) > 0]
-  return(out)
-}
+## create function for finding colnames in hmis.csv dataset
+# 
+# find_cols <- function(patrn = "ID$", ic = T,
+#                       l = file.colnames){
+#   out <- list()
+#   for(i in 1:length(l)){
+#     out[[names(l[i])]] <- grep(pattern = patrn, 
+#                                x = l[[i]], 
+#                                ignore.case = ic, 
+#                                value = T)
+#   }
+#   # remove files with no results returned
+#   out <- out[lapply(out, length) > 0]
+#   return(out)
+# }
 
 # find_cols("RelationshipToHoH")
 # find_cols("PersonalID")
@@ -227,6 +227,7 @@ c.enrollment <- read_csv("Enrollment.csv") %>%
        "DisablingCondition", "NCCounty", "RelationshipToHoH", 
        "LiteralHomelessHistory", "LivingSituation",
        "MentalHealthDisorderFam", "AlcoholDrugUseDisorderFam", 
+       "LengthOfStay",
        "EntryDate")]
 
 c.exit <- read_csv("Exit.csv") %>%
@@ -235,7 +236,7 @@ c.exit <- read_csv("Exit.csv") %>%
 
 c.enrollmentcoc <- read_csv("EnrollmentCoC.csv") %>%
   .[,c("EnrollmentCoCID", "EnrollmentID", "HouseholdID", "ProjectID", "PersonalID", 
-       "CoCCode", 
+       "CoCCode",
        "InformationDate")]
 colnames(c.enrollmentcoc) <- c("EnrollmentCoCID", "EnrollmentID", "HouseholdID", "ProjectID", "PersonalID", 
                                "CoCCode", 
@@ -260,30 +261,32 @@ c.inventory <- read_csv("Inventory.csv") %>%
 
 some.date <- ymd(20220126)
 
-
 temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
   hmis_join(., c.enrollmentcoc, 
             jtype = "left") 
 
-temp$enrollment_open <- is.na(temp$ExitDate)
+
+
+temp$enrollment_open <- is.na(temp$ExitDate) & temp$EntryDate >= some.date
 
 temp$somedate_between_enrollment <- NA
 for(i in 1:nrow(temp)){
   
   if(!temp$enrollment_open[i]){
-    temp$somedate_between_enrollment[i] <- between(x = some.date, 
-            lower = temp$EntryDate[i], upper = temp$ExitDate[i])
+    temp$somedate_between_enrollment[i] <- dplyr::between(x = some.date, 
+            left = temp$EntryDate[i], right = temp$ExitDate[i])
   }
+  temp$somedate_between_enrollment[i] <- ifelse(is.na(temp$somedate_between_enrollment[i]), F, 
+                                                temp$somedate_between_enrollment[i])
   
 }
+
+temp$los_calculated <- some.date - temp$EntryDate
 
 temp <- temp[temp$somedate_between_enrollment | 
   temp$enrollment_open,]
 
-
 temp <- temp %>%
-  #.[.$EntryDate <= some.date & .$ExitDate >= some.date ,] %>%
-  
   hmis_join(., c.client, jtype = "left") %>%
   hmis_join(., c.project, jtype = "left") %>%
   hmis_join(., c.projectcoc, jtype = "left") %>%
