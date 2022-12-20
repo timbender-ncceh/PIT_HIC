@@ -76,13 +76,13 @@ fun_gender <- function(male = c(0,1),
 
 
 screened_positive_disability <- function(dis_df = c.disabilities, 
-                                          enr_df = c.enrollment, 
-                                          exit_df = c.exit, 
-                                          pit_date = ymd(20220126)){
+                                         enr_df = c.enrollment, 
+                                         exit_df = c.exit, 
+                                         pit_date = ymd(20220126)){
   
   
   # final score:----
-  dis_df$is_disab <- NA
+  dis_df$is_disab <- "unknown or cannot tell"
   
   dis_df[dis_df$DisabilityResponse > 1 | 
            is.na(dis_df$DisabilityResponse),]$is_disab <- "unknown or cannot tell"
@@ -98,57 +98,61 @@ screened_positive_disability <- function(dis_df = c.disabilities,
            dis_df$IndefiniteAndImpairs == 0 & 
            !is.na(dis_df$IndefiniteAndImpairs),]$is_disab <- "not disabled"
   
-  dis_df[is.na(dis_df$is_disab),]$is_disab <- "unknown or cannot tell"
+  #dis_df[is.na(dis_df$is_disab),]$is_disab <- "unknown or cannot tell"
   
   
   #To Do----
-    
-    # add the non-disabled clients back into the output table
-    
-    # there is a problem in the logic of the output table - there should not be
-    # multiple of any one disability type per each enrollment_ID
-    
+  
+  # add the non-disabled clients back into the output table
+  
+  # there is a problem in the logic of the output table - there should not be
+  # multiple of any one disability type per each enrollment_ID
+  
   "https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf"
   "Working with Ncceh Data report.docx"
   
-   dis_df %>%
-   group_by(is_disab) %>%
+  dis_df %>%
+    group_by(is_disab) %>%
     summarise(count_disabilities = n()) 
-   
-   # identify most recent informationDate for each client-enrollment----
-   
-   join_dates <- hmis_join(dis_df,  
-             enr_df[colnames(enr_df) %in% c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
-                                            #"DisablingCondition", "RelationshipToHoH", 
-                                            "EntryDate")], 
-             jtype = "left") %>%
-     hmis_join(., 
-               exit_df, jtype = "left") 
-   
-   
-   # join_dates$enr_during_surv <- NA
-   # join_dates$enr_during_surv[(join_dates$EntryDate > pit_date | 
-   #   join_dates$ExitDate < pit_date) | !is.na(join_dates$EntryDate > pit_date | 
-   #                                              join_dates$ExitDate < pit_date)] <- F
-   # 
-   # 
-   # table(join_dates$enr_during_surv, useNA = "always")
-   # join_dates[is.na(join_dates$enr_during_surv),]
-   # 
-   # table(join_dates$EntryDate > pit_date, useNA = "always")
-   # table(join_dates$EntryDate == pit_date, useNA = "always")
-   # table(join_dates$EntryDate < pit_date, useNA = "always")
-   
-   # filter out all information dates that occur after the PIT survey date and
-   # then find the latest InformationDate for each enrollment - that becomes
-   # your most recent and thus most applicable date for disability inventory
-   join_dates <- join_dates %>%
-     .[.$InformationDate_disab <= pit_date,] %>%
-     group_by(PersonalID, EnrollmentID) %>%
-     slice_max(., 
-               order_by = InformationDate_disab, 
-               n = 1)
-   
+  
+  # identify most recent informationDate for each client-enrollment----
+  
+  join_dates <- hmis_join(dis_df,  
+                          enr_df[colnames(enr_df) %in% c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
+                                                         #"DisablingCondition", "RelationshipToHoH", 
+                                                         "EntryDate")], 
+                          jtype = "left") %>%
+    hmis_join(., 
+              exit_df, jtype = "left") 
+  
+  
+  # join_dates$enr_during_surv <- NA
+  # join_dates$enr_during_surv[(join_dates$EntryDate > pit_date | 
+  #   join_dates$ExitDate < pit_date) | !is.na(join_dates$EntryDate > pit_date | 
+  #                                              join_dates$ExitDate < pit_date)] <- F
+  # 
+  # 
+  # table(join_dates$enr_during_surv, useNA = "always")
+  # join_dates[is.na(join_dates$enr_during_surv),]
+  # 
+  # table(join_dates$EntryDate > pit_date, useNA = "always")
+  # table(join_dates$EntryDate == pit_date, useNA = "always")
+  # table(join_dates$EntryDate < pit_date, useNA = "always")
+  
+  # filter out all information dates that occur after the PIT survey date and
+  # then find the latest InformationDate for each enrollment - that becomes
+  # your most recent and thus most applicable date for disability inventory
+  
+  join_dates <- join_dates %>%
+    .[.$InformationDate_disab <= pit_date,] %>%
+    group_by(PersonalID, EnrollmentID) %>%
+    slice_max(., 
+              order_by = InformationDate_disab, 
+              n = 1)
+  
+  
+  
+  
   #  library(ggplot2)
   #  
   #  plot.this <- mutate(join_dates[sample(1:nrow(join_dates), size = 200, replace = F),], 
@@ -169,26 +173,36 @@ screened_positive_disability <- function(dis_df = c.disabilities,
   #              color = "blue")+
   #   geom_vline(aes(xintercept = pit_date), 
   #              linetype = 2232, color = "red")
-   
-   
-   jd <- join_dates %>%
-     left_join(., 
-               data.frame(DisabilityType = 5:10, 
-                          dt_name = c("physical_D", 
-                                      "developmental_D", 
-                                      "chronic_hlth_C", 
-                                      "HIV.AIDS", 
-                                      "mental_health_D", 
-                                      "substance_use_D"))) %>%
-     as.data.table() %>%
-   dcast(., 
-         PersonalID + EnrollmentID + #is_disab +
-         InformationDate_disab ~ dt_name, 
-         #fun.aggregate = length
-         value.var = "is_disab") 
-   
-   return(jd)
-   
+  
+  
+  jd <- join_dates %>%
+    left_join(., 
+              data.frame(DisabilityType = 5:10, 
+                         dt_name = c("physical_D", 
+                                     "developmental_D", 
+                                     "chronic_hlth_C", 
+                                     "HIV.AIDS", 
+                                     "mental_health_D", 
+                                     "substance_use_D"))) %>%
+    as.data.table() %>%
+    dcast(., 
+          PersonalID + EnrollmentID + #is_disab +
+            InformationDate_disab ~ dt_name, 
+          #fun.aggregate = length
+          value.var = "is_disab") 
+  
+  # There are NA values in this table and it's not clear why----- VVVV
+  
+  jd[jd$developmental_D == T & jd$chronic_hlth_C == T,]
+  
+  jd %>%
+    group_by(developmental_D, HIV.AIDS, chronic_hlth_C, 
+             mental_health_D, physical_D, substance_use_D) %>%
+    summarise(n = n()) %>%
+    .[order(.$n,decreasing = T),]
+  
+  return(jd)
+  
 }
 
 
