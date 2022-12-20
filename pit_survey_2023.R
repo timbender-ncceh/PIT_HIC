@@ -14,6 +14,14 @@ gc()
 library(tictoc)
 
 
+
+# NOTE----
+print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
+
+pit.night <- ""
+
+# /NOTE----
+
 tic()
 # resources----
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
@@ -204,7 +212,7 @@ is_hashed(read_csv("Client.csv")) %>% as.data.frame()
 
 # Needed Data----
 
-c.curlivingsit <- read_csv("CurrentLivingSituation.csv") %>%
+c.curlivingsit <- read_csv("CurrentLivingSituation.csv") %>% 
   .[,c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation", 
        "InformationDate")]
 colnames(c.curlivingsit) <- c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation", 
@@ -280,6 +288,8 @@ for(i in 1:nrow(temp)){
   
 }
 
+# note----
+# length of stay not needed
 temp$los_calculated <- some.date - temp$EntryDate
 
 temp <- temp[temp$somedate_between_enrollment | 
@@ -309,7 +319,7 @@ library(ggplot2)
 #          aes(x = EntryDate, xend = ExitDate, y = rid, yend = rid)) + 
 #   geom_segment()
 
-.# /QA enrollment lengths----
+# /QA enrollment lengths----
 
 
 temp <- temp %>%
