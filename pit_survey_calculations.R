@@ -49,8 +49,8 @@ fun_livingsituation_def <- function(x){
 }
 
 fun_rel2hoh <- function(x){
-  if(x == 1){
-    out <- "Self (head of household)"
+  if(is.na(x)){
+    out <- "Data not collected"
   }else if(x == 2){
     out <- "Head of household’s Child"
   }else if(x == 3){
@@ -59,8 +59,10 @@ fun_rel2hoh <- function(x){
     out <- "Head of household’s other relation member"
   }else if(x == 5){
     out <- "Other: non-relation member "
-  }else if(x == 99 | is.na(x)){
+  }else if(x == 99){
     out <- "Data not collected"
+  }else if(x == 1){
+    out <- "Self (head of household)"
   }else{
     out <- "[undetermined]"
   }
@@ -123,16 +125,18 @@ fun_gender <- function(male = c(0,1),
 }
 
 fun_1.8_def <- function(x){
-  if(x == 0){
-    out <- "No"
+  if(is.na(x)){
+    out <- "Data not collected"
   }else if(x == 1){
     out <- "Yes"
   }else if(x == 8){
     out <- "Client doesn't Know"
   }else if(x == 9){
     out <- "Client refused"
-  }else if(x == 99 | is.na(x)){
+  }else if(x == 99){
     out <- "Data not collected"
+  }else if(x == 0){
+    out <- "No"
   }else{
     out <- "[undetermined]"
   }
