@@ -48,6 +48,23 @@ fun_livingsituation_def <- function(x){
   return(out2)
 }
 
+
+fun_hhtype <- function(x){
+  if(is.na(x)){
+    out <- "[Undetermined]"
+  }else if(x == 1){
+    out <- "Households without children"
+  }else if(x == 3){
+    out <- "Households with at least one adult and one child"
+  }else if(x == 4){
+    out <- "Households with only children"
+  }else{
+    out <- "[Undetermined]"
+  }
+  return(out)
+}
+
+
 fun_rel2hoh <- function(x){
   if(is.na(x)){
     out <- "Data not collected"
