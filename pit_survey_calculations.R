@@ -55,6 +55,23 @@ fun_gender <- function(male = c(0,1),
   return(out)
 }
 
+fun_1.8_def <- function(x){
+  if(x == 0){
+    out <- "No"
+  }else if(x == 1){
+    out <- "Yes"
+  }else if(x == 8){
+    out <- "Client doesn't Know"
+  }else if(x == 9){
+    out <- "Client refused"
+  }else if(x == 99 | is.na(x)){
+    out <- "Data not collected"
+  }else{
+    out <- "[undetermined]"
+  }
+  return(out)
+}
+
 fun_ethnicity_def <- function(x){
   if(x == 0){
     out <- "Non-Hispanic/Non-Latin(a)(o)(x)"
