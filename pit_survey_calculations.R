@@ -1,3 +1,18 @@
+fun_projtype <- function(x){
+  out <- data.frame(x_in = c(1:4,
+                             6:14), 
+                    x_txt = c("ES", "TH", 
+                              "PH - psh", "Street Outreach", 
+                              "Services only", 
+                              "Other", "Safe Haven", 
+                              "PH - Housing only", 
+                              "PH - Housing with services", 
+                              "Day Shelter", 
+                              "Homelessness Prevention", 
+                              "PH - rrh", 
+                              "Coordinated Entry"))
+  return(out[out$x_in == x,]$x_txt)
+}
 
 fun_livingsituation_def <- function(x){
   out <- data.frame(x_in = c(16,1,18,15,6,
