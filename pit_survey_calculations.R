@@ -55,6 +55,27 @@ fun_gender <- function(male = c(0,1),
   return(out)
 }
 
+fun_ethnicity_def <- function(x){
+  if(x == 0){
+    out <- "Non-Hispanic/Non-Latin(a)(o)(x)"
+  }else if(x == 1){
+    out <- "Hispanic/Latin(a)(o)(x)"
+  }else if(x == 8){
+    out <- "Client doesn’t know"
+  }else if(x == 9){
+    out <- "Client refused"
+  }else if(x == 99){
+    out <- "Data not collected"
+  }else if(is.na(x)){
+    out <- "Data not collected"
+  }else {
+    out <- "[undetermined]"
+  }
+  return(out)
+}
+
+
+
 # all possible permutations found in data: 
 # fun_gender(1,0,0,0,0,NA)
 # fun_gender(0,1,0,0,0,NA)
