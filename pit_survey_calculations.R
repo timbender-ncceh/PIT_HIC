@@ -1,4 +1,53 @@
 
+fun_livingsituation_def <- function(x){
+  out <- data.frame(x_in = c(16,1,18,15,6,
+                             7,25,4,5,29,
+                             14,2,32,13,36, 
+                             12,22,35,23,26,
+                             27,28,19,3,31,33,34,10,20,21,
+                             11,30,17,24,37,8,9,99), 
+                    x_txt = c("Place not mean for human habitation", 
+                              "Emergency Shelter", "Safe Haven",
+                              "Foster care home or foster care group home", 
+                              "Hospital or other residential non-psychiatric medical facility",
+                              "Jail, prison or juvenile detention facility", 
+                              "Long-term care facility or nursing home", 
+                              "Psychiatric hospital or other psychiatric facility", 
+                              "Substance abuse treatment facility or detox center", 
+                              "Residential project or halfway house iwth no homeless criteria",
+                              "Hotel or motel paid without emergency shelter voucher", 
+                              "Transitional Housing", 
+                              "Host Home (non-crisis)", 
+                              "Staying or living with friends, temporary tenure", 
+                              "Staying or living in a friend's room, apartment, or house",
+                              "Staying or living with family, temporary tenure", 
+                              "Staying or living with family, permanent tenure", 
+                              "Staying or living in a family member’s room, apartment or house", 
+                              "Staying or living with friends, permanent tenure", 
+                              "Moved from one HOPWA funded project to HOPWA PH", 
+                              "Moved from one HOPWA funded project to HOPWA TH", 
+                              "Rental by client, with GPD TIP housing subsidy", 
+                              "Rental by client, with VASH housing subsidy", 
+                              "Permanent housing (other than RRH) for formerly homeless persons", 
+                              "Rental by client (RRH)", 
+                              "Rental by client (HCV - tenant or project based)", 
+                              "Rental by client in public housing unit", 
+                              "Rental by client, no ongoing housing subsidy", 
+                              "Rental by client with other ongoing housing subsidy", 
+                              "Owned by client, with ongoing housing subsidy", 
+                              "Owned by client, no ongoing housing subsidy", 
+                              "No exit interview completed", 
+                              "Other", "Deceased", "Worker unable to determine", 
+                              "Client doesn't know", "Client refused", "Data not collected"))
+  out2 <- out[out$x_in == x,]$x_txt
+  
+  if(any(is.na(out2))){
+    out2 <- "Data not collected"
+  }
+  
+  return(out2)
+}
+
 fun_rel2hoh <- function(x){
   if(x == 1){
     out <- "Self (head of household)"
