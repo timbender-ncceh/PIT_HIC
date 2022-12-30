@@ -1,4 +1,22 @@
 
+fun_rel2hoh <- function(x){
+  if(x == 1){
+    out <- "Self (head of household)"
+  }else if(x == 2){
+    out <- "Head of household’s Child"
+  }else if(x == 3){
+    out <- "Head of household’s spouse or partner"
+  }else if(x == 4){
+    out <- "Head of household’s other relation member"
+  }else if(x == 5){
+    out <- "Other: non-relation member "
+  }else if(x == 99 | is.na(x)){
+    out <- "Data not collected"
+  }else{
+    out <- "[undetermined]"
+  }
+  return(out)
+}
 
 fun_race <- function(racenone=c(8,9,99,NA),
                      amindaknative=c(0,1,99),
