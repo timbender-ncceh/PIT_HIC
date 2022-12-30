@@ -1,0 +1,1084 @@
+ZIP	City	County	Type
+27006	Advance	Davie	Standard
+27007	Ararat	Surry	Standard
+27009	Belews Creek	Forsyth	Standard
+27010	Bethania	Forsyth	P.O. Box
+27011	Boonville	Yadkin	Standard
+27012	Clemmons	Forsyth	Standard
+27013	Cleveland	Rowan	Standard
+27014	Cooleemee	Davie	P.O. Box
+27016	Danbury	Stokes	Standard
+27017	Dobson	Surry	Standard
+27018	East Bend	Yadkin	Standard
+27019	Germanton	Stokes	Standard
+27020	Hamptonville	Yadkin	Standard
+27021	King	Stokes	Standard
+27022	Lawsonville	Stokes	Standard
+27023	Lewisville	Forsyth	Standard
+27024	Lowgap	Surry	Standard
+27025	Madison	Rockingham	Standard
+27027	Mayodan	Rockingham	Standard
+27028	Mocksville	Davie	Standard
+27030	Mount Airy	Surry	Standard
+27031	Mount Airy	Surry	P.O. Box
+27040	Pfafftown	Forsyth	Standard
+27041	Pilot Mountain	Surry	Standard
+27042	Pine Hall	Stokes	Standard
+27043	Pinnacle	Stokes	Standard
+27045	Rural Hall	Forsyth	Standard
+27046	Sandy Ridge	Stokes	Standard
+27047	Siloam	Surry	Standard
+27048	Stoneville	Rockingham	Standard
+27049	Toast	Surry	P.O. Box
+27050	Tobaccoville	Forsyth	Standard
+27051	Walkertown	Forsyth	Standard
+27052	Walnut Cove	Stokes	Standard
+27053	Westfield	Surry	Standard
+27054	Woodleaf	Rowan	Standard
+27055	Yadkinville	Yadkin	Standard
+27094	Rural Hall	Forsyth	Unique
+27098	Rural Hall	Forsyth	Unique
+27099	Rural Hall	Forsyth	Unique
+27101	Winston Salem	Forsyth	Standard
+27102	Winston Salem	Forsyth	P.O. Box
+27103	Winston Salem	Forsyth	Standard
+27104	Winston Salem	Forsyth	Standard
+27105	Winston Salem	Forsyth	Standard
+27106	Winston Salem	Forsyth	Standard
+27107	Winston Salem	Forsyth	Standard
+27108	Winston Salem	Forsyth	P.O. Box
+27109	Winston Salem	Forsyth	Standard
+27110	Winston Salem	Forsyth	Unique
+27111	Winston Salem	Forsyth	Unique
+27113	Winston Salem	Forsyth	P.O. Box
+27114	Winston Salem	Forsyth	P.O. Box
+27115	Winston Salem	Forsyth	P.O. Box
+27116	Winston Salem	Forsyth	P.O. Box
+27117	Winston Salem	Forsyth	P.O. Box
+27120	Winston Salem	Forsyth	P.O. Box
+27127	Winston Salem	Forsyth	Standard
+27130	Winston Salem	Forsyth	P.O. Box
+27150	Winston Salem	Forsyth	Unique
+27152	Winston Salem	Forsyth	Unique
+27155	Winston Salem	Forsyth	Unique
+27157	Winston Salem	Forsyth	Unique
+27198	Winston Salem	Forsyth	Unique
+27199	Winston Salem	Forsyth	Unique
+27201	Alamance	Alamance	P.O. Box
+27202	Altamahaw	Alamance	P.O. Box
+27203	Asheboro	Randolph	Standard
+27204	Asheboro	Randolph	P.O. Box
+27205	Asheboro	Randolph	Standard
+27207	Bear Creek	Chatham	Standard
+27208	Bennett	Chatham	Standard
+27209	Biscoe	Montgomery	Standard
+27212	Blanch	Caswell	Standard
+27213	Bonlee	Chatham	P.O. Box
+27214	Browns Summit	Guilford	Standard
+27215	Burlington	Alamance	Standard
+27216	Burlington	Alamance	P.O. Box
+27217	Burlington	Alamance	Standard
+27228	Bynum	Chatham	P.O. Box
+27229	Candor	Montgomery	Standard
+27230	Cedar Falls	Randolph	P.O. Box
+27231	Cedar Grove	Orange	Standard
+27233	Climax	Guilford	Standard
+27235	Colfax	Guilford	Standard
+27237	Cumnock	Lee	P.O. Box
+27239	Denton	Davidson	Standard
+27242	Eagle Springs	Moore	Standard
+27243	Efland	Orange	Standard
+27244	Elon	Alamance	Standard
+27247	Ether	Montgomery	P.O. Box
+27248	Franklinville	Randolph	Standard
+27249	Gibsonville	Guilford	Standard
+27252	Goldston	Chatham	Standard
+27253	Graham	Alamance	Standard
+27256	Gulf	Chatham	P.O. Box
+27258	Haw River	Alamance	Standard
+27259	Highfalls	Moore	P.O. Box
+27260	High Point	Guilford	Standard
+27261	High Point	Guilford	P.O. Box
+27262	High Point	Guilford	Standard
+27263	High Point	Guilford	Standard
+27264	High Point	Guilford	P.O. Box
+27265	High Point	Guilford	Standard
+27268	High Point	Guilford	Unique
+27278	Hillsborough	Orange	Standard
+27281	Jackson Springs	Moore	Standard
+27282	Jamestown	Guilford	Standard
+27283	Julian	Guilford	Standard
+27284	Kernersville	Forsyth	Standard
+27285	Kernersville	Forsyth	P.O. Box
+27288	Eden	Rockingham	Standard
+27289	Eden	Rockingham	P.O. Box
+27291	Leasburg	Caswell	Standard
+27292	Lexington	Davidson	Standard
+27293	Lexington	Davidson	P.O. Box
+27294	Lexington	Davidson	Unique
+27295	Lexington	Davidson	Standard
+27298	Liberty	Randolph	Standard
+27299	Linwood	Davidson	Standard
+27301	Mc Leansville	Guilford	Standard
+27302	Mebane	Alamance	Standard
+27305	Milton	Caswell	Standard
+27306	Mount Gilead	Montgomery	Standard
+27310	Oak Ridge	Guilford	Standard
+27311	Pelham	Caswell	Standard
+27312	Pittsboro	Chatham	Standard
+27313	Pleasant Garden	Guilford	Standard
+27314	Prospect Hill	Caswell	Standard
+27315	Providence	Caswell	Standard
+27316	Ramseur	Randolph	Standard
+27317	Randleman	Randolph	Standard
+27320	Reidsville	Rockingham	Standard
+27323	Reidsville	Rockingham	P.O. Box
+27325	Robbins	Moore	Standard
+27326	Ruffin	Rockingham	Standard
+27330	Sanford	Lee	Standard
+27331	Sanford	Lee	P.O. Box
+27332	Sanford	Lee	Standard
+27340	Saxapahaw	Alamance	P.O. Box
+27341	Seagrove	Randolph	Standard
+27342	Sedalia	Guilford	P.O. Box
+27343	Semora	Person	Standard
+27344	Siler City	Chatham	Standard
+27349	Snow Camp	Alamance	Standard
+27350	Sophia	Randolph	Standard
+27351	Southmont	Davidson	P.O. Box
+27355	Staley	Randolph	Standard
+27356	Star	Montgomery	Standard
+27357	Stokesdale	Guilford	Standard
+27358	Summerfield	Guilford	Standard
+27359	Swepsonville	Alamance	P.O. Box
+27360	Thomasville	Davidson	Standard
+27361	Thomasville	Davidson	P.O. Box
+27370	Trinity	Randolph	Standard
+27371	Troy	Montgomery	Standard
+27373	Wallburg	Davidson	P.O. Box
+27374	Welcome	Davidson	P.O. Box
+27375	Wentworth	Rockingham	P.O. Box
+27376	West End	Moore	Standard
+27377	Whitsett	Guilford	Standard
+27379	Yanceyville	Caswell	Standard
+27401	Greensboro	Guilford	Standard
+27402	Greensboro	Guilford	P.O. Box
+27403	Greensboro	Guilford	Standard
+27404	Greensboro	Guilford	P.O. Box
+27405	Greensboro	Guilford	Standard
+27406	Greensboro	Guilford	Standard
+27407	Greensboro	Guilford	Standard
+27408	Greensboro	Guilford	Standard
+27409	Greensboro	Guilford	Standard
+27410	Greensboro	Guilford	Standard
+27411	Greensboro	Guilford	Unique
+27412	Greensboro	Guilford	Unique
+27413	Greensboro	Guilford	Unique
+27415	Greensboro	Guilford	P.O. Box
+27416	Greensboro	Guilford	P.O. Box
+27417	Greensboro	Guilford	P.O. Box
+27419	Greensboro	Guilford	P.O. Box
+27420	Greensboro	Guilford	P.O. Box
+27425	Greensboro	Guilford	P.O. Box
+27427	Greensboro	Guilford	P.O. Box
+27429	Greensboro	Guilford	P.O. Box
+27435	Greensboro	Guilford	P.O. Box
+27438	Greensboro	Guilford	P.O. Box
+27455	Greensboro	Guilford	Standard
+27495	Greensboro	Guilford	Standard
+27497	Greensboro	Guilford	Unique
+27498	Greensboro	Guilford	Unique
+27499	Greensboro	Guilford	Unique
+27501	Angier	Harnett	Standard
+27502	Apex	Wake	Standard
+27503	Bahama	Durham	Standard
+27504	Benson	Johnston	Standard
+27505	Broadway	Lee	Standard
+27506	Buies Creek	Harnett	P.O. Box
+27507	Bullock	Granville	Standard
+27508	Bunn	Franklin	Standard
+27509	Butner	Granville	Standard
+27510	Carrboro	Orange	Standard
+27511	Cary	Wake	Standard
+27512	Cary	Wake	P.O. Box
+27513	Cary	Wake	Standard
+27514	Chapel Hill	Orange	Standard
+27515	Chapel Hill	Orange	P.O. Box
+27516	Chapel Hill	Orange	Standard
+27517	Chapel Hill	Orange	Standard
+27518	Cary	Wake	Standard
+27519	Cary	Wake	Standard
+27520	Clayton	Johnston	Standard
+27521	Coats	Harnett	Standard
+27522	Creedmoor	Granville	Standard
+27523	Apex	Wake	Standard
+27524	Four Oaks	Johnston	Standard
+27525	Franklinton	Franklin	Standard
+27526	Fuquay Varina	Wake	Standard
+27527	Clayton	Johnston	Standard
+27528	Clayton	Johnston	Standard
+27529	Garner	Wake	Standard
+27530	Goldsboro	Wayne	Standard
+27531	Goldsboro	Wayne	Standard
+27532	Goldsboro	Wayne	P.O. Box
+27533	Goldsboro	Wayne	P.O. Box
+27534	Goldsboro	Wayne	Standard
+27536	Henderson	Vance	Standard
+27537	Henderson	Vance	Standard
+27539	Apex	Wake	Standard
+27540	Holly Springs	Wake	Standard
+27541	Hurdle Mills	Person	Standard
+27542	Kenly	Johnston	Standard
+27543	Kipling	Harnett	P.O. Box
+27544	Kittrell	Vance	Standard
+27545	Knightdale	Wake	Standard
+27546	Lillington	Harnett	Standard
+27549	Louisburg	Franklin	Standard
+27551	Macon	Warren	Standard
+27552	Mamers	Harnett	P.O. Box
+27553	Manson	Vance	Standard
+27555	Micro	Johnston	P.O. Box
+27556	Middleburg	Vance	P.O. Box
+27557	Middlesex	Nash	Standard
+27559	Moncure	Chatham	Standard
+27560	Morrisville	Wake	Standard
+27562	New Hill	Wake	Standard
+27563	Norlina	Warren	Standard
+27565	Oxford	Granville	Standard
+27568	Pine Level	Johnston	P.O. Box
+27569	Princeton	Johnston	Standard
+27570	Ridgeway	Warren	P.O. Box
+27571	Rolesville	Wake	Standard
+27572	Rougemont	Durham	Standard
+27573	Roxboro	Person	Standard
+27574	Roxboro	Person	Standard
+27576	Selma	Johnston	Standard
+27577	Smithfield	Johnston	Standard
+27581	Stem	Granville	Standard
+27582	Stovall	Granville	P.O. Box
+27583	Timberlake	Person	Standard
+27584	Townsville	Vance	P.O. Box
+27586	Vaughan	Warren	P.O. Box
+27587	Wake Forest	Wake	Standard
+27588	Wake Forest	Wake	P.O. Box
+27589	Warrenton	Warren	Standard
+27591	Wendell	Wake	Standard
+27592	Willow Spring	Wake	Standard
+27593	Wilsons Mills	Johnston	P.O. Box
+27594	Wise	Warren	P.O. Box
+27596	Youngsville	Franklin	Standard
+27597	Zebulon	Wake	Standard
+27599	Chapel Hill	Orange	Unique
+27601	Raleigh	Wake	Standard
+27602	Raleigh	Wake	P.O. Box
+27603	Raleigh	Wake	Standard
+27604	Raleigh	Wake	Standard
+27605	Raleigh	Wake	Standard
+27606	Raleigh	Wake	Standard
+27607	Raleigh	Wake	Standard
+27608	Raleigh	Wake	Standard
+27609	Raleigh	Wake	Standard
+27610	Raleigh	Wake	Standard
+27611	Raleigh	Wake	P.O. Box
+27612	Raleigh	Wake	Standard
+27613	Raleigh	Wake	Standard
+27614	Raleigh	Wake	Standard
+27615	Raleigh	Wake	Standard
+27616	Raleigh	Wake	Standard
+27617	Raleigh	Wake	Standard
+27619	Raleigh	Wake	P.O. Box
+27620	Raleigh	Wake	P.O. Box
+27621	Raleigh	Wake	P.O. Box
+27622	Raleigh	Wake	P.O. Box
+27623	Raleigh	Wake	P.O. Box
+27624	Raleigh	Wake	P.O. Box
+27625	Raleigh	Wake	P.O. Box
+27626	Raleigh	Wake	P.O. Box
+27627	Raleigh	Wake	P.O. Box
+27628	Raleigh	Wake	P.O. Box
+27629	Raleigh	Wake	P.O. Box
+27634	Raleigh	Wake	Unique
+27635	Raleigh	Wake	Unique
+27636	Raleigh	Wake	P.O. Box
+27640	Raleigh	Wake	Unique
+27650	Raleigh	Wake	P.O. Box
+27656	Raleigh	Wake	Unique
+27658	Raleigh	Wake	P.O. Box
+27661	Raleigh	Wake	P.O. Box
+27668	Raleigh	Wake	Unique
+27675	Raleigh	Wake	P.O. Box
+27676	Raleigh	Wake	P.O. Box
+27690	Raleigh	Wake	Unique
+27695	Raleigh	Wake	Unique
+27697	Raleigh	Wake	Unique
+27698	Raleigh	Wake	Unique
+27699	Raleigh	Wake	Unique
+27701	Durham	Durham	Standard
+27702	Durham	Durham	P.O. Box
+27703	Durham	Durham	Standard
+27704	Durham	Durham	Standard
+27705	Durham	Durham	Standard
+27706	Durham	Durham	Standard
+27707	Durham	Durham	Standard
+27708	Durham	Durham	Unique
+27709	Durham	Durham	P.O. Box
+27709	Research Triangle Park	Durham	P.O. Box
+27710	Durham	Durham	Unique
+27711	Durham	Durham	Unique
+27711	Research Triangle Park	Durham	Unique
+27712	Durham	Durham	Standard
+27713	Durham	Durham	Standard
+27715	Durham	Durham	P.O. Box
+27717	Durham	Durham	P.O. Box
+27722	Durham	Durham	P.O. Box
+27801	Rocky Mount	Edgecombe	Standard
+27802	Rocky Mount	Edgecombe	P.O. Box
+27803	Rocky Mount	Nash	Standard
+27804	Rocky Mount	Nash	Standard
+27805	Aulander	Bertie	Standard
+27806	Aurora	Beaufort	Standard
+27807	Bailey	Nash	Standard
+27808	Bath	Beaufort	Standard
+27809	Battleboro	Edgecombe	Standard
+27810	Belhaven	Beaufort	Standard
+27811	Bellarthur	Pitt	P.O. Box
+27812	Bethel	Pitt	Standard
+27813	Black Creek	Wilson	P.O. Box
+27814	Blounts Creek	Beaufort	Standard
+27815	Rocky Mount	Edgecombe	Unique
+27816	Castalia	Nash	Standard
+27817	Chocowinity	Beaufort	Standard
+27818	Como	Hertford	Standard
+27819	Conetoe	Edgecombe	P.O. Box
+27820	Conway	Northampton	Standard
+27821	Edward	Beaufort	Standard
+27822	Elm City	Wilson	Standard
+27823	Enfield	Halifax	Standard
+27824	Engelhard	Hyde	Standard
+27825	Everetts	Martin	P.O. Box
+27826	Fairfield	Hyde	Standard
+27827	Falkland	Pitt	P.O. Box
+27828	Farmville	Pitt	Standard
+27829	Fountain	Pitt	Standard
+27830	Fremont	Wayne	Standard
+27831	Garysburg	Northampton	Standard
+27832	Gaston	Northampton	Standard
+27833	Greenville	Pitt	P.O. Box
+27834	Greenville	Pitt	Standard
+27835	Greenville	Pitt	P.O. Box
+27836	Greenville	Pitt	P.O. Box
+27837	Grimesland	Pitt	Standard
+27839	Halifax	Halifax	Standard
+27840	Hamilton	Martin	Standard
+27841	Hassell	Martin	P.O. Box
+27842	Henrico	Northampton	Standard
+27843	Hobgood	Halifax	Standard
+27844	Hollister	Halifax	Standard
+27845	Jackson	Northampton	Standard
+27846	Jamesville	Martin	Standard
+27847	Kelford	Bertie	Standard
+27849	Lewiston Woodville	Bertie	Standard
+27850	Littleton	Halifax	Standard
+27851	Lucama	Wilson	Standard
+27852	Macclesfield	Edgecombe	Standard
+27853	Margarettsville	Northampton	Standard
+27855	Murfreesboro	Hertford	Standard
+27856	Nashville	Nash	Standard
+27857	Oak City	Martin	Standard
+27858	Greenville	Pitt	Standard
+27860	Pantego	Beaufort	Standard
+27861	Parmele	Martin	P.O. Box
+27862	Pendleton	Northampton	Standard
+27863	Pikeville	Wayne	Standard
+27864	Pinetops	Edgecombe	Standard
+27865	Pinetown	Beaufort	Standard
+27866	Pleasant Hill	Northampton	Standard
+27867	Potecasi	Northampton	P.O. Box
+27868	Red Oak	Nash	P.O. Box
+27869	Rich Square	Northampton	Standard
+27870	Roanoke Rapids	Halifax	Standard
+27871	Robersonville	Martin	Standard
+27872	Roxobel	Bertie	Standard
+27873	Saratoga	Wilson	P.O. Box
+27874	Scotland Neck	Halifax	Standard
+27875	Scranton	Hyde	Standard
+27876	Seaboard	Northampton	Standard
+27877	Severn	Northampton	P.O. Box
+27878	Sharpsburg	Nash	P.O. Box
+27879	Simpson	Pitt	P.O. Box
+27880	Sims	Wilson	Standard
+27881	Speed	Edgecombe	P.O. Box
+27882	Spring Hope	Nash	Standard
+27883	Stantonsburg	Wilson	Standard
+27884	Stokes	Pitt	Standard
+27885	Swanquarter	Hyde	Standard
+27886	Tarboro	Edgecombe	Standard
+27887	Tillery	Halifax	P.O. Box
+27888	Walstonburg	Greene	Standard
+27889	Washington	Beaufort	Standard
+27890	Weldon	Halifax	Standard
+27891	Whitakers	Nash	Standard
+27892	Williamston	Martin	Standard
+27893	Wilson	Wilson	Standard
+27894	Wilson	Wilson	P.O. Box
+27895	Wilson	Wilson	P.O. Box
+27896	Wilson	Wilson	Standard
+27897	Woodland	Northampton	Standard
+27906	Elizabeth City	Pasquotank	P.O. Box
+27907	Elizabeth City	Pasquotank	P.O. Box
+27909	Elizabeth City	Pasquotank	Standard
+27910	Ahoskie	Hertford	Standard
+27915	Avon	Dare	P.O. Box
+27916	Aydlett	Currituck	Standard
+27917	Barco	Currituck	Standard
+27919	Belvidere	Perquimans	Standard
+27920	Buxton	Dare	P.O. Box
+27921	Camden	Camden	Standard
+27922	Cofield	Hertford	Standard
+27923	Coinjock	Currituck	Standard
+27924	Colerain	Bertie	Standard
+27925	Columbia	Tyrrell	Standard
+27926	Corapeake	Gates	Standard
+27927	Corolla	Currituck	Standard
+27928	Creswell	Washington	Standard
+27929	Currituck	Currituck	Standard
+27930	Hertford	Perquimans	P.O. Box
+27932	Edenton	Chowan	Standard
+27935	Eure	Gates	Standard
+27936	Frisco	Dare	P.O. Box
+27937	Gates	Gates	Standard
+27938	Gatesville	Gates	Standard
+27939	Grandy	Currituck	Standard
+27941	Harbinger	Currituck	Standard
+27942	Harrellsville	Hertford	Standard
+27943	Hatteras	Dare	P.O. Box
+27944	Hertford	Perquimans	Standard
+27946	Hobbsville	Gates	Standard
+27947	Jarvisburg	Currituck	Standard
+27948	Kill Devil Hills	Dare	Standard
+27949	Kitty Hawk	Dare	Standard
+27950	Knotts Island	Currituck	Standard
+27953	Manns Harbor	Dare	Standard
+27954	Manteo	Dare	Standard
+27956	Maple	Currituck	Standard
+27957	Merry Hill	Bertie	Standard
+27958	Moyock	Currituck	Standard
+27959	Nags Head	Dare	Standard
+27960	Ocracoke	Hyde	P.O. Box
+27962	Plymouth	Washington	Standard
+27964	Point Harbor	Currituck	Standard
+27965	Poplar Branch	Currituck	Standard
+27966	Powells Point	Currituck	Standard
+27967	Powellsville	Bertie	P.O. Box
+27968	Rodanthe	Dare	P.O. Box
+27969	Roduco	Gates	P.O. Box
+27970	Roper	Washington	Standard
+27972	Salvo	Dare	P.O. Box
+27973	Shawboro	Currituck	Standard
+27974	Shiloh	Camden	Standard
+27976	South Mills	Camden	Standard
+27978	Stumpy Point	Dare	Standard
+27979	Sunbury	Gates	Standard
+27980	Tyner	Chowan	Standard
+27981	Wanchese	Dare	Standard
+27982	Waves	Dare	P.O. Box
+27983	Windsor	Bertie	Standard
+27985	Winfall	Perquimans	P.O. Box
+27986	Winton	Hertford	Standard
+28001	Albemarle	Stanly	Standard
+28002	Albemarle	Stanly	P.O. Box
+28006	Alexis	Gaston	Standard
+28007	Ansonville	Anson	P.O. Box
+28009	Badin	Stanly	P.O. Box
+28010	Barium Springs	Iredell	P.O. Box
+28012	Belmont	Gaston	Standard
+28016	Bessemer City	Gaston	Standard
+28017	Boiling Springs	Cleveland	P.O. Box
+28018	Bostic	Rutherford	Standard
+28019	Caroleen	Rutherford	P.O. Box
+28020	Casar	Cleveland	Standard
+28021	Cherryville	Gaston	Standard
+28023	China Grove	Rowan	Standard
+28024	Cliffside	Rutherford	P.O. Box
+28025	Concord	Cabarrus	Standard
+28026	Concord	Cabarrus	P.O. Box
+28027	Concord	Cabarrus	Standard
+28031	Cornelius	Mecklenburg	Standard
+28032	Cramerton	Gaston	Standard
+28033	Crouse	Lincoln	Standard
+28034	Dallas	Gaston	Standard
+28035	Davidson	Mecklenburg	Standard
+28036	Davidson	Mecklenburg	Standard
+28037	Denver	Lincoln	Standard
+28038	Earl	Cleveland	P.O. Box
+28039	East Spencer	Rowan	P.O. Box
+28040	Ellenboro	Rutherford	Standard
+28041	Faith	Rowan	P.O. Box
+28042	Fallston	Cleveland	P.O. Box
+28043	Forest City	Rutherford	Standard
+28052	Gastonia	Gaston	Standard
+28053	Gastonia	Gaston	P.O. Box
+28054	Gastonia	Gaston	Standard
+28055	Gastonia	Gaston	P.O. Box
+28056	Gastonia	Gaston	Standard
+28070	Huntersville	Mecklenburg	P.O. Box
+28071	Gold Hill	Rowan	Standard
+28072	Granite Quarry	Rowan	P.O. Box
+28073	Grover	Cleveland	Standard
+28074	Harris	Rutherford	P.O. Box
+28075	Harrisburg	Cabarrus	Standard
+28076	Henrietta	Rutherford	P.O. Box
+28077	High Shoals	Gaston	P.O. Box
+28078	Huntersville	Mecklenburg	Standard
+28079	Indian Trail	Union	Standard
+28080	Iron Station	Lincoln	Standard
+28081	Kannapolis	Cabarrus	Standard
+28082	Kannapolis	Cabarrus	P.O. Box
+28083	Kannapolis	Cabarrus	Standard
+28086	Kings Mountain	Cleveland	Standard
+28088	Landis	Rowan	Standard
+28089	Lattimore	Cleveland	P.O. Box
+28090	Lawndale	Cleveland	Standard
+28091	Lilesville	Anson	Standard
+28092	Lincolnton	Lincoln	Standard
+28093	Lincolnton	Lincoln	P.O. Box
+28097	Locust	Stanly	Standard
+28098	Lowell	Gaston	Standard
+28101	Mc Adenville	Gaston	Standard
+28102	Mc Farlan	Anson	P.O. Box
+28103	Marshville	Union	Standard
+28104	Matthews	Union	Standard
+28105	Matthews	Mecklenburg	Standard
+28106	Matthews	Mecklenburg	P.O. Box
+28107	Midland	Cabarrus	Standard
+28108	Mineral Springs	Union	P.O. Box
+28109	Misenheimer	Stanly	P.O. Box
+28110	Monroe	Union	Standard
+28111	Monroe	Union	P.O. Box
+28112	Monroe	Union	Standard
+28114	Mooresboro	Cleveland	Standard
+28115	Mooresville	Iredell	Standard
+28117	Mooresville	Iredell	Standard
+28119	Morven	Anson	Standard
+28120	Mount Holly	Gaston	Standard
+28123	Mount Mourne	Iredell	P.O. Box
+28124	Mount Pleasant	Cabarrus	Standard
+28125	Mount Ulla	Rowan	Standard
+28126	Newell	Mecklenburg	P.O. Box
+28127	New London	Stanly	Standard
+28128	Norwood	Stanly	Standard
+28129	Oakboro	Stanly	Standard
+28130	Paw Creek	Mecklenburg	P.O. Box
+28133	Peachland	Anson	Standard
+28134	Pineville	Mecklenburg	Standard
+28135	Polkton	Anson	Standard
+28136	Polkville	Cleveland	P.O. Box
+28137	Richfield	Stanly	Standard
+28138	Rockwell	Rowan	Standard
+28139	Rutherfordton	Rutherford	Standard
+28144	Salisbury	Rowan	Standard
+28145	Salisbury	Rowan	P.O. Box
+28146	Salisbury	Rowan	Standard
+28147	Salisbury	Rowan	Standard
+28150	Shelby	Cleveland	Standard
+28151	Shelby	Cleveland	P.O. Box
+28152	Shelby	Cleveland	Standard
+28159	Spencer	Rowan	Standard
+28160	Spindale	Rutherford	Standard
+28163	Stanfield	Stanly	Standard
+28164	Stanley	Gaston	Standard
+28166	Troutman	Iredell	Standard
+28167	Union Mills	Rutherford	Standard
+28168	Vale	Lincoln	Standard
+28169	Waco	Cleveland	P.O. Box
+28170	Wadesboro	Anson	Standard
+28173	Waxhaw	Union	Standard
+28174	Wingate	Union	Standard
+28201	Charlotte	Mecklenburg	P.O. Box
+28202	Charlotte	Mecklenburg	Standard
+28203	Charlotte	Mecklenburg	Standard
+28204	Charlotte	Mecklenburg	Standard
+28205	Charlotte	Mecklenburg	Standard
+28206	Charlotte	Mecklenburg	Standard
+28207	Charlotte	Mecklenburg	Standard
+28208	Charlotte	Mecklenburg	Standard
+28209	Charlotte	Mecklenburg	Standard
+28210	Charlotte	Mecklenburg	Standard
+28211	Charlotte	Mecklenburg	Standard
+28212	Charlotte	Mecklenburg	Standard
+28213	Charlotte	Mecklenburg	Standard
+28214	Charlotte	Mecklenburg	Standard
+28215	Charlotte	Mecklenburg	Standard
+28216	Charlotte	Mecklenburg	Standard
+28217	Charlotte	Mecklenburg	Standard
+28218	Charlotte	Mecklenburg	P.O. Box
+28219	Charlotte	Mecklenburg	P.O. Box
+28220	Charlotte	Mecklenburg	P.O. Box
+28221	Charlotte	Mecklenburg	P.O. Box
+28222	Charlotte	Mecklenburg	P.O. Box
+28223	Charlotte	Mecklenburg	Unique
+28224	Charlotte	Mecklenburg	P.O. Box
+28226	Charlotte	Mecklenburg	Standard
+28227	Charlotte	Mecklenburg	Standard
+28228	Charlotte	Mecklenburg	Unique
+28229	Charlotte	Mecklenburg	P.O. Box
+28230	Charlotte	Mecklenburg	P.O. Box
+28231	Charlotte	Mecklenburg	P.O. Box
+28232	Charlotte	Mecklenburg	P.O. Box
+28233	Charlotte	Mecklenburg	P.O. Box
+28234	Charlotte	Mecklenburg	P.O. Box
+28235	Charlotte	Mecklenburg	P.O. Box
+28236	Charlotte	Mecklenburg	P.O. Box
+28237	Charlotte	Mecklenburg	P.O. Box
+28241	Charlotte	Mecklenburg	P.O. Box
+28242	Charlotte	Mecklenburg	Unique
+28243	Charlotte	Mecklenburg	Unique
+28244	Charlotte	Mecklenburg	Standard
+28246	Charlotte	Mecklenburg	Standard
+28247	Charlotte	Mecklenburg	P.O. Box
+28253	Charlotte	Mecklenburg	Unique
+28254	Charlotte	Mecklenburg	Standard
+28255	Charlotte	Mecklenburg	Unique
+28256	Charlotte	Mecklenburg	P.O. Box
+28258	Charlotte	Mecklenburg	Unique
+28260	Charlotte	Mecklenburg	P.O. Box
+28262	Charlotte	Mecklenburg	Standard
+28263	Charlotte	Mecklenburg	Unique
+28265	Charlotte	Mecklenburg	P.O. Box
+28266	Charlotte	Mecklenburg	P.O. Box
+28269	Charlotte	Mecklenburg	Standard
+28270	Charlotte	Mecklenburg	Standard
+28271	Charlotte	Mecklenburg	P.O. Box
+28272	Charlotte	Mecklenburg	P.O. Box
+28273	Charlotte	Mecklenburg	Standard
+28274	Charlotte	Mecklenburg	Unique
+28275	Charlotte	Mecklenburg	P.O. Box
+28277	Charlotte	Mecklenburg	Standard
+28278	Charlotte	Mecklenburg	Standard
+28280	Charlotte	Mecklenburg	Standard
+28281	Charlotte	Mecklenburg	Standard
+28282	Charlotte	Mecklenburg	Standard
+28284	Charlotte	Mecklenburg	Standard
+28285	Charlotte	Mecklenburg	Standard
+28287	Charlotte	Mecklenburg	Standard
+28288	Charlotte	Mecklenburg	Unique
+28289	Charlotte	Mecklenburg	Unique
+28290	Charlotte	Mecklenburg	Unique
+28296	Charlotte	Mecklenburg	Unique
+28297	Charlotte	Mecklenburg	P.O. Box
+28299	Charlotte	Mecklenburg	P.O. Box
+28301	East Fayetteville	Cumberland	Standard
+28301	Fayetteville	Cumberland	Standard
+28302	Fayetteville	Cumberland	P.O. Box
+28303	Fayetteville	Cumberland	Standard
+28304	Fayetteville	Cumberland	Standard
+28305	Fayetteville	Cumberland	Standard
+28306	Fayetteville	Cumberland	Standard
+28307	Fort Bragg	Cumberland	Standard
+28308	Pope Army Airfield	Cumberland	Standard
+28309	Fayetteville	Cumberland	P.O. Box
+28310	Fort Bragg	Cumberland	Unique
+28311	Fayetteville	Cumberland	Standard
+28312	Fayetteville	Cumberland	Standard
+28314	Fayetteville	Cumberland	Standard
+28315	Aberdeen	Moore	Standard
+28318	Autryville	Sampson	Standard
+28319	Barnesville	Robeson	P.O. Box
+28320	Bladenboro	Bladen	Standard
+28323	Bunnlevel	Harnett	Standard
+28325	Calypso	Duplin	P.O. Box
+28326	Cameron	Harnett	Standard
+28327	Carthage	Moore	Standard
+28328	Clinton	Sampson	Standard
+28329	Clinton	Sampson	P.O. Box
+28330	Cordova	Richmond	P.O. Box
+28331	Cumberland	Cumberland	P.O. Box
+28332	Dublin	Bladen	P.O. Box
+28333	Dudley	Wayne	Standard
+28334	Dunn	Harnett	Standard
+28335	Dunn	Harnett	P.O. Box
+28337	Elizabethtown	Bladen	Standard
+28338	Ellerbe	Richmond	Standard
+28339	Erwin	Harnett	Standard
+28340	Fairmont	Robeson	Standard
+28341	Faison	Duplin	Standard
+28342	Falcon	Cumberland	P.O. Box
+28343	Gibson	Scotland	Standard
+28344	Godwin	Sampson	Standard
+28345	Hamlet	Richmond	Standard
+28347	Hoffman	Richmond	Standard
+28348	Hope Mills	Cumberland	Standard
+28349	Kenansville	Duplin	Standard
+28350	Lakeview	Moore	P.O. Box
+28351	Laurel Hill	Scotland	Standard
+28352	Laurinburg	Scotland	Standard
+28353	Laurinburg	Scotland	P.O. Box
+28355	Lemon Springs	Lee	P.O. Box
+28356	Linden	Cumberland	Standard
+28357	Lumber Bridge	Robeson	Standard
+28358	Lumberton	Robeson	Standard
+28359	Lumberton	Robeson	P.O. Box
+28360	Lumberton	Robeson	Standard
+28362	Marietta	Robeson	P.O. Box
+28363	Marston	Richmond	Standard
+28364	Maxton	Robeson	Standard
+28365	Mount Olive	Wayne	Standard
+28366	Newton Grove	Sampson	Standard
+28367	Norman	Richmond	P.O. Box
+28368	Olivia	Harnett	P.O. Box
+28369	Orrum	Robeson	Standard
+28370	Pinehurst	Moore	P.O. Box
+28371	Parkton	Robeson	Standard
+28372	Pembroke	Robeson	Standard
+28373	Pinebluff	Moore	Standard
+28374	Pinehurst	Moore	Standard
+28375	Proctorville	Robeson	P.O. Box
+28376	Raeford	Hoke	Standard
+28377	Red Springs	Robeson	Standard
+28378	Rex	Robeson	P.O. Box
+28379	Rockingham	Richmond	Standard
+28380	Rockingham	Richmond	P.O. Box
+28382	Roseboro	Sampson	Standard
+28383	Rowland	Robeson	Standard
+28384	Saint Pauls	Robeson	Standard
+28385	Salemburg	Sampson	Standard
+28386	Shannon	Robeson	Standard
+28387	Southern Pines	Moore	Standard
+28388	Southern Pines	Moore	P.O. Box
+28390	Spring Lake	Cumberland	Standard
+28391	Stedman	Cumberland	Standard
+28392	Tar Heel	Bladen	Standard
+28393	Turkey	Sampson	Standard
+28394	Vass	Moore	Standard
+28395	Wade	Cumberland	Standard
+28396	Wagram	Scotland	Standard
+28398	Warsaw	Duplin	Standard
+28399	White Oak	Bladen	Standard
+28401	Wilmington	New Hanover	Standard
+28402	Wilmington	New Hanover	P.O. Box
+28403	Wilmington	New Hanover	Standard
+28404	Wilmington	New Hanover	P.O. Box
+28405	Wilmington	New Hanover	Standard
+28406	Wilmington	New Hanover	P.O. Box
+28407	Wilmington	New Hanover	P.O. Box
+28408	Wilmington	New Hanover	P.O. Box
+28409	Wilmington	New Hanover	Standard
+28410	Wilmington	New Hanover	Unique
+28411	Wilmington	New Hanover	Standard
+28412	Wilmington	New Hanover	Standard
+28420	Ash	Brunswick	Standard
+28421	Atkinson	Pender	Standard
+28422	Bolivia	Brunswick	Standard
+28423	Bolton	Columbus	Standard
+28424	Brunswick	Columbus	P.O. Box
+28425	Burgaw	Pender	Standard
+28428	Carolina Beach	New Hanover	Standard
+28429	Castle Hayne	New Hanover	Standard
+28430	Cerro Gordo	Columbus	Standard
+28431	Chadbourn	Columbus	Standard
+28432	Clarendon	Columbus	Standard
+28433	Clarkton	Bladen	Standard
+28434	Council	Bladen	Standard
+28435	Currie	Pender	Standard
+28436	Delco	Columbus	Standard
+28438	Evergreen	Columbus	Standard
+28439	Fair Bluff	Columbus	Standard
+28441	Garland	Sampson	Standard
+28442	Hallsboro	Columbus	Standard
+28443	Hampstead	Pender	Standard
+28444	Harrells	Sampson	Standard
+28445	Holly Ridge	Onslow	Standard
+28447	Ivanhoe	Sampson	Standard
+28448	Kelly	Bladen	Standard
+28449	Kure Beach	New Hanover	Standard
+28450	Lake Waccamaw	Columbus	Standard
+28451	Leland	Brunswick	Standard
+28452	Longwood	Brunswick	Standard
+28453	Magnolia	Duplin	Standard
+28454	Maple Hill	Pender	Standard
+28455	Nakina	Columbus	Standard
+28456	Riegelwood	Columbus	Standard
+28457	Rocky Point	Pender	Standard
+28458	Rose Hill	Duplin	Standard
+28459	Shallotte	Brunswick	P.O. Box
+28460	Sneads Ferry	Onslow	Standard
+28461	Southport	Brunswick	Standard
+28462	Supply	Brunswick	Standard
+28463	Tabor City	Columbus	Standard
+28464	Teachey	Duplin	Standard
+28465	Oak Island	Brunswick	Standard
+28466	Wallace	Duplin	Standard
+28467	Calabash	Brunswick	Standard
+28468	Sunset Beach	Brunswick	Standard
+28469	Ocean Isle Beach	Brunswick	Standard
+28470	Shallotte	Brunswick	Standard
+28472	Whiteville	Columbus	Standard
+28478	Willard	Pender	Standard
+28479	Winnabow	Brunswick	Standard
+28480	Wrightsville Beach	New Hanover	Standard
+28501	Kinston	Lenoir	Standard
+28502	Kinston	Lenoir	P.O. Box
+28503	Kinston	Lenoir	P.O. Box
+28504	Kinston	Lenoir	Standard
+28508	Albertson	Duplin	Standard
+28509	Alliance	Pamlico	P.O. Box
+28510	Arapahoe	Pamlico	Standard
+28511	Atlantic	Carteret	Standard
+28512	Atlantic Beach	Carteret	Standard
+28513	Ayden	Pitt	Standard
+28515	Bayboro	Pamlico	Standard
+28516	Beaufort	Carteret	Standard
+28518	Beulaville	Duplin	Standard
+28519	Bridgeton	Craven	P.O. Box
+28520	Cedar Island	Carteret	Standard
+28521	Chinquapin	Duplin	Standard
+28522	Comfort	Jones	P.O. Box
+28523	Cove City	Craven	Standard
+28524	Davis	Carteret	Standard
+28525	Deep Run	Lenoir	Standard
+28526	Dover	Craven	Standard
+28527	Ernul	Craven	Standard
+28528	Gloucester	Carteret	Standard
+28529	Grantsboro	Pamlico	Standard
+28530	Grifton	Pitt	Standard
+28531	Harkers Island	Carteret	Standard
+28532	Havelock	Craven	Standard
+28533	Cherry Point	Craven	Standard
+28537	Hobucken	Pamlico	Standard
+28538	Hookerton	Greene	Standard
+28539	Hubert	Onslow	Standard
+28540	Jacksonville	Onslow	Standard
+28541	Jacksonville	Onslow	P.O. Box
+28542	Camp Lejeune	Onslow	P.O. Box
+28543	Tarawa Terrace	Onslow	Standard
+28544	Midway Park	Onslow	Standard
+28545	Mccutcheon Field	Onslow	Standard
+28546	Jacksonville	Onslow	Standard
+28547	Camp Lejeune	Onslow	Standard
+28551	La Grange	Lenoir	Standard
+28552	Lowland	Pamlico	Standard
+28553	Marshallberg	Carteret	Standard
+28554	Maury	Greene	P.O. Box
+28555	Maysville	Jones	Standard
+28556	Merritt	Pamlico	Standard
+28557	Morehead City	Carteret	Standard
+28560	New Bern	Craven	Standard
+28561	New Bern	Craven	P.O. Box
+28562	New Bern	Craven	Standard
+28563	New Bern	Craven	P.O. Box
+28564	New Bern	Craven	P.O. Box
+28570	Newport	Carteret	Standard
+28571	Oriental	Pamlico	Standard
+28572	Pink Hill	Lenoir	Standard
+28573	Pollocksville	Jones	Standard
+28574	Richlands	Onslow	Standard
+28575	Salter Path	Carteret	P.O. Box
+28577	Sealevel	Carteret	Standard
+28578	Seven Springs	Wayne	Standard
+28579	Smyrna	Carteret	Standard
+28580	Snow Hill	Greene	Standard
+28581	Stacy	Carteret	Standard
+28582	Stella	Carteret	Standard
+28583	Stonewall	Pamlico	P.O. Box
+28584	Swansboro	Onslow	Standard
+28585	Trenton	Jones	Standard
+28586	Vanceboro	Craven	Standard
+28587	Vandemere	Pamlico	Standard
+28589	Williston	Carteret	P.O. Box
+28590	Winterville	Pitt	Standard
+28594	Emerald Isle	Carteret	Standard
+28601	Hickory	Catawba	Standard
+28602	Hickory	Catawba	Standard
+28603	Hickory	Catawba	P.O. Box
+28604	Banner Elk	Avery	Standard
+28605	Blowing Rock	Watauga	Standard
+28606	Boomer	Wilkes	Standard
+28607	Boone	Watauga	Standard
+28608	Boone	Watauga	Unique
+28609	Catawba	Catawba	Standard
+28610	Claremont	Catawba	Standard
+28611	Collettsville	Caldwell	Standard
+28612	Connelly Springs	Burke	Standard
+28613	Conover	Catawba	Standard
+28615	Creston	Ashe	Standard
+28616	Crossnore	Avery	P.O. Box
+28617	Crumpler	Ashe	Standard
+28618	Deep Gap	Watauga	Standard
+28619	Drexel	Burke	P.O. Box
+28621	Elkin	Surry	Standard
+28622	Elk Park	Avery	Standard
+28623	Ennice	Alleghany	Standard
+28624	Ferguson	Wilkes	Standard
+28625	Statesville	Iredell	Standard
+28626	Fleetwood	Ashe	Standard
+28627	Glade Valley	Alleghany	Standard
+28628	Glen Alpine	Burke	P.O. Box
+28629	Glendale Springs	Ashe	Standard
+28630	Granite Falls	Caldwell	Standard
+28631	Grassy Creek	Ashe	Standard
+28633	Lenoir	Caldwell	Unique
+28634	Harmony	Iredell	Standard
+28635	Hays	Wilkes	Standard
+28636	Hiddenite	Alexander	Standard
+28637	Hildebran	Burke	Standard
+28638	Hudson	Caldwell	Standard
+28640	Jefferson	Ashe	Standard
+28641	Jonas Ridge	Burke	P.O. Box
+28642	Jonesville	Yadkin	Standard
+28643	Lansing	Ashe	Standard
+28644	Laurel Springs	Alleghany	Standard
+28645	Lenoir	Caldwell	Standard
+28646	Linville	Avery	P.O. Box
+28647	Linville Falls	Burke	P.O. Box
+28649	Mc Grady	Wilkes	Standard
+28650	Maiden	Catawba	Standard
+28651	Millers Creek	Wilkes	Standard
+28652	Minneapolis	Avery	P.O. Box
+28653	Montezuma	Avery	P.O. Box
+28654	Moravian Falls	Wilkes	Standard
+28655	Morganton	Burke	Standard
+28656	North Wilkesboro	Wilkes	Unique
+28657	Newland	Avery	Standard
+28658	Newton	Catawba	Standard
+28659	North Wilkesboro	Wilkes	Standard
+28660	Olin	Iredell	Standard
+28661	Patterson	Caldwell	P.O. Box
+28662	Pineola	Avery	P.O. Box
+28663	Piney Creek	Alleghany	Standard
+28664	Plumtree	Avery	P.O. Box
+28665	Purlear	Wilkes	Standard
+28666	Icard	Burke	P.O. Box
+28667	Rhodhiss	Caldwell	P.O. Box
+28668	Roaring Gap	Alleghany	Standard
+28669	Roaring River	Wilkes	Standard
+28670	Ronda	Wilkes	Standard
+28671	Rutherford College	Burke	P.O. Box
+28672	Scottville	Ashe	Standard
+28673	Sherrills Ford	Catawba	Standard
+28675	Sparta	Alleghany	Standard
+28676	State Road	Surry	Standard
+28677	Statesville	Iredell	Standard
+28678	Stony Point	Alexander	Standard
+28679	Sugar Grove	Watauga	Standard
+28680	Morganton	Burke	P.O. Box
+28681	Taylorsville	Alexander	Standard
+28682	Terrell	Catawba	Standard
+28683	Thurmond	Wilkes	Standard
+28684	Todd	Ashe	Standard
+28685	Traphill	Wilkes	Standard
+28687	Statesville	Iredell	P.O. Box
+28688	Turnersburg	Iredell	P.O. Box
+28689	Union Grove	Iredell	Standard
+28690	Valdese	Burke	Standard
+28691	Valle Crucis	Watauga	P.O. Box
+28692	Vilas	Watauga	Standard
+28693	Warrensville	Ashe	Standard
+28694	West Jefferson	Ashe	Standard
+28697	Wilkesboro	Wilkes	Standard
+28698	Zionville	Watauga	Standard
+28699	Scotts	Iredell	P.O. Box
+28701	Alexander	Buncombe	Standard
+28702	Almond	Swain	Standard
+28704	Arden	Buncombe	Standard
+28705	Bakersville	Mitchell	Standard
+28707	Balsam	Jackson	P.O. Box
+28708	Balsam Grove	Transylvania	Standard
+28709	Barnardsville	Buncombe	Standard
+28710	Bat Cave	Henderson	P.O. Box
+28711	Black Mountain	Buncombe	Standard
+28712	Brevard	Transylvania	Standard
+28713	Bryson City	Swain	Standard
+28714	Burnsville	Yancey	Standard
+28715	Candler	Buncombe	Standard
+28716	Canton	Haywood	Standard
+28717	Cashiers	Jackson	Standard
+28718	Cedar Mountain	Transylvania	Standard
+28719	Cherokee	Swain	Standard
+28720	Chimney Rock	Rutherford	P.O. Box
+28721	Clyde	Haywood	Standard
+28722	Columbus	Polk	Standard
+28723	Cullowhee	Jackson	Standard
+28724	Dana	Henderson	P.O. Box
+28725	Dillsboro	Jackson	P.O. Box
+28726	East Flat Rock	Henderson	Standard
+28727	Edneyville	Henderson	P.O. Box
+28728	Enka	Buncombe	P.O. Box
+28729	Etowah	Henderson	Standard
+28730	Fairview	Buncombe	Standard
+28731	Flat Rock	Henderson	Standard
+28732	Fletcher	Henderson	Standard
+28733	Fontana Dam	Graham	Standard
+28734	Franklin	Macon	Standard
+28735	Gerton	Henderson	Standard
+28736	Glenville	Jackson	Standard
+28737	Glenwood	McDowell	P.O. Box
+28738	Hazelwood	Haywood	P.O. Box
+28739	Hendersonville	Henderson	Standard
+28740	Green Mountain	Yancey	Standard
+28741	Highlands	Macon	Standard
+28742	Horse Shoe	Henderson	Standard
+28743	Hot Springs	Madison	Standard
+28744	Franklin	Macon	P.O. Box
+28745	Lake Junaluska	Haywood	Standard
+28746	Lake Lure	Rutherford	Standard
+28747	Lake Toxaway	Transylvania	Standard
+28748	Leicester	Buncombe	Standard
+28749	Little Switzerland	McDowell	P.O. Box
+28750	Lynn	Polk	P.O. Box
+28751	Maggie Valley	Haywood	Standard
+28752	Marion	McDowell	Standard
+28753	Marshall	Madison	Standard
+28754	Mars Hill	Madison	Standard
+28755	Micaville	Yancey	P.O. Box
+28756	Mill Spring	Polk	Standard
+28757	Montreat	Buncombe	P.O. Box
+28758	Mountain Home	Henderson	P.O. Box
+28759	Mills River	Henderson	Standard
+28760	Naples	Henderson	P.O. Box
+28761	Nebo	McDowell	Standard
+28762	Old Fort	McDowell	Standard
+28763	Otto	Macon	Standard
+28765	Penland	Mitchell	P.O. Box
+28766	Penrose	Transylvania	Standard
+28768	Pisgah Forest	Transylvania	Standard
+28770	Ridgecrest	Buncombe	P.O. Box
+28771	Robbinsville	Graham	Standard
+28772	Rosman	Transylvania	Standard
+28773	Saluda	Polk	Standard
+28774	Sapphire	Transylvania	Standard
+28775	Scaly Mountain	Macon	Standard
+28776	Skyland	Buncombe	P.O. Box
+28777	Spruce Pine	Mitchell	Standard
+28778	Swannanoa	Buncombe	Standard
+28779	Sylva	Jackson	Standard
+28781	Topton	Cherokee	Standard
+28782	Tryon	Polk	Standard
+28783	Tuckasegee	Jackson	Standard
+28784	Tuxedo	Henderson	P.O. Box
+28785	Waynesville	Haywood	Standard
+28786	Waynesville	Haywood	Standard
+28787	Weaverville	Buncombe	Standard
+28788	Webster	Jackson	P.O. Box
+28789	Whittier	Jackson	Standard
+28790	Zirconia	Henderson	Standard
+28791	Hendersonville	Henderson	Standard
+28792	Hendersonville	Henderson	Standard
+28793	Hendersonville	Henderson	P.O. Box
+28801	Asheville	Buncombe	Standard
+28802	Asheville	Buncombe	P.O. Box
+28803	Asheville	Buncombe	Standard
+28804	Asheville	Buncombe	Standard
+28805	Asheville	Buncombe	Standard
+28806	Asheville	Buncombe	Standard
+28810	Asheville	Buncombe	Standard
+28813	Asheville	Buncombe	P.O. Box
+28814	Asheville	Buncombe	P.O. Box
+28815	Asheville	Buncombe	P.O. Box
+28816	Asheville	Buncombe	P.O. Box
+28901	Andrews	Cherokee	Standard
+28902	Brasstown	Clay	Standard
+28903	Culberson	Cherokee	P.O. Box
+28904	Hayesville	Clay	Standard
+28905	Marble	Cherokee	Standard
+28906	Murphy	Cherokee	Standard
+28909	Warne	Clay	Standard
