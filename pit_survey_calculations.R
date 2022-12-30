@@ -6,7 +6,7 @@ fun_livingsituation_def <- function(x){
                              12,22,35,23,26,
                              27,28,19,3,31,33,34,10,20,21,
                              11,30,17,24,37,8,9,99), 
-                    x_txt = c("Place not mean for human habitation", 
+                    x_txt = c("Place not meant for human habitation", 
                               "Emergency Shelter", "Safe Haven",
                               "Foster care home or foster care group home", 
                               "Hospital or other residential non-psychiatric medical facility",
