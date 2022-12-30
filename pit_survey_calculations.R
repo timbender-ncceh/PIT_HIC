@@ -11,8 +11,15 @@ fun_projtype <- function(x){
                               "Homelessness Prevention", 
                               "PH - rrh", 
                               "Coordinated Entry"))
-  return(out[out$x_in == x,]$x_txt)
+  out1 <- out[out$x_in == x,]$x_txt
+  if(any(is.na(out1))){
+    out1 <- "[undetermined]"
+  }
+  
+  return(out1)
 }
+
+fun_projtype(NA)
 
 fun_livingsituation_def <- function(x){
   out <- data.frame(x_in = c(16,1,18,15,6,
