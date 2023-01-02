@@ -1,3 +1,24 @@
+fun_lengthOfStay <- function(x){
+  out <- data.frame(x_in = c(2:5,8:11,99), 
+                    x_txt = c("One week or more, but less than one month",
+                              "One month or more, but less than 90 days",
+                              "90 days or more but less than one year", 
+                              "One year or longer", 
+                              "Client doesn't know", 
+                              "Client refused", 
+                              "One night or less", 
+                              "Two to six nights", 
+                              "Data not collected"))
+  out1 <- out[out$x_in == x,]$x_txt
+  if(any(is.na(out1)) | length(out1) == 0){
+    out1 <- "[undetermined]"
+  }
+  
+  return(out1)
+}
+
+
+
 fun_projtype <- function(x){
   out <- data.frame(x_in = c(1:4,
                              6:14), 
