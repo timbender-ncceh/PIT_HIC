@@ -11,10 +11,6 @@ rm(list=ls())
 cat('\f')
 gc()
 
-library(tictoc)
-
-
-
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
@@ -22,7 +18,7 @@ pit.night <- ""
 
 # /NOTE----
 
-tic()
+
 # resources----
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
@@ -88,6 +84,21 @@ bind_file <- function(filename,
   return(rbind(read_csv(f1), read_csv(f2), read_csv(f3)))
 }
 
+find_cols <- function(patrn = "ID$", ic = T,
+                      l = file.colnames){
+  out <- list()
+  for(i in 1:length(l)){
+    out[[names(l[i])]] <- grep(pattern = patrn,
+                               x = l[[i]],
+                               ignore.case = ic,
+                               value = T)
+  }
+  # remove files with no results returned
+  out <- out[lapply(out, length) > 0]
+  return(out)
+}
+
+
 
 # Working Directory Setup----
 setwd(csv.file.dir)
@@ -98,386 +109,194 @@ getwd()
 csv.files <- list.files(pattern = "\\.csv$") 
 csv.files <- csv.files[!csv.files %in% c("Client2.csv", "report_phoneemail.csv")]
 
-# 
 # # build list of colnames
-# file.colnames <- list()
-# for(i in csv.files){
-#   file.colnames[[i]] <- colnames(read_csv(i))
-# }
+file.colnames <- list()
+for(i in csv.files){
+  file.colnames[[i]] <- colnames(read_csv(i))
+}
 
-# desired cols 
-des.cols <- read_tsv("var1	Description	Calculated	Type	Option 1	Option 2	Option 3	Option 4	Option 5	Option 6	Option 7	var2	var3	var4	var5	var6	var7
-Client ID	Client ID	FALSE	numeric													
-HH Rel	Relationship to Head of Household	FALSE	picklist	Self	Head of Household's child	Head of Household's spouse		Head of Household's other relation	Other: non-relation	Data Not Collected						
-HLD ID	Household ID	FALSE	numeric													
-Vet	Veteran Status	FALSE	picklist	Yes	No	Client Doesn't Know	Client Refused	Data Not Collected								
-Age	Age on 1/25/23	TRUE	numeric													
-Age Category	Category as defined by HUD	TRUE	picklist	Under 18	18-24	25-34	35-44	45-54	55-64	65 and older						
-Gender	Gender Identity	FALSE	picklist (multiple select)	Male	Female	A gender other than singlularly female or male	Questioning	Transgender	Client Doesn't Know	Client Refused	Data Not Collected					
-Gender Category	Gender Category	TRUE	picklist	Male	Female	No Single Gender	Questioning	Transgender	Client Doesn't Know	Client Refused	Data Not Collected					
-race1	Primary Race 	FALSE	picklist	White	Black, African American, or African	Asian or Asian American	American Indian, Alaska Native, or Indigenous	Native Hawaiian or Pacific Islander	Client Doesn't Know	Client Refused	Data Not Collected					
-race2	secondary Race	FALSE	picklist	White	Black, African American, or African	Asian or Asian American	American Indian, Alaska Native, or Indigenous	Native Hawaiian or Pacific Islander	Client Doesn't Know	Client Refused	Data Not Collected					
-Race Cat	Multi-racial or single racial identity	TRUE	picklist	White	Black, African American, or African	Asian or Asian American	American Indian, Alaska Native, or Indigenous	Native Hawaiian or Pacific Islander	Multiple Races	Client Doesn't Know	Client Refused	Data Not Collected				
-ethnicity	Ethnicity	FALSE	picklist	Non-Hispanic/Non-Latin(a)(o)(x)	Hispanic/Latin(a)(o)(x)	Client Doesn't Know	Client Refused	Data Not Collected								
-Disability (Gateway)	Disabling Condition	FALSE	picklist	Yes	No	Client Doesn't Know	Client Refused	Data Not Collected								
-Disability Type	positive types of Disabling Conditions	FALSE	picklist (multiple select)	Mental Health Disorder	Alcohol Use Disorder	Drug Use Disorder	Both Alcohol and Drug Use Disorders	Chronic Health Condition	HIV/AIDS	Development Disability	Physical Disability					
-Provider	Project Name	FALSE	CHAR (50)													
-Region	NC-BoS CoC Region	TRUE	picklist	R01	R02	R03	R04	R05	R06	R07	R08	R09	R10	R11	R12	R13
-County	NC County of Service	FALSE	picklist													
-CH	Chronic Homelessness	not sure														
-DV	Domestic Violence History	FALSE	picklist	Yes	No	Client Doesn't Know	Client Refused	Data Not Collected								
-DV fleeing	Fleeing Domestic Violence response	FALSE	picklist	Yes	No	Client Doesn't Know	Client Refused	Data Not Collected								
-HH Type	Household Type	TRUE	picklist	AO (Adults Only)	AC (Adults with Children)	CO (Children Only)										
-Youth Type	Youth Household Type	TRUE	picklist	UA (Unaccompanied Adult)	PY (Parenting Youth)	PYC (Children of Parenting Youth)										
-Vet Type	Veteran Household Type	TRUE	picklist	Vet AO (Adults Only)	Vet AC (Adults with Children)											
-Disability Types	formatting break only															
-Alcohol Use disorder	positive for Alcohol Use Disorder	TRUE	picklist	Yes	No											
-Drug Use Disorder	positive for Substance Use Disorder	TRUE	picklist	Yes	No											
-Mental health	positive for Mental Health Disorder	TRUE	picklist	Yes	No											
-HIV	positive for HIV/AIDS	TRUE	picklist	Yes	No											
-DV	positive for Fleeing Domestic Violence	TRUE	picklist	Yes	No											
-CLS Date	Client's Current Living Situation Date	FALSE	Date													
-CLS	Client's Current Living Situation	FALSE	picklist	3.12.1 Living Situation Option List												
-HoH CLS Date	Head of Household's Current Living Situation Date	TRUE	Date													
-HoH CLS	Head of Household's Current Living Situation	TRUE	picklist	3.12.1 Living Situation Option List												
-Notes	Manual notes for context															")
+# Client Checks----
+a.client <- read_csv("Client.csv")
 
+# pii hash check
+a.rando.key <- paste(sample(c(letters,LETTERS,0:9), size = 100,replace = T),sep="",collapse="")
 
+if(sum(is_hashed(a.client$SSN),na.rm = T)== 0){
+  a.client$SSN <- openssl::sha256(x = as.character(a.client$SSN), key = a.rando.key)
+}
 
-colnames(des.cols) <- c("abbr", "desc", "calculated", 
-                        "type", paste("opt", const_nchar(1:13), sep = ""))
+if(sum(is_hashed(a.client$FirstName),na.rm = T)== 0){
+  a.client$FirstName <- openssl::sha256(x = as.character(a.client$FirstName), key = a.rando.key)
+}
 
-des.cols[,c(1,2)]
+if(sum(is_hashed(a.client$LastName),na.rm = T)== 0){
+  a.client$LastName <- openssl::sha256(x = as.character(a.client$LastName), key = a.rando.key)
+}
 
+rm(a.rando.key)
+# /pii hash check
 
+# add fields
 
-## create function for finding colnames in hmis.csv dataset
-# 
-# find_cols <- function(patrn = "ID$", ic = T,
-#                       l = file.colnames){
-#   out <- list()
-#   for(i in 1:length(l)){
-#     out[[names(l[i])]] <- grep(pattern = patrn, 
-#                                x = l[[i]], 
-#                                ignore.case = ic, 
-#                                value = T)
-#   }
-#   # remove files with no results returned
-#   out <- out[lapply(out, length) > 0]
-#   return(out)
-# }
+a.client$age_calc     <- calc_age(dob = a.client$DOB)
+a.client$hud_age_calc <- NA
+for(i in 1:nrow(a.client)){
+  #print(i)
+  a.client$hud_age_calc[i] <- hud_age_category(age_yrs = a.client$age_calc[i])
+}
 
-# find_cols("RelationshipToHoH")
-# find_cols("PersonalID")
-# find_cols("HouseholdID")
-# find_cols("VeteranStatus")
-# #find_cols("age[!stage][!manage]")
-# find_cols("gender")
-# find_cols("sexualorientation")
-# find_cols("category")
-# find_cols("racenone")
-# find_cols("white|black|african|asian|paci|chin")
-# find_cols("primary|secondary")
-# find_cols("multi")
-# find_cols("Ethnicity")
-# find_cols("DisablingCondition")
-# find_cols("DisabilityType")
-# find_cols("projectname")
-# find_cols("provider")
-# find_cols("CoC")
-# find_cols("County")
-# find_cols("CH", ic = F)
-# find_cols("DV")
-# find_cols("Violence")
-# find_cols("Fleeing")
-# find_cols("history")
-# find_cols("HouseholdType")
-# find_cols("HoH")
-# find_cols("Alcohol|Drug")
-# find_cols("Disorder")
-# find_cols("Mental|MentalHealth")
-# find_cols("CurrentLivingSituation")
-# find_cols("InformationDate")
-# find_cols("LivingSituation")
-# find_cols("DOB")
-# find_cols("ID$")
-# find_cols("male")
-# find_cols("entrydate")
+a.client$gender_calc  <- NA
+for(i in 1:nrow(a.client)){
+  a.client$gender_calc[i] <- fun_gender(male        = a.client$Male[i], 
+                                        female      = a.client$Female[i], 
+                                        nosingle    = a.client$NoSingleGender[i], 
+                                        questioning = a.client$Questioning[i], 
+                                        trans       = a.client$Transgender[i], 
+                                        gendernone  = a.client$GenderNone[i])
+}
 
-
-
-is_hashed(read_csv("Client.csv")) %>% as.data.frame()
-
-
-
-# Needed Data----
-
-c.curlivingsit <- read_csv("CurrentLivingSituation.csv") %>% 
-  .[,c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation", 
-       "InformationDate")]
-colnames(c.curlivingsit) <- c("CurrentLivingSitID", "EnrollmentID", "PersonalID","CurrentLivingSituation", 
-                              "InformationDate_cls")
-
-
-c.healthanddv <- read_csv("HealthAndDV.csv") %>%
-  .[,c("HealthAndDVID", "EnrollmentID",  "PersonalID", "CurrentlyFleeing", 
-       "InformationDate")]
-colnames(c.healthanddv) <- c("HealthAndDVID", "EnrollmentID",  "PersonalID", "CurrentlyFleeing", 
-                         "InformationDate_hdv")
-
-c.client <- read_csv("Client.csv") %>%
-  .[,c("PersonalID", "DOB", "NoSingleGender", "Transgender", "GenderNone", 
-       "Female", "Male", "Ethnicity", "RaceNone", "AmIndAKNative", "Asian", 
-       "BlackAfAmerican", "NativeHIPacific", "White", "Questioning", 
-       "VeteranStatus")]
-
-c.enrollment <- read_csv("Enrollment.csv") %>%
-  .[,c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
-       "DisablingCondition", "NCCounty", "RelationshipToHoH", 
-       "LiteralHomelessHistory", "LivingSituation",
-       "MentalHealthDisorderFam", "AlcoholDrugUseDisorderFam", 
-       "LengthOfStay",
-       "EntryDate")]
-
-c.exit <- read_csv("Exit.csv") %>%
-  .[,c("ExitID"  ,     "EnrollmentID" ,"PersonalID", "ExitDate")]
+a.client$race_calc    <- NA
+for(i in 1:nrow(a.client)){
+  a.client$race_calc[i] <- fun_race(racenone        = a.client$RaceNone[i], 
+                                    amindaknative   = a.client$AmIndAKNative[i], 
+                                    asian           = a.client$Asian[i], 
+                                    blackafamerican = a.client$BlackAfAmerican[i], 
+                                    nativehipacific = a.client$NativeHIPacific[i], 
+                                    white           = a.client$White[i])
   
+}
 
-c.enrollmentcoc <- read_csv("EnrollmentCoC.csv") %>%
-  .[,c("EnrollmentCoCID", "EnrollmentID", "HouseholdID", "ProjectID", "PersonalID", 
-       "CoCCode",
-       "InformationDate")]
-colnames(c.enrollmentcoc) <- c("EnrollmentCoCID", "EnrollmentID", "HouseholdID", "ProjectID", "PersonalID", 
-                               "CoCCode", 
-                               "InformationDate_enr")
+a.client$ethncity_def <- unlist(lapply(a.client$Ethnicity, fun_ethnicity_def))
+a.client$vetStatus_def <- unlist(lapply(a.client$VeteranStatus, fun_1.8_def))
+
+# Enrollment Checks----
+a.enrollment <- read_csv("Enrollment.csv")
+
+# date filter
+
+# / date filter
+
+
+a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
+
+a.enrollment$HoH_PersonalID <- NA
+for(i in unique(a.enrollment$HouseholdID)){
+  enr.hoh_pid <- NA
+  try(enr.hoh_pid <- a.enrollment[a.enrollment$HouseholdID == i & 
+     a.enrollment$reltionshiptohoh_def == "Self (head of household)",]$PersonalID)
   
-c.disabilities <- read_csv("Disabilities.csv") %>%
-  .[,c("DisabilitiesID", "EnrollmentID", "PersonalID", "DisabilityType", 
-       "DisabilityResponse", "IndefiniteAndImpairs", "DataCollectionStage",
-       "InformationDate")]
-colnames(c.disabilities) <- c("DisabilitiesID", "EnrollmentID", "PersonalID", "DisabilityType", 
-                              "DisabilityResponse", "IndefiniteAndImpairs", "DataCollectionStage",
-                              "InformationDate_disab")
-
-c.project <- read_csv("Project.csv") %>% 
-  .[,c("ProjectID", "OrganizationID", "ProjectName")]
-
-c.projectcoc <- read_csv("ProjectCoC.csv") %>%
-  .[,c("ProjectCoCID", "ProjectID", "CoCCode")]
-
-c.inventory <- read_csv("Inventory.csv") %>%
-  .[,c("InventoryID", "ProjectID","HouseholdType")]
-
-some.date <- ymd(20220126)
-
-temp <- hmis_join(c.enrollment, c.exit, jtype = "left") %>%
-  hmis_join(., c.enrollmentcoc, 
-            jtype = "left") 
-
-temp$enrollment_open <- is.na(temp$ExitDate) & temp$EntryDate >= some.date
-
-temp$somedate_between_enrollment <- NA
-for(i in 1:nrow(temp)){
-  
-  if(!temp$enrollment_open[i]){
-    temp$somedate_between_enrollment[i] <- dplyr::between(x = some.date, 
-            left = temp$EntryDate[i], right = temp$ExitDate[i])
+  if(length(enr.hoh_pid) != 1){
+    enr.hoh_pid <- NA
   }
-  temp$somedate_between_enrollment[i] <- ifelse(is.na(temp$somedate_between_enrollment[i]), F, 
-                                                temp$somedate_between_enrollment[i])
   
+  try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- enr.hoh_pid)
 }
 
-# note----
-# length of stay not needed
-temp$los_calculated <- some.date - temp$EntryDate
-
-temp <- temp[temp$somedate_between_enrollment | 
-  temp$enrollment_open,]
-
-# QA enrollment lengths----
-
-library(ggplot2)
-# temp %>%
-#   group_by(ent_yearFrac = year(EntryDate) + 
-#              (month(EntryDate)/12), 
-#            ex_yearFrac = year(ExitDate) + 
-#              (month(ExitDate)/12)) %>%
-#   summarise(n = n()) %>%
-#   ungroup() %>%
-#   mutate(., 
-#          rid = 1:length(ex_yearFrac)) %>%
-#   ggplot(data = .) +
-#   geom_segment(aes(x = ent_yearFrac, xend = ex_yearFrac, 
-#                    y = rid, yend = rid,
-#                  color = n))
-
-
-# mutate(ungroup(temp), 
-#        rid = sample(1:length(EntryDate), size = length(EntryDate), replace = F)) %>%
-#   ggplot(data = ., 
-#          aes(x = EntryDate, xend = ExitDate, y = rid, yend = rid)) + 
-#   geom_segment()
-
-# /QA enrollment lengths----
-
-
-temp <- temp %>%
-  hmis_join(., c.client, jtype = "left") %>%
-  hmis_join(., c.project, jtype = "left") %>%
-  hmis_join(., c.projectcoc, jtype = "left") %>%
-  hmis_join(., c.inventory, jtype = "left") %>%
-  hmis_join(., c.curlivingsit, jtype = "left") %>%
-  #hmis_join(., c.disabilities, jtype = "left") %>%
-  hmis_join(., c.healthanddv, jtype = "left")
-
-temp <- temp[!(is.na(temp$EnrollmentID) & is.na(temp$PersonalID)),]
-
-gc()
-
-
-#disabilities
-
-temp.disab <- screened_positive_disability(dis_df = c.disabilities, 
-                                           enr_df = c.enrollment, 
-                                           exit_df = c.exit, 
-                                           pit_date = some.date)
-
-temp <- left_join(temp, temp.disab)
 
 
 
-#temp$disab_calc <- NA
+# NC County of Service & Region
+zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
 
-# args(screened_positive_disability)
-# 
-# disab_out <- screened_positive_disability(dr0 = c.disabilities$DisabilityResponse, 
-#                                           ii0 = c.disabilities$IndefiniteAndImpairs, 
-#                                           dt0 = c.disabilities$DisabilityType, 
-#                                           dis_df = c.disabilities) %>% as_tibble()
+a.projectcoc <- read_csv(file = "ProjectCoC.csv") %>%
+  left_join(., zip_co.cw[,c("ZIP", "County", "City")]) %>%
+  left_join(., get_coc_region())
 
-
-temp$age_calc <- calc_age(temp$DOB, age_on_date = ymd(20220105))
-temp$is_HoH_calc <- temp$RelationshipToHoH == 1
-
-#temp$hud_agegrp_cal <- unlist(lapply(temp$age_calc, hud_age_category))
-
-temp$hud_agegrp_cal <- NA
-gc()
-for(i in 1:nrow(temp)){
-  temp$hud_agegrp_cal[i] <- hud_age_category(temp$age_calc[i])
-}
-
-cat(crayon::bgRed(crayon::bold("DONE")))
-
-
-temp$gender <- NA
-
-for(i in 1:nrow(temp)){
-   if(!is.na(temp$EnrollmentID[i])){
-    if(i %% 1000 == 0){
-      print(i) 
-    }
-     
-    temp$gender[i] <- fun_gender(male = temp$Male[i], 
-                                 female = temp$Female[i], 
-                                 nosingle = temp$NoSingleGender[i], 
-                                 questioning = temp$Questioning[i], 
-                                 trans = temp$Transgender[i], 
-                                 gendernone = temp$GenderNone[i])
-  }
-}
-  
-
-
-
-temp$race <- NA
-
-for(i in 1:nrow(temp)){
-  if(i %% 1000 == 0){
-    print(i) 
-  }
-  temp$race[i] <- fun_race(racenone = temp$RaceNone[i], 
-           amindaknative = temp$AmIndAKNative[i], 
-           asian = temp$Asian[i], 
-           blackafamerican = temp$BlackAfAmerican[i], 
-           nativehipacific = temp$NativeHIPacific[i], 
-           white = temp$White[i])
-}
-
-# Region----
-
-cocreg_cw <- get_coc_region()
-
-temp <- left_join(x = temp, 
-          y = cocreg_cw, 
-          by = c("NCCounty" = "County"))
-
-
-# temp$region <- NA
-# for(i in 1:nrow(temp)){
-#   if(i %% 1000 == 0){
-#     cat('\f')
-#     print(i) 
-#   }
-#   try(temp$region[i] <- coc_region(temp$NCCounty[i]))
-# }
-
-
-colnames(temp)
-des.cols[,c(1,2)]$desc
-
-des.cols$abbr
-
-# missing cols
-
-missing.cols <- c(#"race", 
-                  "disability stuff", 
-                  #"region", 
-                  #"place not meant for human habitation", 
-                  "chronic homelessness", 
-                  #"fleeing domestic violence", 
-                  "youth HH type", "vet HH type", 
-                  #"current living situation date", 
-                  "hoh current living situation date", 
-                 # "client current living situation", 
-                  "hoh current living situation", 
-                  "Notes/manual notes for context")
+rm(zip_co.cw)
 
 
 
 
-#remove cols
 
-#temp$curr
+# living situation
+a.enrollment$livingSituation_def <- unlist(lapply(a.enrollment$LivingSituation, fun_livingsituation_def))
 
-keep.cols <- c("PersonalID", "HouseholdID", "EnrollmentID", 
-               "RelationshipToHoH", "VeteranStatus", 
-               "age_calc", "gender", "Ethnicity", "LivingSituation",
-               "NCCounty", "HouseholdType", "CurrentLivingSituation",
-               "CurLivingSitDate", "CurrentlyFleeing", "race")
+# Exit Checks----
+a.exit <- read_csv("Exit.csv")
 
+a.exit$destination_def <- unlist(lapply(a.exit$Destination, fun_livingsituation_def))
+table(a.exit$destination_def, useNA = "always")
 
-# Output----
+# CurrentLivingSituation Checks----
+a.currentlivingsituation <- read_csv("CurrentLivingSituation.csv")
+a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentlivingsituation$CurrentLivingSituation, 
+                                                                     fun_livingsituation_def))
+a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsituation$InformationDate
 
-# check if hashed
-library(openssl)
-
-
-
-hash.key <- paste(sample(c(letters,LETTERS,0:9), size = sample(c(3:100), 1), replace = T), 
-                  sep = "", collapse = "")
-
-if(!all(is_hashed(temp$DOB))){
-  temp$DOB <- openssl::sha256(x = as.character(temp$DOB), key = hash.key)
-}
-
-library(readr)
-write_csv(x = temp, 
-          file = "master_PIT_draft2.csv")
-
-openxlsx::write.xlsx(x = temp, 
-                     file = "master_PIT_draft2.xlsx")
+table(a.currentlivingsituation$currentLivingSituation_def, 
+      useNA = "always")
 
 
-toc(log = T)
+# Project Checks----
+a.project <- read_csv("Project.csv")
+a.project$provider_calc <- a.project$ProjectName
+a.project$projectType_def <- unlist(lapply(a.project$ProjectType, fun_projtype))
+
+
+
+# Disabilities Check----
+a.disabilities <- read_csv("Disabilities.csv")
+
+a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
+
+screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
+
+
+# Healthanddv check----
+a.healthanddv <- read_csv("HealthAndDV.csv")
+
+a.healthanddv$domesticViolenceVictim_def <- unlist(lapply(a.healthanddv$DomesticViolenceVictim,
+                                                          fun_1.8_def))
+a.healthanddv$currentlyFleeingDV_def <- unlist(lapply(a.healthanddv$CurrentlyFleeing, fun_1.8_def))
+
+
+# Inventory check----
+a.inventory <- read_csv("Inventory.csv")
+a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
+
+
+
+# Output files, pre-join----
+b.client <- a.client[,c("PersonalID", "age_calc", "hud_age_calc", "gender_calc", "race_calc", "ethncity_def", "vetStatus_def")]
+
+colnames(a.enrollment)
+a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
+                                                ignore.case = F, value = T), 
+                                           "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID")]
+
+colnames(a.currentlivingsituation)
+a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
+                                                ignore.case = F, value = T), 
+                                           "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID")]
+
+colnames(a.exit)
+a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
+                                                ignore.case = F, value = T), 
+                                           "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
+                               "ExitID", "ExitDate")]
+
+colnames(a.project)
+a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
+                                                ignore.case = F, value = T), 
+                                           "ProjectID", "OrganizationID")]
+
+colnames(a.projectcoc)
+a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
+                                                ignore.case = F, value = T), 
+                                           "ProjectCoCID", "ProjectID", "City", "ZIP", "County", "Region", 
+                                           "CoCCode", "NCCounty", "HoH_PersonalID", "ProjectName")]
+
+screened.pos.disab_df
+
+
+colnames(a.healthanddv)
+a.healthanddv[colnames(a.healthanddv) %in% c(grep("_def$|_calc$", colnames(a.healthanddv), 
+                                    ignore.case = F, value = T), 
+                               "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
+                               "ExitID", "ExitDate")]
+
+colnames(a.inventory)
+a.inventory[colnames(a.inventory) %in% c(grep("_def$|_calc$", colnames(a.inventory), 
+                                                  ignore.case = F, value = T), 
+                                             "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
+                                             "ExitID", "ExitDate", "CoCCode")]
