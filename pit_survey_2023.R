@@ -6,6 +6,7 @@ library(glue)
 library(lubridate)
 library(data.table)
 library(devtools)
+library(openxlsx)
 
 rm(list=ls())
 cat('\f')
@@ -14,7 +15,7 @@ gc()
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
-pit.night <- ""
+pit.night <- ymd(20220126)
 
 # /NOTE----
 
@@ -172,11 +173,6 @@ a.client$vetStatus_def <- unlist(lapply(a.client$VeteranStatus, fun_1.8_def))
 # Enrollment Checks----
 a.enrollment <- read_csv("Enrollment.csv")
 
-# date filter
-
-# / date filter
-
-
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
 
 a.enrollment$HoH_PersonalID <- NA
@@ -192,9 +188,6 @@ for(i in unique(a.enrollment$HouseholdID)){
   try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- enr.hoh_pid)
 }
 
-
-
-
 # NC County of Service & Region
 zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
 
@@ -204,15 +197,35 @@ a.projectcoc <- read_csv(file = "ProjectCoC.csv") %>%
 
 rm(zip_co.cw)
 
-
-
-
-
 # living situation
 a.enrollment$livingSituation_def <- unlist(lapply(a.enrollment$LivingSituation, fun_livingsituation_def))
 
 # Exit Checks----
 a.exit <- read_csv("Exit.csv")
+
+# date filter
+
+all.eids <- full_join(a.enrollment[,c("EnrollmentID", "EntryDate")],
+                      a.exit[,c("EnrollmentID", "ExitDate")])
+
+eids.that.span.pit.night <- all.eids$EntryDate <= pit.night & 
+  all.eids$ExitDate > pit.night
+eids.that.span.pit.night[is.na(eids.that.span.pit.night)] <- F
+all.eids$stay_spans_pit_night <- eids.that.span.pit.night
+
+
+all.eids$lengthOfStay_calc <- all.eids$ExitDate - 
+  all.eids$EntryDate
+
+all.eids$days_bw_entry_and_pit_night <- pit.night - all.eids$EntryDate
+
+
+pit.eids <- all.eids[all.eids$stay_spans_pit_night,]
+rm(all.eids)
+
+pit.eids <- pit.eids[!colnames(pit.eids) %in% c("EntryDate", "ExitDate")]
+
+# / date filter
 
 a.exit$destination_def <- unlist(lapply(a.exit$Destination, fun_livingsituation_def))
 table(a.exit$destination_def, useNA = "always")
@@ -260,43 +273,118 @@ a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hh
 b.client <- a.client[,c("PersonalID", "age_calc", "hud_age_calc", "gender_calc", "race_calc", "ethncity_def", "vetStatus_def")]
 
 colnames(a.enrollment)
-a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
+b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
                                                 ignore.case = F, value = T), 
-                                           "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID")]
+                                           "EnrollmentID", "PersonalID", "ProjectID",
+                                           "NCCounty",
+                                           "HouseholdID", "HoH_PersonalID")]
 
 colnames(a.currentlivingsituation)
-a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
+b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
                                                 ignore.case = F, value = T), 
-                                           "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID")]
+                                           "EnrollmentID", "PersonalID", "ProjectID", 
+                                           "HouseholdID", "HoH_PersonalID", 
+                                           "InformationDate")]
 
 colnames(a.exit)
-a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
+b.exit <- a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
                                "ExitID", "ExitDate")]
 
 colnames(a.project)
-a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
+b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
                                                 ignore.case = F, value = T), 
                                            "ProjectID", "OrganizationID")]
 
 colnames(a.projectcoc)
-a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
+b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
                                                 ignore.case = F, value = T), 
-                                           "ProjectCoCID", "ProjectID", "City", "ZIP", "County", "Region", 
-                                           "CoCCode", "NCCounty", "HoH_PersonalID", "ProjectName")]
+                                           "ProjectCoCID", "ProjectID", 
+                                           #"City", "ZIP", "CoCCode", 
+                                           "County", "Region", 
+                                           "NCCounty", "HoH_PersonalID", "ProjectName")]
 
 screened.pos.disab_df
 
 
 colnames(a.healthanddv)
-a.healthanddv[colnames(a.healthanddv) %in% c(grep("_def$|_calc$", colnames(a.healthanddv), 
+b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in% c(grep("_def$|_calc$", colnames(a.healthanddv), 
                                     ignore.case = F, value = T), 
                                "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
                                "ExitID", "ExitDate")]
 
 colnames(a.inventory)
-a.inventory[colnames(a.inventory) %in% c(grep("_def$|_calc$", colnames(a.inventory), 
+b.inventory <- a.inventory[colnames(a.inventory) %in% c(grep("_def$|_calc$", colnames(a.inventory), 
                                                   ignore.case = F, value = T), 
                                              "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
                                              "ExitID", "ExitDate", "CoCCode")]
+
+
+# keep only these enrollment_ids
+c.enrollment             <- inner_join(b.enrollment, pit.eids)
+c.exit                   <- inner_join(b.exit, pit.eids)
+c.currentlivingsituation <- inner_join(b.currentlivingsituation, pit.eids)
+c.client                 <- b.client[b.client$PersonalID %in% c.enrollment$PersonalID,]
+c.screened.pos.disab_df  <- screened.pos.disab_df[screened.pos.disab_df$EnrollmentID %in% 
+                                                    pit.eids$EnrollmentID,]
+c.healthanddv            <- b.healthanddv[b.healthanddv$EnrollmentID %in%
+                                            pit.eids$EnrollmentID,]
+
+colnames(c.currentlivingsituation)
+# get last Information Date prior to or on pit night
+
+d.currentlivingsituation <- c.currentlivingsituation %>%
+  .[.$InformationDate <= pit.night & 
+      .$currentLivingSituation.Date_calc <= pit.night,] %>%
+  group_by(EnrollmentID, InformationDate) %>%
+  slice_max(., order_by= currentLivingSituation.Date_calc, 
+            n = 1) %>%
+  ungroup() %>%
+  group_by(EnrollmentID) %>%
+  slice_max(., 
+            order_by = InformationDate, n = 1)
+
+
+b.projectcoc
+
+c.enrollment %>% colnames
+c.exit
+c.currentlivingsituation
+b.project
+
+
+comp_county <- inner_join(c.enrollment[,c("EnrollmentID", "ProjectID", "NCCounty")],
+           b.projectcoc[,c("ProjectID", "County")]) %>%
+  mutate(., county_matches = ifelse(NCCounty == County, T, F)) %>%
+  mutate(., county_matches = ifelse(is.na(county_matches), F, county_matches))
+
+
+ls(pattern = "^a\\.") %>%
+  .[! . %in% c("a.client", "a.enrollment", "a.exit", 
+               "a.project", "a.projectcoc", "a.disabilities", 
+               "a.healthanddv")]
+
+
+output <- left_join(c.enrollment, c.client) %>%
+  #left_join(., c.exit) %>%
+  left_join(., comp_county) %>%
+  left_join(., b.project) %>%
+  left_join(., screened.pos.disab_df) %>%
+  left_join(., c.healthanddv) %>%
+  #left_join(., d.currentlivingsituation) %>%
+  left_join(., b.inventory[,c("ProjectID", 
+                              "householdType_def")] ) 
+output %>%
+  group_by(EnrollmentID) %>%
+  summarise(n = n()) %>%
+  .$n %>% table()
+
+# write to file----
+getwd()
+library(glue)
+
+
+out.name <- glue("test_output{Sys.Date()}.xlsx")
+write.xlsx(x = output, 
+           file = out.name)
