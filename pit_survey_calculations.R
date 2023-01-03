@@ -1,3 +1,21 @@
+
+fun_dob_dataqual <- function(x){
+  out <- data.frame(x_in = c(1,2,8,9,99), 
+                    x_txt = c("Full DOB reported", 
+                              "Approximate or partial DOB reported", 
+                              "Client doesn't know", 
+                              "Client refused", 
+                              "Data not collected"))
+  out1 <- out[out$x_in == x,]$x_txt
+  if(any(is.na(out1)) | length(out1) == 0){
+    out1 <- "[undetermined]"
+  }
+  
+  return(out1)
+}
+
+
+
 fun_lengthOfStay <- function(x){
   out <- data.frame(x_in = c(2:5,8:11,99), 
                     x_txt = c("One week or more, but less than one month",
