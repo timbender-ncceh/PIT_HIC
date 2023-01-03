@@ -33,7 +33,7 @@ fun_projtype <- function(x){
                               "PH - rrh", 
                               "Coordinated Entry"))
   out1 <- out[out$x_in == x,]$x_txt
-  if(any(is.na(out1))){
+  if(any(is.na(out1))| length(out1) == 0){
     out1 <- "[undetermined]"
   }
   
