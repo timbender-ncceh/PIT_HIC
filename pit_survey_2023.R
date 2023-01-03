@@ -167,7 +167,7 @@ for(i in 1:nrow(a.client)){
   
 }
 
-a.client$ethncity_def <- unlist(lapply(a.client$Ethnicity, fun_ethnicity_def))
+a.client$ethnicity_def <- unlist(lapply(a.client$Ethnicity, fun_ethnicity_def))
 a.client$vetStatus_def <- unlist(lapply(a.client$VeteranStatus, fun_1.8_def))
 
 # Enrollment Checks----
@@ -176,7 +176,11 @@ a.enrollment <- read_csv("Enrollment.csv")
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
 
 a.enrollment$HoH_PersonalID <- NA
+# a.enrollment$HoH_CLS        <- NA
+# a.enrollment$HoH_CLS_date   <- NA
 for(i in unique(a.enrollment$HouseholdID)){
+  
+  # HoH_PersonalID
   enr.hoh_pid <- NA
   try(enr.hoh_pid <- a.enrollment[a.enrollment$HouseholdID == i & 
      a.enrollment$reltionshiptohoh_def == "Self (head of household)",]$PersonalID)
@@ -186,7 +190,41 @@ for(i in unique(a.enrollment$HouseholdID)){
   }
   
   try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- enr.hoh_pid)
+  
+  # #HoH_CLS
+  # enr.hoh_cls <- NA
+  # 
+  # 
+  # # try(enr.hoh_cls <- a.enrollment[a.enrollment$HouseholdID == i & 
+  # #                                   a.enrollment$reltionshiptohoh_def == "Self (head of household)",]$LivingSituation)
+  # 
+  # try(enr.hoh_cls <- a.currentlivingsituation$CurrentLivingSituation[a.currentlivingsituation$PersonalID == enr.hoh_pid])
+  # 
+  # if(length(enr.hoh_cls) != 1){
+  #   enr.hoh_cls <- NA
+  # }
+  # 
+  # #try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- fun_livingsituation_def(enr.hoh_cls))
+  # 
+  # #HoH_CLS_date
+  # enr.hoh_cls_date <- NA
+  # 
+  # # try(enr.hoh_cls_date <- a.enrollment[a.enrollment$HouseholdID == i & 
+  # #                                   a.enrollment$reltionshiptohoh_def == "Self (head of household)",]$PersonalID)
+  # 
+  # try(enr.hoh_cls_date <- a.currentlivingsituation$currentLivingSituation.Date_calc[a.currentlivingsituation$PersonalID == enr.hoh_pid])
+  # 
+  # if(length(enr.hoh_cls_date) != 1){
+  #   enr.hoh_cls_date <- NA
+  # }
+  # 
+  # try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- (enr.hoh_cls_date))
+  # 
+  
 }
+
+a.enrollment$HoH_PersonalID %>% is.na() %>% table(., useNA = "always")
+
 
 # NC County of Service & Region
 zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
@@ -232,13 +270,23 @@ table(a.exit$destination_def, useNA = "always")
 
 # CurrentLivingSituation Checks----
 a.currentlivingsituation <- read_csv("CurrentLivingSituation.csv")
+
+a.currentlivingsituation[,c("PersonalID", "CurrentLivingSituation", 
+                            "InformationDate")] %>% colnames
+
+
 a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentlivingsituation$CurrentLivingSituation, 
                                                                      fun_livingsituation_def))
 a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsituation$InformationDate
 
-table(a.currentlivingsituation$currentLivingSituation_def, 
-      useNA = "always")
+latest.cls <- a.currentlivingsituation %>%
+  group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID) %>%
+  summarise() %>%
+  group_by(EnrollmentID, PersonalID) %>%
+  slice_max(., order_by = HoH_CLS_date, n = 1)
 
+a.enrollment <- left_join(a.enrollment, 
+          latest.cls, by = c("EnrollmentID", "HoH_PersonalID" = "PersonalID"))
 
 # Project Checks----
 a.project <- read_csv("Project.csv")
@@ -270,21 +318,26 @@ a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hh
 
 
 # Output files, pre-join----
-b.client <- a.client[,c("PersonalID", "age_calc", "hud_age_calc", "gender_calc", "race_calc", "ethncity_def", "vetStatus_def")]
+b.client <- a.client[,c("PersonalID", "age_calc",
+                        "hud_age_calc", "gender_calc", "race_calc", 
+                        "ethnicity_def", "vetStatus_def")]
 
 colnames(a.enrollment)
 b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID",
                                            "NCCounty",
-                                           "HouseholdID", "HoH_PersonalID")]
+                                           "HouseholdID", "HoH_PersonalID",
+                                           "HoH_CLS_date", "livingSituation_def", 
+                                           "relationshiptohoh_def")]
 
 colnames(a.currentlivingsituation)
 b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID", 
                                            "HouseholdID", "HoH_PersonalID", 
-                                           "InformationDate")]
+                                           "InformationDate", "currentLivingSituation_def", 
+                                           "currentLivingSituation.Date_calc")]
 
 colnames(a.exit)
 b.exit <- a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
@@ -374,17 +427,62 @@ output <- left_join(c.enrollment, c.client) %>%
   left_join(., c.healthanddv) %>%
   #left_join(., d.currentlivingsituation) %>%
   left_join(., b.inventory[,c("ProjectID", 
-                              "householdType_def")] ) 
-output %>%
-  group_by(EnrollmentID) %>%
-  summarise(n = n()) %>%
-  .$n %>% table()
+                              "householdType_def")] ) %>%
+  left_join(., b.projectcoc)
+# output %>%
+#   group_by(EnrollmentID) %>%
+#   summarise(n = n()) %>%
+#   .$n %>% table()
+
+
+# reorder to meet andrea's specs----
+"https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
+
+out.cn <- colnames(output)
+
+grep("hoh", out.cn, ignore.case = T, value = T)
+
+output$gender_category_calc <- NA
+output$race2_calc <- NA
+output$race_cat_calc <- NA
+output$CH <- NA
+output$youth_type_hh <- NA
+output$veteran_type_hh <- NA
+
+
+output[,c("PersonalID", 
+          "reltionshiptohoh_def", 
+          "HouseholdID", 
+          "vetStatus_def", 
+          "age_calc", 
+          "hud_age_calc", 
+          "gender_calc", "gender_category_calc", 
+          "race_calc", "race2_calc", "race_cat_calc", 
+          "ethnicity_def", 
+          "HIV.AIDS", 
+          "chronic_hlth_C", 
+          "developmental_D", 
+          "mental_health_D", 
+          "physical_D", 
+          "substance_use_D", 
+          "provider_calc", 
+          "Region", 
+          "County", "NCCounty", "county_matches", 
+          "CH", 
+          "domesticViolenceVictim_def", 
+          "currentlyFleeingDV_def",
+          "householdType_def", 
+          "youth_type_hh", "veteran_type_hh", 
+          'HoH_CLS_date',
+          "livingSituation_def")]
+
+
 
 # write to file----
 getwd()
 library(glue)
 
 
-out.name <- glue("test_output{Sys.Date()}.xlsx")
+out.name <- glue("test_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 write.xlsx(x = output, 
            file = out.name)
