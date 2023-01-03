@@ -442,7 +442,7 @@ output <- left_join(c.enrollment, c.client) %>%
 
 out.cn <- colnames(output)
 
-grep("hoh", out.cn, ignore.case = T, value = T)
+grep("dob", out.cn, ignore.case = T, value = T)
 
 output$gender_category_calc <- NA
 output$race2_calc <- NA
@@ -452,35 +452,57 @@ output$youth_type_hh <- NA
 output$veteran_type_hh <- NA
 
 
-output[,c("PersonalID", 
-          "reltionshiptohoh_def", 
-          "HouseholdID", 
-          "vetStatus_def", 
-          "age_calc", 
-          "hud_age_calc", 
-          "gender_calc", "gender_category_calc", 
-          "race_calc", "race2_calc", "race_cat_calc", 
-          "ethnicity_def", 
-          "HIV.AIDS", 
-          "chronic_hlth_C", 
-          "developmental_D", 
-          "mental_health_D", 
-          "physical_D", 
-          "substance_use_D", 
-          "provider_calc", 
-          "Region", 
-          "County", "NCCounty", "county_matches", 
-          "CH", 
-          "domesticViolenceVictim_def", 
-          "currentlyFleeingDV_def",
-          "householdType_def", 
-          "youth_type_hh", "veteran_type_hh", 
-          'HoH_CLS_date',
-          "livingSituation_def")]
+output2 <- output[,c("PersonalID", 
+                     "reltionshiptohoh_def", 
+                     "HouseholdID", 
+                     "vetStatus_def", 
+                     "age_calc", 
+                     "DOBDataQuality_def",
+                     "hud_age_calc", 
+                     "gender_calc", "gender_category_calc", 
+                     "race_calc", "race2_calc", "race_cat_calc", 
+                     "ethnicity_def", 
+                     "HIV.AIDS", 
+                     "chronic_hlth_C", 
+                     "developmental_D", 
+                     "mental_health_D", 
+                     "physical_D", 
+                     "substance_use_D", 
+                     "provider_calc", 
+                     "Region", 
+                     "County", "NCCounty", "county_matches", 
+                     "CH", 
+                     "domesticViolenceVictim_def", 
+                     "currentlyFleeingDV_def",
+                     "householdType_def", 
+                     "youth_type_hh", "veteran_type_hh", 
+                     'HoH_CLS_date',
+                     "livingSituation_def")]
 
 
 # identify data issues----
-output$age_calc %>% is.na 
+output2$age_calc %>% is.na  %>% sum
+output2$DOBDataQuality_def %>% unique()
+
+# DOB vs DOB Data Quality
+output2$issue.DOB_vs_DOBDataQuality <- F
+output2[output2$DOBDataQuality_def %in% c("Client refused", "Data not collected") & 
+  !is.na(output2$age_calc),]$issue.DOB_vs_DOBDataQuality <- T
+
+
+output2[is.na(output2$age_calc) & 
+  output2$DOBDataQuality_def %in% 
+  c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
+  
+
+
+output2 %>%
+  group_by(DOBDataQuality_def, 
+           na_agecalc = is.na(age_calc)) %>%
+  summarise(n = n(), 
+            avg_age = mean(age_calc)) %>%
+  as.data.table() %>%
+  dcast(DOBDataQuality_def ~ na_agecalc, value.var = "avg_age")
 
 grep("age|dob|_def$", colnames(a.client), value = T, ignore.case = T)
 
