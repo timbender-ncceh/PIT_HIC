@@ -225,6 +225,7 @@ for(i in unique(a.enrollment$HouseholdID)){
   
 }
 
+
 a.enrollment$HoH_PersonalID %>% is.na() %>% table(., useNA = "always")
 
 
@@ -282,20 +283,22 @@ a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentli
 a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsituation$InformationDate
 
 latest.cls <- a.currentlivingsituation %>%
-  group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID) %>%
+  group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID, 
+           currentLivingSituation_def) %>%
   summarise() %>%
-  group_by(EnrollmentID, PersonalID) %>%
+  group_by(EnrollmentID, HoH_PersonalID = PersonalID, 
+           HoH_currentLivingSituation_def = currentLivingSituation_def) %>%
   slice_max(., order_by = HoH_CLS_date, n = 1)
 
 a.enrollment <- left_join(a.enrollment, 
-          latest.cls, by = c("EnrollmentID", "HoH_PersonalID" = "PersonalID"))
+          latest.cls, by = c("EnrollmentID", "PersonalID" = "HoH_PersonalID" ))
+
+colnames(a.enrollment)
 
 # Project Checks----
 a.project <- read_csv("Project.csv")
 a.project$provider_calc <- a.project$ProjectName
 a.project$projectType_def <- unlist(lapply(a.project$ProjectType, fun_projtype))
-
-
 
 # Disabilities Check----
 a.disabilities <- read_csv("Disabilities.csv")
@@ -317,8 +320,6 @@ a.healthanddv$currentlyFleeingDV_def <- unlist(lapply(a.healthanddv$CurrentlyFle
 a.inventory <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
 
-
-
 # Output files, pre-join----
 b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         "hud_age_calc", "gender_calc", "race_calc", 
@@ -329,7 +330,8 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID",
                                            "NCCounty",
-                                           "HouseholdID", "HoH_PersonalID",
+                                           "HouseholdID", "HoH_PersonalID", 
+                                           "HoH_currentLivingSituation_def",
                                            "HoH_CLS_date", "livingSituation_def", 
                                            "relationshiptohoh_def")]
 
@@ -350,7 +352,9 @@ b.exit <- a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit),
 colnames(a.project)
 b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
                                                 ignore.case = F, value = T), 
-                                           "ProjectID", "OrganizationID")]
+                                           "ProjectID", "OrganizationID", 
+                                           "projectType_def", 
+                                           "ProjectName")]
 
 colnames(a.projectcoc)
 b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
@@ -442,7 +446,7 @@ output <- left_join(c.enrollment, c.client) %>%
 
 out.cn <- colnames(output)
 
-grep("dob", out.cn, ignore.case = T, value = T)
+grep("cls", out.cn, ignore.case = T, value = T)
 
 output$gender_category_calc <- NA
 output$race2_calc <- NA
@@ -476,13 +480,43 @@ output2 <- output[,c("PersonalID",
                      "currentlyFleeingDV_def",
                      "householdType_def", 
                      "youth_type_hh", "veteran_type_hh", 
+                     "livingSituation_def",
                      'HoH_CLS_date',
-                     "livingSituation_def")]
+                     "HoH_PersonalID", 
+                     "HoH_currentLivingSituation_def", 
+                     "EnrollmentID", 
+                     "ProjectName")]
 
 
 # identify data issues----
-output2$age_calc %>% is.na  %>% sum
-output2$DOBDataQuality_def %>% unique()
+colnames(output2) %>%
+  .[!. %in% c("age_calc", "DOBDataQuality_def", "Region",
+              "hud_age_calc",
+              "NCCounty", "County", "county_matches", 
+              "domesticViolenceVictim_def", 
+              "currentlyFleeingDV_def")]
+
+grep("type", 
+     colnames(output2), value = T, ignore.case = T)
+
+
+# issue - HOH living situation vs Person livins situation
+output2
+
+
+# issue - fleeing but not domestic violence victim
+
+output2$domesticViolenceVictim_def %>% unique()
+output2$currentlyFleeingDV_def %>% unique()
+
+output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in%
+                                            c("Client refused", "No") & 
+  output2$currentlyFleeingDV_def %in% c("Yes", "Client doesn't Know"))
+
+# issue - region
+output2$issue_region <- is.na(output2$Region)
+output2$issue_nccounty <- is.na(output2$county_matches) | !output2$county_matches
+
 
 # DOB vs DOB Data Quality
 output2$issue.DOB_vs_DOBDataQuality <- F
@@ -495,16 +529,48 @@ output2[is.na(output2$age_calc) &
   c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
   
 
+output2$issue_race <- output2$race_calc == "[unknown]"
+output2$householdType_def %>% unique()
 
-output2 %>%
-  group_by(DOBDataQuality_def, 
-           na_agecalc = is.na(age_calc)) %>%
-  summarise(n = n(), 
-            avg_age = mean(age_calc)) %>%
+output2$livingSituation_def %>% unique()
+output2$reltionshiptohoh_def
+
+output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_PersonalID & 
+  output2$reltionshiptohoh_def != "Self (head of household)")
+
+
+
+# for(i in 1:ncol(output2)){
+#   if(any(grepl("^\\[|unknown|undetermined", unname(unlist(output2[,i])), ignore.case = T))|
+#      any(is.na(unname(unlist(output2[,2]))))){
+#     print(i)
+#   }
+# }
+# output2[,10]
+
+
+
+
+colnames(output) %>%
+  grep("date", ., ignore.case = T, value = T)
+
+output3 <- output2 %>%
+  group_by(PersonalID, EnrollmentID, ProjectName,
+           issue_dv.victim_vs_dv.fleeing,
+           issue_region, 
+           issue_nccounty, 
+           issue.DOB_vs_DOBDataQuality, 
+           issue_race, 
+           issue_no_HeadOfHousehold) %>%
+  summarise() %>%
   as.data.table() %>%
-  dcast(DOBDataQuality_def ~ na_agecalc, value.var = "avg_age")
-
-grep("age|dob|_def$", colnames(a.client), value = T, ignore.case = T)
+  melt(., 
+        id.vars = c("EnrollmentID", "PersonalID", "ProjectName") , 
+       variable.name = "DQ_flag_type") %>%
+  as.data.frame() %>%
+  as_tibble() %>%
+  .[.$value == T,] %>%
+  .[!colnames(.) %in% c("value")]
 
 
 # write to file----
@@ -513,5 +579,5 @@ library(glue)
 
 
 out.name <- glue("test_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
-write.xlsx(x = output, 
+write.xlsx(x = output3, 
            file = out.name)
