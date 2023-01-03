@@ -138,6 +138,8 @@ rm(a.rando.key)
 # /pii hash check
 
 # add fields
+a.client$DOBDataQuality_def <- unlist(lapply(a.client$DOBDataQuality, 
+                                             fun_dob_dataqual))
 
 a.client$age_calc     <- calc_age(dob = a.client$DOB)
 a.client$hud_age_calc <- NA
@@ -318,7 +320,7 @@ a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hh
 
 
 # Output files, pre-join----
-b.client <- a.client[,c("PersonalID", "age_calc",
+b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         "hud_age_calc", "gender_calc", "race_calc", 
                         "ethnicity_def", "vetStatus_def")]
 
@@ -476,6 +478,11 @@ output[,c("PersonalID",
           'HoH_CLS_date',
           "livingSituation_def")]
 
+
+# identify data issues----
+output$age_calc %>% is.na 
+
+grep("age|dob|_def$", colnames(a.client), value = T, ignore.case = T)
 
 
 # write to file----
