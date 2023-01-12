@@ -142,6 +142,12 @@ a.client$DOBDataQuality_def <- unlist(lapply(a.client$DOBDataQuality,
                                              fun_dob_dataqual))
 
 a.client$age_calc     <- calc_age(dob = a.client$DOB)
+
+# FLAG - age----
+a.client$flag.age_too_old <- a.client$age_calc >= 80
+a.client$flag.DOB_na <- is.na(a.client$DOB) | is.na(a.client$DOBDataQuality)
+
+
 a.client$hud_age_calc <- NA
 for(i in 1:nrow(a.client)){
   #print(i)
@@ -158,6 +164,10 @@ for(i in 1:nrow(a.client)){
                                         gendernone  = a.client$GenderNone[i])
 }
 
+# FLAG - gender----
+a.client$flag.gender <- a.client$gender_calc == "[unknown]"
+
+
 a.client$race_calc    <- NA
 for(i in 1:nrow(a.client)){
   a.client$race_calc[i] <- fun_race(racenone        = a.client$RaceNone[i], 
@@ -169,13 +179,38 @@ for(i in 1:nrow(a.client)){
   
 }
 
+# FLAG - race----
+a.client$flag.race <-  a.client$race_calc == "[unknown]"
+
 a.client$ethnicity_def <- unlist(lapply(a.client$Ethnicity, fun_ethnicity_def))
+# FLAG - ethnicity----
+a.client$flag.ethnicity <- a.client$ethnicity_def == "[undetermined]"
+
 a.client$vetStatus_def <- unlist(lapply(a.client$VeteranStatus, fun_1.8_def))
+# FLAG - veteran status----
+a.client$flag.vetstatus <- a.client$vetStatus_def == "[undetermined]"
 
 # Enrollment Checks----
 a.enrollment <- read_csv("Enrollment.csv")
 
+
+# FLAG - nccounty----
+a.enrollment$flag.nccounty_na <- is.na(a.enrollment$NCCounty)
+# FLAG - relationshiphoh----
+a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$RelationshipToHoH)
+
+
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
+
+# FLAG - child HOH----
+flag.child.hoh <- left_join(a.enrollment[,c("PersonalID", "EnrollmentID", "reltionshiptohoh_def")], 
+          a.client[,c("PersonalID", "age_calc")]) %>%
+  mutate(., flag.child_hoh = age_calc <= 15 & reltionshiptohoh_def == 
+           "Self (head of household)") 
+a.enrollment <- left_join(a.enrollment, 
+          flag.child.hoh[,c("PersonalID", "EnrollmentID", "flag.child_hoh")])
+rm(flag.child.hoh)
+
 
 a.enrollment$HoH_PersonalID <- NA
 # a.enrollment$HoH_CLS        <- NA
@@ -236,9 +271,39 @@ a.projectcoc <- read_csv(file = "ProjectCoC.csv") %>%
   left_join(., zip_co.cw[,c("ZIP", "County", "City")]) %>%
   left_join(., get_coc_region())
 
+a.projectcoc2 <- read_csv(file = "ProjectCoC.csv") %>%
+  .[,c("ProjectID", "City", "State", "ZIP")] %>% 
+  left_join(., 
+          zip_co.cw[,c("ZIP", "County", "City")]) %>%
+  left_join(., 
+            get_coc_region())
+
+
+
+a.enrollment2 <- left_join(a.enrollment[,c("EnrollmentID", "PersonalID", "ProjectID", 
+                "NCCounty")], 
+          get_coc_region(), by = c("NCCounty" = "County"))
+
+
+full_join(a.projectcoc2,a.enrollment2, by = "ProjectID") %>%
+  group_by(#County,NCCounty,
+           Region.x, Region.x == Region.y) %>%
+  summarise(n = n())
+
+
+# left_join(a.projectcoc2, a.enrollment, 
+#             by = c("ProjectID")) 
+# 
+#   left_join(., get_coc_region(), 
+#             by = c("NCCounty" = "County"))
+
 rm(zip_co.cw)
 
+
+
+
 # living situation
+
 a.enrollment$livingSituation_def <- unlist(lapply(a.enrollment$LivingSituation, fun_livingsituation_def))
 
 # Exit Checks----
@@ -315,15 +380,24 @@ a.healthanddv$domesticViolenceVictim_def <- unlist(lapply(a.healthanddv$Domestic
                                                           fun_1.8_def))
 a.healthanddv$currentlyFleeingDV_def <- unlist(lapply(a.healthanddv$CurrentlyFleeing, fun_1.8_def))
 
+# FLAG - DV----
+a.healthanddv$flag_dv <- is.na(a.healthanddv$domesticViolenceVictim_def) | 
+  is.na(a.healthanddv$currentlyFleeingDV_def)
+
 
 # Inventory check----
 a.inventory <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
 
 # Output files, pre-join----
+flag_colnames <- function(x){
+  grep("^flag", colnames(x), ignore.case = T, value = T)
+}
+flag_colnames(a.client)
 b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         "hud_age_calc", "gender_calc", "race_calc", 
-                        "ethnicity_def", "vetStatus_def")]
+                        "ethnicity_def", "vetStatus_def", 
+                        flag_colnames(a.client))]
 
 colnames(a.enrollment)
 b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
@@ -333,7 +407,9 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", 
                                            "HouseholdID", "HoH_PersonalID", 
                                            "HoH_currentLivingSituation_def",
                                            "HoH_CLS_date", "livingSituation_def", 
-                                           "relationshiptohoh_def")]
+                                           "relationshiptohoh_def", 
+                                           "EntryDate", 
+                                           flag_colnames(a.enrollment))]
 
 colnames(a.currentlivingsituation)
 b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
@@ -341,20 +417,23 @@ b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsi
                                            "EnrollmentID", "PersonalID", "ProjectID", 
                                            "HouseholdID", "HoH_PersonalID", 
                                            "InformationDate", "currentLivingSituation_def", 
-                                           "currentLivingSituation.Date_calc")]
+                                           "currentLivingSituation.Date_calc", 
+                                           flag_colnames(a.currentlivingsituation))]
 
 colnames(a.exit)
 b.exit <- a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
-                               "ExitID", "ExitDate")]
+                               "ExitID", "ExitDate", 
+                               flag_colnames(a.exit))]
 
 colnames(a.project)
 b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
                                                 ignore.case = F, value = T), 
                                            "ProjectID", "OrganizationID", 
                                            "projectType_def", 
-                                           "ProjectName")]
+                                           "ProjectName", 
+                                           flag_colnames(a.project))]
 
 colnames(a.projectcoc)
 b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
@@ -362,7 +441,8 @@ b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", 
                                            "ProjectCoCID", "ProjectID", 
                                            #"City", "ZIP", "CoCCode", 
                                            "County", "Region", 
-                                           "NCCounty", "HoH_PersonalID", "ProjectName")]
+                                           "NCCounty", "HoH_PersonalID", "ProjectName", 
+                                           flag_colnames(a.projectcoc))]
 
 screened.pos.disab_df
 
@@ -371,13 +451,15 @@ colnames(a.healthanddv)
 b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in% c(grep("_def$|_calc$", colnames(a.healthanddv), 
                                     ignore.case = F, value = T), 
                                "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
-                               "ExitID", "ExitDate")]
+                               "ExitID", "ExitDate", 
+                               flag_colnames(a.healthanddv))]
 
 colnames(a.inventory)
 b.inventory <- a.inventory[colnames(a.inventory) %in% c(grep("_def$|_calc$", colnames(a.inventory), 
                                                   ignore.case = F, value = T), 
                                              "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
-                                             "ExitID", "ExitDate", "CoCCode")]
+                                             "ExitID", "ExitDate", "CoCCode", 
+                                             flag_colnames(a.inventory))]
 
 
 # keep only these enrollment_ids
@@ -413,8 +495,9 @@ c.currentlivingsituation
 b.project
 
 
-comp_county <- inner_join(c.enrollment[,c("EnrollmentID", "ProjectID", "NCCounty")],
-           b.projectcoc[,c("ProjectID", "County")]) %>%
+comp_county <- inner_join(c.enrollment[,c("EnrollmentID", "ProjectID", "NCCounty",
+                                          flag_colnames(c.enrollment))],
+           b.projectcoc[,c("ProjectID", "County", flag_colnames(b.projectcoc))]) %>%
   mutate(., county_matches = ifelse(NCCounty == County, T, F)) %>%
   mutate(., county_matches = ifelse(is.na(county_matches), F, county_matches))
 
@@ -485,7 +568,9 @@ output2 <- output[,c("PersonalID",
                      "HoH_PersonalID", 
                      "HoH_currentLivingSituation_def", 
                      "EnrollmentID", 
-                     "ProjectName")]
+                     "ProjectName", 
+                     "EntryDate", 
+                     flag_colnames(output))]
 
 
 # identify data issues----
@@ -515,7 +600,7 @@ output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in
 
 # issue - region
 output2$issue_region <- is.na(output2$Region)
-output2$issue_nccounty <- is.na(output2$county_matches) | !output2$county_matches
+output2$issue_nccounty <- is.na(output2$county_matches) | !output2$county_matches 
 
 
 # DOB vs DOB Data Quality
@@ -555,23 +640,41 @@ colnames(output) %>%
   grep("date", ., ignore.case = T, value = T)
 
 output3 <- output2 %>%
-  group_by(PersonalID, EnrollmentID, ProjectName,
+  group_by(client_id = PersonalID, 
+           #EnrollmentID, 
+           ProjectName,
+           EntryDate,
            issue_dv.victim_vs_dv.fleeing,
            issue_region, 
            issue_nccounty, 
            issue.DOB_vs_DOBDataQuality, 
            issue_race, 
-           issue_no_HeadOfHousehold) %>%
+           issue_no_HeadOfHousehold, 
+           flag.nccounty_na, 
+           flag.reltohoh_na, 
+           flag.child_hoh, 
+           flag.age_too_old, 
+           flag.DOB_na, 
+           flag.gender, 
+           flag.race, 
+           flag.ethnicity, 
+           flag.vetstatus, 
+           flag_dv) %>%
   summarise() %>%
   as.data.table() %>%
   melt(., 
-        id.vars = c("EnrollmentID", "PersonalID", "ProjectName") , 
+        id.vars = c(#"EnrollmentID",
+                    "client_id", "ProjectName", "EntryDate") , 
        variable.name = "DQ_flag_type") %>%
   as.data.frame() %>%
   as_tibble() %>%
   .[.$value == T,] %>%
   .[!colnames(.) %in% c("value")]
 
+
+output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
+
+output[output$PersonalID == 2664,]$Region
 
 # write to file----
 getwd()
