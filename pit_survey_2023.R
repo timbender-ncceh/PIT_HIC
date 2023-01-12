@@ -573,6 +573,11 @@ output2 <- output[,c("PersonalID",
                      flag_colnames(output))]
 
 
+
+out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+write.xlsx(x = output2, 
+           file = out.name.andrea)
+
 # identify data issues----
 colnames(output2) %>%
   .[!. %in% c("age_calc", "DOBDataQuality_def", "Region",
