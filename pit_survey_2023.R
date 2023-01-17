@@ -646,7 +646,7 @@ colnames(output) %>%
 
 output3 <- output2 %>%
   group_by(client_id = PersonalID, 
-           #EnrollmentID, 
+           EnrollmentID,
            ProjectName,
            EntryDate,
            issue_dv.victim_vs_dv.fleeing,
@@ -655,6 +655,9 @@ output3 <- output2 %>%
            issue.DOB_vs_DOBDataQuality, 
            issue_race, 
            issue_no_HeadOfHousehold, 
+           #Region,
+           #County, 
+           #NCCounty,
            flag.nccounty_na, 
            flag.reltohoh_na, 
            flag.child_hoh, 
@@ -666,10 +669,12 @@ output3 <- output2 %>%
            flag.vetstatus, 
            flag_dv) %>%
   summarise() %>%
+  # left_join(., 
+  #           read_csv("regionscrosswalk.csv"), 
+  #           by = c("County" )) %>%
   as.data.table() %>%
   melt(., 
-        id.vars = c(#"EnrollmentID",
-                    "client_id", "ProjectName", "EntryDate") , 
+        id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate") , 
        variable.name = "DQ_flag_type") %>%
   as.data.frame() %>%
   as_tibble() %>%
@@ -680,6 +685,35 @@ output3 <- output2 %>%
 output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
 
 output[output$PersonalID == 2664,]$Region
+
+
+# change names----
+output3$DQ_flag_type <- output3$DQ_flag_type  %>% as.character()
+
+unique(output3$DQ_flag_type)
+
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.nccounty_na", 
+       "verify NCCounty", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.child_hoh", 
+       "Head Of Household aged 16 or under", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.age_too_old", 
+       "older than 80 years old", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.DOB_na", 
+       "missing Date of Birth or DOB_quality", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race", 
+       "missing race", output3$DQ_flag_type)
+
+output3 <- left_join(output3, a.enrollment[,c("EnrollmentID", "NCCounty")]) %>%
+  left_join(., 
+            a.project[,c("ProjectName", "ProjectID")]) %>%
+  left_join(., 
+            a.projectcoc[,c("ProjectID", "County")]) %>%
+  left_join(., 
+            read_csv("regionscrosswalk.csv")) %>%
+  .[!colnames(.) %in% c("ProjectID")]
+
+
+colnames(output3)[colnames(output3) == "County"] <- "project_county"
 
 # write to file----
 getwd()
