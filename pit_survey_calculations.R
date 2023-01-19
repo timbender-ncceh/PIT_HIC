@@ -1,4 +1,149 @@
 
+# formulas developed in "nccounty_logic.R"
+get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036), 
+                            proj_city = c("Durham", "Raleigh", "Fountain", "Lebanon")){
+  require(readr)
+  zip_cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
+  out <- NULL
+  for(i in 1:length(proj_zip)){
+    if(proj_zip[i] %in% zip_cw$ZIP & 
+       proj_city[i] %in% zip_cw$City){
+      out <- c(out, 
+               zip_cw[zip_cw$ZIP %in% proj_zip[i] & 
+                        zip_cw$City %in% proj_city[i],]$County)
+    }else{
+      out <- c(out, NA)
+    }
+  }
+  return(out)
+}
+
+get.calc_region <- function(calc_location_county){
+  require(dplyr)
+  
+  # case_correct
+  clc <- tolower(calc_location_county)
+  clc <- paste(toupper(substr(clc,1,1)), substr(clc,2,nchar(clc)), 
+               sep = "", collapse = "")
+  
+  try(calc_location_county <- clc)
+  
+  # 
+  # region_cw <- read_csv("regionscrosswalk.csv")
+  # region_cw$Region %>% unique %>% .[order(.)]
+  # 
+  #  
+  #   
+  # cat('\f');paste(region_cw$County[region_cw$Region == "Region 13"], 
+  #       sep = " ", collapse = " ") %>%
+  #   gsub(" ", "\",\"", .) %>%
+  #   paste("c(\"", ., "\")", sep = "") %>% 
+  #   gsub(",", ", ", .) %>% 
+  #   cat()
+  
+  # Region 13
+  if(calc_location_county %in%
+     c("Carteret", "Craven", "Jones", "Onslow", "Pamlico") ){
+    out <- "Region 13"
+  }
+  # Region 12
+  if(calc_location_county %in%
+     c("Beaufort", "Bertie", "Hyde", "Martin", "Pitt", "Washington") ){
+    out <- "Region 12"
+  }
+  # Region 11
+  if(calc_location_county %in%
+     c("Camden", "Chowan", "Currituck", "Dare", "Gates", "Hertford", "Pasquotank", "Perquimans", "Tyrrell") ){
+    out <- "Region 11"
+  }
+  # Region 10
+  if(calc_location_county %in%
+     c("Duplin", "Greene", "Lenoir", "Sampson", "Wayne", "Wilson") ){
+    out <- "Region 10"
+  }
+  # Region 9
+  if(calc_location_county %in%
+     c("Edgecombe", "Franklin", "Granville", "Halifax", "Nash", "Northampton", "Vance", "Warren") ){
+    out <- "Region 9"
+  }
+  # Region 8
+  if(calc_location_county %in%
+     c("Bladen", "Columbus", "Robeson", "Scotland") ){
+    out <- "Region 8"
+  }
+  # Region 7
+  if(calc_location_county %in%
+     c("Anson", "Harnett", "Hoke", "Johnston", "Lee", "Montgomery", "Moore", "Randolph", "Richmond") ){
+    out <- "Region 7"
+  }
+  # Region 6
+  if(calc_location_county %in%
+     c("Alamance", "Caswell", "Chatham", "Person", "Rockingham") ){
+    out <- "Region 6"
+  }
+  # Region 5
+  if(calc_location_county %in%
+     c("Cabarrus", "Davidson", "Rowan", "Stanly", "Union") ){
+    out <- "Region 5"
+  }
+  # Region 4
+  if(calc_location_county %in%
+     c("Davie", "Iredell", "Stokes", "Surry", "Yadkin") ){
+    out <- "Region 4"
+  }
+  # Region 3
+  if(calc_location_county %in%
+     c("Alexander", "Burke", "Caldwell", "Catawba", "Mcdowell") ){
+    out <- "Region 3"
+  }
+  # Region 2
+  if(calc_location_county %in%
+     c("Henderson", "Polk", "Rutherford", "Transylvania") ){
+    out <- "Region 2"
+  }
+  # Region 1
+  if(calc_location_county %in%
+     c("Cherokee", "Clay", "Graham", "Haywood", "Jackson", "Macon", "Madison", "Swain") ){
+    out <- "Region 1"
+  }
+  
+  out1 <- NULL
+  try(out1 <- out)
+  
+  if(length(out1) != 1){
+    out1 <- NA
+  }
+  
+  return(out1)
+}
+
+search_county.names <- function(projname){
+  print(projname)
+  if(length(projname) == 1){
+    out <- strsplit(projname, split = " - | -|- ")
+    out <- unlist(out)[grepl("County$", x = unlist(out), ignore.case = F)]
+    out <- strsplit(out, " ")
+    out <- unlist(out[unlist(lapply(X = out, FUN = length)) == 2]) %>% 
+      paste(., sep = " ", collapse = " ") #%>%
+    #gsub(pattern = " County", "", .)
+    
+    
+  }else{
+    out <- NA
+  }
+  
+  if(!grepl("County", x = out)){
+    out <- NA
+  }
+  
+  return(out)
+}
+
+
+
+#/ formulas developed in "nccounty_logic.R"
+
+
 fun_dob_dataqual <- function(x){
   out <- data.frame(x_in = c(1,2,8,9,99), 
                     x_txt = c("Full DOB reported", 
@@ -58,7 +203,6 @@ fun_projtype <- function(x){
   return(out1)
 }
 
-fun_projtype(NA)
 
 fun_livingsituation_def <- function(x){
   out <- data.frame(x_in = c(16,1,18,15,6,
@@ -124,6 +268,7 @@ fun_hhtype <- function(x){
   }
   return(out)
 }
+
 
 
 fun_rel2hoh <- function(x){
