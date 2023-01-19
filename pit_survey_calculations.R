@@ -1,5 +1,12 @@
 
 # formulas developed in "nccounty_logic.R"
+get.calc_location_county <- function(housingtype, proj.address.county, 
+                                     nccounty){
+  ifelse(test = housingtype %in% c(1,2) & !is.na(housingtype), 
+         yes  = proj.address.county, 
+         no   = nccounty)
+}
+
 get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036), 
                             proj_city = c("Durham", "Raleigh", "Fountain", "Lebanon")){
   require(readr)
