@@ -365,6 +365,65 @@ a.project <- read_csv("Project.csv")
 a.project$provider_calc <- a.project$ProjectName
 a.project$projectType_def <- unlist(lapply(a.project$ProjectType, fun_projtype))
 
+# assign project_county
+a.projectcoc$proj_county <- get.proj_county(proj_zip = a.projectcoc$ZIP, 
+                                            proj_city = a.projectcoc$City)
+
+# get_hh_calc_location_co_by_hoh----
+# and implement get.calc_location_county()----
+
+a.enrollment$calc_location_county <- NA
+
+for(i in 1:nrow(a.enrollment)){
+  
+  if(length(unique(a.project$HousingType[a.project$ProjectID == a.enrollment$ProjectID[i]])) > 1){
+    stop(glue::glue("row {i} has multiple project.csv records associated with it"))
+  }
+  
+  if(length(unique(a.projectcoc$proj_county[a.projectcoc$ProjectID == a.enrollment$ProjectID[i]])) > 1){
+    stop(glue::glue("row {i} has multiple projectcoc.csv records associated with it"))
+  }
+  
+  a.enrollment$calc_location_county[i] <- get.calc_location_county(housingtype = a.project$HousingType[a.project$ProjectID == 
+                                                                                                         a.enrollment$ProjectID[i]], 
+                                                                   proj.address.county = unique(a.projectcoc$proj_county[a.projectcoc$ProjectID == 
+                                                                                                                           a.enrollment$ProjectID[i]]), 
+                                                                   nccounty = a.enrollment$NCCounty[i])
+}
+
+a.enrollment$calc_location_county_flag <- NA
+for(i in unique(a.enrollment$HouseholdID)){
+  
+  n_hh_pids <- length(unique(a.enrollment[a.enrollment$HouseholdID == i,]$PersonalID))
+  n_hh_hoh  <- sum(a.enrollment[a.enrollment$HouseholdID == i,]$RelationshipToHoH == 1)
+  hoh_loc_co <- a.enrollment[a.enrollment$HouseholdID == i & 
+                               a.enrollment$RelationshipToHoH == 1,]$calc_location_county
+  
+  # notes for flag
+  flag1  <- ifelse(n_hh_pids == 1, "Only 1 person in HH.", "")
+  flag2a <- ifelse(n_hh_hoh < 1, "No HoHs in HH.", "")
+  flag2b <- ifelse(n_hh_hoh > 1, "Multiple HoHs in HH.", "")
+  flag3  <- ifelse(any(is.na(hoh_loc_co)), "Non-valid calc_location_county.", "")
+  
+  a.enrollment$calc_location_county_flag[a.enrollment$HouseholdID == i] <- paste(#flag1, 
+    flag2a, flag2b, flag3, 
+    sep = " ", collapse = " ") %>%
+    trimws() %>% 
+    gsub(" {1,}", " ", .)
+  
+  if(all(c(#flag1,
+    flag2a,flag2b,flag3) == "")){
+    a.enrollment$calc_location_county_flag[a.enrollment$HouseholdID == i] <- "no flags"
+  }
+  rm(flag1,flag2a,flag2b,flag3,n_hh_pids,n_hh_hoh,hoh_loc_co)
+  
+}
+
+# dropping in some code developed from "nccounty_logic.R"
+
+
+
+
 # Disabilities Check----
 a.disabilities <- read_csv("Disabilities.csv")
 
@@ -409,6 +468,8 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", 
                                            "HoH_CLS_date", "livingSituation_def", 
                                            "relationshiptohoh_def", 
                                            "EntryDate", 
+                                           "calc_location_county", 
+                                           "calc_location_county_flag",
                                            flag_colnames(a.enrollment))]
 
 colnames(a.currentlivingsituation)
@@ -433,6 +494,7 @@ b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(
                                            "ProjectID", "OrganizationID", 
                                            "projectType_def", 
                                            "ProjectName", 
+                                           "provider_calc",
                                            flag_colnames(a.project))]
 
 colnames(a.projectcoc)
@@ -442,6 +504,7 @@ b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", 
                                            #"City", "ZIP", "CoCCode", 
                                            "County", "Region", 
                                            "NCCounty", "HoH_PersonalID", "ProjectName", 
+                                           "proj_county",
                                            flag_colnames(a.projectcoc))]
 
 screened.pos.disab_df
@@ -497,10 +560,11 @@ b.project
 
 comp_county <- inner_join(c.enrollment[,c("EnrollmentID", "ProjectID", "NCCounty",
                                           flag_colnames(c.enrollment))],
-           b.projectcoc[,c("ProjectID", "County", flag_colnames(b.projectcoc))]) %>%
-  mutate(., county_matches = ifelse(NCCounty == County, T, F)) %>%
-  mutate(., county_matches = ifelse(is.na(county_matches), F, county_matches))
+           b.projectcoc[,c("ProjectID", "County", flag_colnames(b.projectcoc))]) #%>%
+  #mutate(., county_matches = ifelse(NCCounty == County, T, F)) %>%
+  #mutate(., county_matches = ifelse(is.na(county_matches), F, county_matches))
 
+#rm(comp_county)
 
 ls(pattern = "^a\\.") %>%
   .[! . %in% c("a.client", "a.enrollment", "a.exit", 
@@ -538,11 +602,15 @@ output$CH <- NA
 output$youth_type_hh <- NA
 output$veteran_type_hh <- NA
 
+grep("county|calc", colnames(output), value = T, ignore.case = T)
 
 output2 <- output[,c("PersonalID", 
                      "reltionshiptohoh_def", 
                      "HouseholdID", 
                      "vetStatus_def", 
+                     "calc_location_county", 
+                     "calc_location_county_flag",
+                     "proj_county",
                      "age_calc", 
                      "DOBDataQuality_def",
                      "hud_age_calc", 
@@ -557,7 +625,8 @@ output2 <- output[,c("PersonalID",
                      "substance_use_D", 
                      "provider_calc", 
                      "Region", 
-                     "County", "NCCounty", "county_matches", 
+                     "County", "NCCounty", 
+                     #"county_matches", 
                      "CH", 
                      "domesticViolenceVictim_def", 
                      "currentlyFleeingDV_def",
@@ -571,6 +640,8 @@ output2 <- output[,c("PersonalID",
                      "ProjectName", 
                      "EntryDate", 
                      flag_colnames(output))]
+
+grep("calc", colnames(output2), value = T, ignore.case = T)
 
 
 
@@ -604,8 +675,8 @@ output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in
   output2$currentlyFleeingDV_def %in% c("Yes", "Client doesn't Know"))
 
 # issue - region
-output2$issue_region <- is.na(output2$Region)
-output2$issue_nccounty <- is.na(output2$county_matches) | !output2$county_matches 
+#output2$issue_region <- is.na(output2$Region)
+#output2$issue_nccounty <- is.na(output2$county_matches) | !output2$county_matches 
 
 
 # DOB vs DOB Data Quality
@@ -649,9 +720,12 @@ output3 <- output2 %>%
            EnrollmentID,
            ProjectName,
            EntryDate,
+           calc_location_county_flag,
+           calc_location_county,
+           proj_county,
            issue_dv.victim_vs_dv.fleeing,
-           issue_region, 
-           issue_nccounty, 
+           # issue_region, 
+           # issue_nccounty, 
            issue.DOB_vs_DOBDataQuality, 
            issue_race, 
            issue_no_HeadOfHousehold, 
@@ -719,7 +793,20 @@ colnames(output3)[colnames(output3) == "County"] <- "project_county"
 getwd()
 library(glue)
 
+grep("calc", colnames(output3), value = T, ignore.case = T)
 
-out.name <- glue("test_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+
+stop("notes:  1) remove enrollment_ID\n2) one county column,\n3)??? see chat")
+
+
+out.name <- glue("nicole_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 write.xlsx(x = output3, 
            file = out.name)
+
+
+read_xlsx(list.files(pattern = "^andrea_output2023-01-19")) %>%
+  colnames() %>%
+  grepl(pattern = "calc", x = ., 
+       #value = T, 
+       ignore.case = T) %>%
+  which()
