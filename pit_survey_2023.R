@@ -30,6 +30,8 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/Januar
 # Functions----
 #devtools::source_url(url = "https://github.com/timbender-ncceh/R-scripts/blob/main/format_phone_email.R?raw=TRUE")
 devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+
+
 const_nchar <- function(x = 1:130){
   #formats numbers for use in column fields so that they can be sorted as
   #strings and remain in order
@@ -417,6 +419,7 @@ for(i in 1:nrow(a.enrollment)){
 }
 
 
+
 # Project Checks----
 a.project <- read_csv("Project.csv")
 a.project$provider_calc <- a.project$ProjectName
@@ -447,8 +450,52 @@ for(i in 1:nrow(a.enrollment)){
                                                                    proj.address.county = unique(a.projectcoc$proj_county[a.projectcoc$ProjectID == 
                                                                                                                            a.enrollment$ProjectID[i]]), 
                                                                    nccounty = a.enrollment$NCCounty[i])
+  # if you don't get a county back (i.e. NA returned above)
+  if(is.na(a.enrollment$calc_location_county[i])){
+    # see if you can extract county from project name
+    temp <- search_county.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
+      unique()
+    
+    if(length(temp) == 1 & 
+       !is.na(temp)){
+      a.enrollment$calc_location_county[i] <- temp
+    }
+    rm(temp)
+  }
+  
+  # Regions
   a.enrollment$calc_region[i] <- get.calc_region(a.enrollment$calc_location_county[i])
+  # if you don't get a region back (i.e. NA returned above)
+  if(is.na(a.enrollment$calc_region[i])){
+    # see if you can extract county from project name
+    temp <- search_region.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
+      unique()
+    
+    if(length(temp) == 1 & 
+       !is.na(temp)){
+      a.enrollment$calc_region[i] <- temp
+    }
+    rm(temp)
+  }
+  
+  
 }
+
+a.enrollment %>%
+  group_by(NA_clc = is.na(calc_location_county), 
+           na_reg = is.na(calc_region)) %>%
+  #group_by(calc_location_county, calc_region) %>%
+  summarise(n = n())
+
+# a.enrollment <- left_join(a.enrollment, 
+#           read_csv("https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/regionscrosswalk.csv"),
+#           by = c("calc_location_county" = "County")) 
+# colnames(a.enrollment)[colnames(a.enrollment) == "Region"] <- "calc_region_join"
+# 
+# a.enrollment %>%
+#   group_by(calc_location_county, calc_region, calc_region_join) %>%
+#   summarise(n = n()) %>%
+#   .[!complete.cases(.),]
 
 
 a.enrollment$calc_location_county_flag <- NA
@@ -891,10 +938,11 @@ output2 <- output[,c("PersonalID",
                      "EntryDate", 
                      flag_colnames(output))]
 
-output2 <- output2[!colnames(output2) %in% "flag.nccounty_na"]
+output2 <- output2[!colnames(output2) %in% c("flag.nccounty_na", "Region")]
 
 
 grep("calc", colnames(output2), value = T, ignore.case = T)
+
 
 
 
@@ -1071,7 +1119,7 @@ library(glue)
 grep("calc", colnames(output3), value = T, ignore.case = T)
 
 
-stop("notes:  1) remove enrollment_ID\n2) one county column,\n3)??? see chat")
+#stop("notes:  1) remove enrollment_ID\n2) one county column,\n3)??? see chat")
 
 
 out.name <- glue("nicole_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
