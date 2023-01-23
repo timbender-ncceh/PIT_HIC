@@ -360,6 +360,63 @@ a.enrollment <- left_join(a.enrollment,
 
 colnames(a.enrollment)
 
+
+is_household_CLS_nmfhh <- function(pid, eid, 
+                                   df_enr = a.enrollment, 
+                                   df_cls = a.currentlivingsituation){
+  
+  hhid <- df_enr$HouseholdID[df_enr$PersonalID == pid & 
+                               df_enr$EnrollmentID == eid] %>%
+    unique()
+  # is pid the hoh?
+  pid_is_hoh <- unique(df_enr$reltionshiptohoh_def[df_enr$PersonalID == pid & 
+                                                     df_enr$EnrollmentID == eid]) == 
+    "Self (head of household)"
+  
+  # if pid IS the HoH
+  if(pid_is_hoh){
+    # do this
+    pid_cls <- left_join(df_enr[,c("PersonalID", "EnrollmentID", "HouseholdID")], 
+                         df_cls[,c("PersonalID", "EnrollmentID", 
+                                   "CurrentLivingSituation")]) %>%
+      .[.$PersonalID == pid & 
+          .$EnrollmentID == eid,] %>%
+      .$CurrentLivingSituation %>% unique()
+    
+    hh_cls <- pid_cls
+  }else{
+    # do that
+    hoh_pid_cls <- left_join(df_enr[,c("PersonalID", "EnrollmentID", "HouseholdID")], 
+                             df_cls[,c("PersonalID", "EnrollmentID", 
+                                       "CurrentLivingSituation")]) %>%
+      .[.$HouseholdID == hhid & 
+          .$EnrollmentID == eid,] %>%
+      .$CurrentLivingSituation %>% unique()
+    hh_cls <- hoh_pid_cls
+  }
+  
+  out <- NA
+  if(length(hh_cls) != 1){
+    if(length(hh_cls) == 0){ out <- "no cls records found"}
+    if(length(hh_cls) > 1){ out <- "multiple cls records found"}
+  }else{
+    if(length(hh_cls) == 1 & hh_cls == 16 & !is.na(hh_cls)){ out <- "Place Not Meant for Human Habitation"}
+    if(length(hh_cls) == 1 & hh_cls != 16 & !is.na(hh_cls)){ out <- "other than NMFHH"}
+  }
+  return(out)
+}
+
+a.enrollment$calc_household_currentlivingsituation <- NA
+for(i in 1:nrow(a.enrollment)){
+  #if(i > 1000){break}
+  a.enrollment$calc_household_currentlivingsituation[i] <- 
+    is_household_CLS_nmfhh(pid = a.enrollment$PersonalID[i], 
+                                   eid = a.enrollment$EnrollmentID[i],
+                                   df_enr = a.enrollment, 
+                                   df_cls = a.currentlivingsituation) 
+}
+
+
 # Project Checks----
 a.project <- read_csv("Project.csv")
 a.project$provider_calc <- a.project$ProjectName
@@ -373,6 +430,7 @@ a.projectcoc$proj_county <- get.proj_county(proj_zip = a.projectcoc$ZIP,
 # and implement get.calc_location_county()----
 
 a.enrollment$calc_location_county <- NA
+a.enrollment$calc_region <- NA
 
 for(i in 1:nrow(a.enrollment)){
   
@@ -389,7 +447,9 @@ for(i in 1:nrow(a.enrollment)){
                                                                    proj.address.county = unique(a.projectcoc$proj_county[a.projectcoc$ProjectID == 
                                                                                                                            a.enrollment$ProjectID[i]]), 
                                                                    nccounty = a.enrollment$NCCounty[i])
+  a.enrollment$calc_region[i] <- get.calc_region(a.enrollment$calc_location_county[i])
 }
+
 
 a.enrollment$calc_location_county_flag <- NA
 for(i in unique(a.enrollment$HouseholdID)){
@@ -459,6 +519,8 @@ b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         flag_colnames(a.client))]
 
 colnames(a.enrollment)
+
+
 b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID",
@@ -468,11 +530,14 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", 
                                            "HoH_CLS_date", "livingSituation_def", 
                                            "relationshiptohoh_def", 
                                            "EntryDate", 
+                                           "calc_household_currentlivingsituation",
                                            "calc_location_county", 
+                                           "calc_region",
                                            "calc_location_county_flag",
                                            flag_colnames(a.enrollment))]
 
 colnames(a.currentlivingsituation)
+
 b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID", 
@@ -525,7 +590,8 @@ b.inventory <- a.inventory[colnames(a.inventory) %in% c(grep("_def$|_calc$", col
                                              flag_colnames(a.inventory))]
 
 
-# keep only these enrollment_ids
+# keep only these enrollment_ids----
+#what is this???
 c.enrollment             <- inner_join(b.enrollment, pit.eids)
 c.exit                   <- inner_join(b.exit, pit.eids)
 c.currentlivingsituation <- inner_join(b.currentlivingsituation, pit.eids)
@@ -587,6 +653,189 @@ output <- left_join(c.enrollment, c.client) %>%
 #   summarise(n = n()) %>%
 #   .$n %>% table()
 
+## new changes ----
+# date_in_pitweek <- function(a.date){
+#   # date stuff
+#   
+#   #  within a date range: PIT Night plus PIT week. Nicole has requested (to me) that we expand this to
+#   #  dates of 1/22/23 - 2/4/23. For this filter, 
+#   if(Sys.Date() < ymd(20230122)){
+#     pit.date <- ymd(20220126)
+#     pit.week <- ymd(20220122):ymd(20220204)
+#     pit.week <- as_date(pit.week)
+#   }else{
+#     pit.date <- ymd(20230126)
+#     pit.week <- ymd(20220123):ymd(20230204)
+#     pit.week <- as_date(pit.week)
+#   }
+#   
+#   # informationdate of cls is in pit.week
+#   return(a.date %in% pit.week)
+# }
+# 
+# hh_nmfh <- function(hhid = NULL, pid = NULL, 
+#                     df_enr = a.enrollment, 
+#                     df_cls = a.currentlivingsituation){
+#   
+# #  1. There must be a filter that narrows Andrea's output to households with
+# #  Current Living Situation = Place not mean for habitation 
+# 
+# 
+#   
+# #  if a HOH has CLS meeting these
+# #  parameters, apply it to the rest of the household.
+#   
+#   require(glue)
+#   require(dplyr)
+#   require(lubridate)
+#   
+#   # error check
+#   if(is.null(hhid) & is.null(pid)){
+#     # fails error check (1)
+#     stop("[must provide one of 'hhid' or 'pid']")
+#   }else if(!is.null(hhid) | !is.null(pid)){
+#     # passes error check - main body here
+#     # get hhid if null
+#     if(is.null(hhid)){
+#       hhid <- df_enr$HouseholdID[df_enr$PersonalID == pid]
+#     }
+#     # get hoh_personalID
+#     hoh_personalID <- df_enr$PersonalID[df_enr$HouseholdID == hhid & 
+#                                           df_enr$RelationshipToHoH == 1]
+#         # get hh_enrollmentID
+#     hh_enrollmentID <- df_enr$EnrollmentID[df_enr$HouseholdID == hhid]
+#     
+#     if(length(hoh_personalID) != 1){
+#       # if there is
+#       out <- "Flag - incorrect number of HeadOfHouseholds"
+#     }else{
+#       
+#       # handle possible multiple-record duplicates due to data changes that are not 
+#       # related to these values. 
+#       
+#       df_cls <- df_cls %>%
+#         .[.$PersonalID %in% hoh_personalID & 
+#             .$EnrollmentID %in% hh_enrollmentID,] %>%
+#         .[!duplicated(.),]
+#       
+#      # df_cls <- df_cls %>%
+#      #    .[.$PersonalID %in% hoh_personalID & 
+#      #        .$EnrollmentID %in% hh_enrollmentID,] %>%
+#      #    group_by(PersonalID, 
+#      #             EnrollmentID, 
+#      #             InformationDate, 
+#      #             CurrentLivingSituation) %>%
+#      #    summarise(n = n())
+#       
+#       # get currentlivingsituation of hoh_personalID
+#       out <- (df_cls$CurrentLivingSituation[df_cls$PersonalID == hoh_personalID] == 16) & 
+#         !is.na(df_cls$CurrentLivingSituation[df_cls$PersonalID == hoh_personalID])
+#     }
+#     
+#     
+#   }else {
+#     # fails error check (2)
+#     stop("[logic did not account for input paramter combination]")
+#   }
+#   
+#   if(length(out) == 0 ){
+#     out <- "no solution found (NA)"
+#   }
+#   
+#   if(length(out) > 1){
+#     out <- "multiple solutions found (NA)"
+#   }
+#   
+#   # return output
+#   return(out)
+# }
+# 
+# # a.pid <- sample(a.enrollment$PersonalID, size = 1)
+# # a.hhid <- sample(a.enrollment$HouseholdID, size = 1)
+# # 
+# # 
+# # # error check for hhids that return multiples in function
+# # some.hhids <- replicate(n = 200,
+# #                         sample(a.enrollment$HouseholdID,
+# #                                size = 1));x <- lapply(X = some.hhids, 
+# #                                                       FUN = hh_nmfh) %>%
+# #   lapply(X = ., FUN = length) %>% 
+# #   unlist(); any(x>1)
+# # 
+# # some.hhids[which(x>1)]
+# # 
+# # df_cls[df_cls$PersonalID == hoh_personalID,] %>%
+# #   group_by(PersonalID, EnrollmentID, InformationDate) %>%
+# #   summarise(n_rows = n())
+# 
+# check.hhid <- c("s_1147220", "h_1145388", "s_1153561", "h_1141007", "s_1147473", "s_1111647")
+# 
+# 
+# 
+# a.enrollment$tempA <- NA
+# a.enrollment$tempB <- NA
+# a.enrollment$test_cls_tim <- NA
+# 
+# #n <- 0
+# 
+# for(i in 1:nrow(a.enrollment)){
+#   # n <- n + 1
+#   # if ( n > 100){
+#   #   break
+#   # }
+#   
+#   tempa <- hh_nmfh(hhid = a.enrollment$HouseholdID[i], pid = a.enrollment$PersonalID[i], 
+#                    df_enr = a.enrollment,
+#                    df_cls = a.currentlivingsituation)
+#   
+#   tempb <- date_in_pitweek(a.date = a.currentlivingsituation$InformationDate[which(a.currentlivingsituation$PersonalID %in% 
+#                                                                                      a.enrollment$PersonalID[i])])
+#   tempa <- ifelse(length(tempa) == 0, NA, tempa)
+#   tempa <- ifelse(grepl("\\(NA\\)$|^Flag", tempa), F, tempa)
+#   tempb <- ifelse(length(tempb) == 0, NA, tempb)
+#   
+#   a.enrollment$tempA[i] <- tempa
+#   a.enrollment$tempB[i] <- tempb
+#   
+#   a.enrollment$test_cls_tim[i] <- (tempa & tempb) | (tempa & is.na(tempb))
+#   
+#   
+#   # try(a.enrollment$test_cls_tim[a.enrollment$HouseholdID == i] <- 
+#   #   as.logical(hh_nmfh(hhid = i, pid = NULL, 
+#   #           df_enr = a.enrollment,
+#   #            df_cls = a.currentlivingsituation)) & 
+#   #   date_in_pitweek(a.date = a.currentlivingsituation$InformationDate[which(a.currentlivingsituation$PersonalID %in% 
+#   #                                                                       a.enrollment$PersonalID[a.enrollment$HouseholdID %in% i])]))
+# }
+# 
+# 
+# 
+# a.enrollment %>%
+#   group_by(tempA, tempB) %>%
+#   summarise(n = n())
+# 
+# 
+# full_join(a.enrollment, 
+#           a.currentlivingsituation, 
+#           by = c("EnrollmentID", "PersonalID")) %>% 
+#   .[,c("EnrollmentID", "PersonalID", "HouseholdID", "CurrentLivingSituation", "InformationDate")] %>%
+#   group_by(NA_eid = is.na(EnrollmentID),
+#            NA_pid = is.na(PersonalID), 
+#            NA_hhid = is.na(HouseholdID),
+#            NA_infoDate = is.na(InformationDate),
+#            NA_cls = is.na(CurrentLivingSituation)) %>%
+#   summarise(total = n()) %>%
+#   ungroup() %>%
+#   mutate(., 
+#          pct_tot = scales::percent(total / sum(total)))
+# 
+# 
+# # / error
+
+
+
+
+
 
 # reorder to meet andrea's specs----
 "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
@@ -610,7 +859,8 @@ output2 <- output[,c("PersonalID",
                      "vetStatus_def", 
                      "calc_location_county", 
                      "calc_location_county_flag",
-                     "proj_county",
+                     "calc_region",
+                     #"proj_county",
                      "age_calc", 
                      "DOBDataQuality_def",
                      "hud_age_calc", 
@@ -625,7 +875,7 @@ output2 <- output[,c("PersonalID",
                      "substance_use_D", 
                      "provider_calc", 
                      "Region", 
-                     "County", "NCCounty", 
+                     #"County", "NCCounty", 
                      #"county_matches", 
                      "CH", 
                      "domesticViolenceVictim_def", 
@@ -641,6 +891,9 @@ output2 <- output[,c("PersonalID",
                      "EntryDate", 
                      flag_colnames(output))]
 
+output2 <- output2[!colnames(output2) %in% "flag.nccounty_na"]
+
+
 grep("calc", colnames(output2), value = T, ignore.case = T)
 
 
@@ -651,7 +904,9 @@ write.xlsx(x = output2,
 
 # identify data issues----
 colnames(output2) %>%
-  .[!. %in% c("age_calc", "DOBDataQuality_def", "Region",
+  .[!. %in% c("age_calc", "DOBDataQuality_def", 
+              #"Region", 
+              "calc_region",
               "hud_age_calc",
               "NCCounty", "County", "county_matches", 
               "domesticViolenceVictim_def", 
@@ -717,12 +972,13 @@ colnames(output) %>%
 
 output3 <- output2 %>%
   group_by(client_id = PersonalID, 
-           EnrollmentID,
+           EnrollmentID, # THIS NEEDS TO BE REMOVED
            ProjectName,
            EntryDate,
-           calc_location_county_flag,
+           #calc_location_county_flag,
            calc_location_county,
-           proj_county,
+           calc_region,
+           #proj_county,
            issue_dv.victim_vs_dv.fleeing,
            # issue_region, 
            # issue_nccounty, 
@@ -732,7 +988,7 @@ output3 <- output2 %>%
            #Region,
            #County, 
            #NCCounty,
-           flag.nccounty_na, 
+           #flag.nccounty_na, 
            flag.reltohoh_na, 
            flag.child_hoh, 
            flag.age_too_old, 
@@ -748,7 +1004,7 @@ output3 <- output2 %>%
   #           by = c("County" )) %>%
   as.data.table() %>%
   melt(., 
-        id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate") , 
+        id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region") , 
        variable.name = "DQ_flag_type") %>%
   as.data.frame() %>%
   as_tibble() %>%
@@ -758,7 +1014,11 @@ output3 <- output2 %>%
 
 output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
 
-output[output$PersonalID == 2664,]$Region
+# narrow donw to just 1 field with a county in it
+grep("county", colnames(output3), value = T, ignore.case = T)
+
+output3 <- output3[!colnames(output3) %in% c("proj_county")]
+#output[output$PersonalID == 2664,]$Region
 
 
 # change names----
@@ -777,6 +1037,8 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.DOB_na",
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race", 
        "missing race", output3$DQ_flag_type)
 
+colnames(output3)
+
 output3 <- left_join(output3, a.enrollment[,c("EnrollmentID", "NCCounty")]) %>%
   left_join(., 
             a.project[,c("ProjectName", "ProjectID")]) %>%
@@ -784,10 +1046,23 @@ output3 <- left_join(output3, a.enrollment[,c("EnrollmentID", "NCCounty")]) %>%
             a.projectcoc[,c("ProjectID", "County")]) %>%
   left_join(., 
             read_csv("regionscrosswalk.csv")) %>%
-  .[!colnames(.) %in% c("ProjectID")]
+  .[!colnames(.) %in% c("ProjectID")] %>% colnames()
 
 
-colnames(output3)[colnames(output3) == "County"] <- "project_county"
+colnames(output3)
+
+output3 <- output3[!colnames(output3) %in% c("County", "NCCounty", "Region")]
+
+#colnames(output3)[colnames(output3) == "County"] <- "project_county"
+
+
+# nicole changes----
+# remove enrolllmentID
+output3 <- output3[!colnames(output3) %in% c("EnrollmentID")]
+
+
+
+
 
 # write to file----
 getwd()
