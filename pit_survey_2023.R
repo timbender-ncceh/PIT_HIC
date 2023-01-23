@@ -1039,19 +1039,19 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race",
 
 colnames(output3)
 
-output3 <- left_join(output3, a.enrollment[,c("EnrollmentID", "NCCounty")]) %>%
-  left_join(., 
-            a.project[,c("ProjectName", "ProjectID")]) %>%
-  left_join(., 
-            a.projectcoc[,c("ProjectID", "County")]) %>%
-  left_join(., 
-            read_csv("regionscrosswalk.csv")) %>%
-  .[!colnames(.) %in% c("ProjectID")] %>% colnames()
-
-
-colnames(output3)
-
-output3 <- output3[!colnames(output3) %in% c("County", "NCCounty", "Region")]
+# output3 <- left_join(output3, a.enrollment[,c("EnrollmentID", "NCCounty")]) %>%
+#   left_join(., 
+#             a.project[,c("ProjectName", "ProjectID")]) %>%
+#   left_join(., 
+#             a.projectcoc[,c("ProjectID", "County")]) %>%
+#   left_join(., 
+#             read_csv("regionscrosswalk.csv")) %>%
+#   .[!colnames(.) %in% c("ProjectID")] %>% colnames()
+# 
+# 
+# colnames(output3)
+# 
+# output3 <- output3[!colnames(output3) %in% c("County", "NCCounty", "Region")]
 
 #colnames(output3)[colnames(output3) == "County"] <- "project_county"
 
@@ -1079,6 +1079,7 @@ write.xlsx(x = output3,
            file = out.name)
 
 
+library(readxl)
 read_xlsx(list.files(pattern = "^andrea_output2023-01-19")) %>%
   colnames() %>%
   grepl(pattern = "calc", x = ., 
