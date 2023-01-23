@@ -3,8 +3,8 @@
 get.calc_location_county <- function(housingtype, proj.address.county, 
                                      nccounty){
   return(ifelse(test = housingtype %in% c(1,2) & !is.na(housingtype), 
-         yes  = proj.address.county, 
-         no   = nccounty))
+                yes  = proj.address.county, 
+                no   = nccounty))
 }
 
 get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036), 
@@ -122,6 +122,27 @@ get.calc_region <- function(calc_location_county){
   }
   
   return(out1)
+}
+
+
+search_region.names <- function(projname){
+  print(projname)
+  if(length(projname) == 1){
+    out <- strsplit(projname, split = " - | -|- ")
+    out <- unlist(out)[grepl("Region", x = unlist(out), ignore.case = F)]
+    #out <- strsplit(out, " ")
+    #out <- unlist(out[unlist(lapply(X = out, FUN = length)) == 2]) %>% 
+    #  paste(., sep = " ", collapse = " ") #%>%
+    # #gsub(pattern = " County", "", .)
+  }else{
+    out <- NA
+  }
+  
+  if(!grepl("Region", x = out)){
+    out <- NA
+  }
+  
+  return(out)
 }
 
 search_county.names <- function(projname){
@@ -308,7 +329,7 @@ fun_race <- function(racenone=c(8,9,99,NA),
   if(racenone %in% c(8,9)){
     out <- ifelse(racenone == 8, "Client doesn't know", "Client refused")
   }else if((amindaknative + asian + blackafamerican + 
-           nativehipacific + white) > 1 ){
+            nativehipacific + white) > 1 ){
     out <- "Multiple Races"
   }else if(amindaknative == 1){
     out <- "American Indian, Alaska Native, or Indigenous"
