@@ -371,14 +371,14 @@ fun_gender <- function(male = c(0,1),
   }else if(female == 1){
     out <- "Female"
   }else {
-    out <- "[unknown]"
+    out <- NA#"[unknown]"
   }
   
   if((gendernone == c(99) | is.na(gendernone)) & out == "GenderNone"){
     out <- NA
   }
   
-  if(out == "[unknown]"){
+  if(out == "[unknown]" & !is.na(out)){
     out <- NA
   }
   
