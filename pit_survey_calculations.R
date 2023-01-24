@@ -405,21 +405,22 @@ fun_1.8_def <- function(x){
   return(out)
 }
 
+
 fun_ethnicity_def <- function(x){
-  if(x == 0){
+  if(x  == 0 & !is.na(x)){
     out <- "Non-Hispanic/Non-Latin(a)(o)(x)"
-  }else if(x == 1){
+  }else if(x == 1 & !is.na(x) ){
     out <- "Hispanic/Latin(a)(o)(x)"
-  }else if(x == 8){
+  }else if(x  == 8 & !is.na(x) ){
     out <- "Client doesn’t know"
-  }else if(x == 9){
+  }else if(x  == 9 & !is.na(x) ){
     out <- "Client refused"
-  }else if(x == 99){
-    out <- "Data not collected"
+  }else if(x == 99 & !is.na(x) ){
+    out <- NA#"Data not collected"
   }else if(is.na(x)){
-    out <- "Data not collected"
+    out <- NA#"Data not collected"
   }else {
-    out <- "[undetermined]"
+    out <- NA
   }
   return(out)
 }
