@@ -53,6 +53,10 @@ get.calc_location_county <- function(housingtype, proj.address.county,
                 no   = nccounty))
 }
 
+get.calc_location_county(housingtype = 1, 
+                         proj.address.county = NA, 
+                         nccounty = "Rowan")
+
 get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036), 
                             proj_city = c("Durham", "Raleigh", "Fountain", "Lebanon")){
   require(readr)
@@ -171,11 +175,17 @@ get.calc_region <- function(calc_location_county){
 }
 
 
-search_region.names <- function(projname){
-  print(projname)
-  if(length(projname) == 1){
-    out <- strsplit(projname, split = " - | -|- ")
+search_region.names <- function(projname = "Greenville Community Shelters - (Region 1) Pitt County - Emergency Shelter - ES - State ESG CV"){
+  #print(projname)
+  out <- gsub(pattern = "Region {1,}", "Region_", projname)
+  out <- strsplit(out, " ") %>% unlist()
+  out <- out[grepl(pattern = "Region_", x = out)] %>% unique()
+  
+  if(length(out) == 1){
+    out <- strsplit(out, split = " ")
     out <- unlist(out)[grepl("Region", x = unlist(out), ignore.case = F)]
+    out <- gsub("_", " ", out)
+    out <- gsub("\\(|\\)", "", out)
     #out <- strsplit(out, " ")
     #out <- unlist(out[unlist(lapply(X = out, FUN = length)) == 2]) %>% 
     #  paste(., sep = " ", collapse = " ") #%>%
