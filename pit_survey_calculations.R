@@ -344,7 +344,7 @@ fun_race <- function(racenone=c(8,9,99,NA),
   }else if(white == 1){
     out <- "White"
   }else{
-    out <- "[unknown]"
+    out <- NA
   }
   return(out)
 }
