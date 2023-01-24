@@ -208,6 +208,7 @@ a.enrollment <- read_csv("Enrollment.csv")
 a.enrollment$flag.nccounty_na <- is.na(a.enrollment$NCCounty)
 
 
+
 # FLAG - relationshiphoh----
 #a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$RelationshipToHoH) | a.enrollment$RelationshipToHoH == 99
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
@@ -599,7 +600,8 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", 
 
 colnames(a.currentlivingsituation)
 
-b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
+b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% 
+                                                        c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID", 
                                            "HouseholdID", "HoH_PersonalID", 
@@ -921,7 +923,7 @@ output2 <- output[,c("PersonalID",
                      "calc_location_county", 
                      "calc_location_county_flag",
                      "calc_region",
-                     #"proj_county",
+                     "proj_county",
                      "age_calc", 
                      "DOBDataQuality_def",
                      "hud_age_calc", 
@@ -936,7 +938,8 @@ output2 <- output[,c("PersonalID",
                      "substance_use_D", 
                      "provider_calc", 
                      "Region", 
-                     #"County", "NCCounty", 
+                     #"County", 
+                     "NCCounty", 
                      #"county_matches", 
                      "CH", 
                      "domesticViolenceVictim_def", 
@@ -952,7 +955,7 @@ output2 <- output[,c("PersonalID",
                      "EntryDate", 
                      flag_colnames(output))]
 
-output2 <- output2[!colnames(output2) %in% c("flag.nccounty_na", "Region")]
+output2 <- output2[!colnames(output2) %in% c("Region")]
 
 
 grep("calc", colnames(output2), value = T, ignore.case = T)
@@ -1050,7 +1053,7 @@ output3 <- output2 %>%
            #Region,
            #County, 
            #NCCounty,
-           #flag.nccounty_na, 
+           flag.nccounty_na, 
            flag.reltohoh_na, 
            flag.child_hoh, 
            flag.age_too_old, 
