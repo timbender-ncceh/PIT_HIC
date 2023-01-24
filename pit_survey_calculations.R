@@ -202,7 +202,7 @@ search_region.names <- function(projname = "Greenville Community Shelters - (Reg
 }
 
 search_county.names <- function(projname){
-  print(projname)
+  #print(projname)
   if(length(projname) == 1){
     out <- strsplit(projname, split = " - | -|- ")
     out <- unlist(out)[grepl("County$", x = unlist(out), ignore.case = F)]
