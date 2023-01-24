@@ -1,5 +1,8 @@
 
 # formulas developed in "nccounty_logic.R"
+flag_colnames <- function(x){
+  grep("^flag", colnames(x), ignore.case = T, value = T)
+}
 is_household_CLS_nmfhh <- function(pid, eid, 
                                    df_enr = a.enrollment, 
                                    df_cls = a.currentlivingsituation){
