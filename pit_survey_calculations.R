@@ -388,7 +388,7 @@ fun_gender <- function(male = c(0,1),
 
 fun_1.8_def <- function(x){
   if(is.na(x)){
-    out <- "Data not collected"
+    out <- NA#"Data not collected"
   }else if(x == 1){
     out <- "Yes"
   }else if(x == 8){
@@ -396,11 +396,11 @@ fun_1.8_def <- function(x){
   }else if(x == 9){
     out <- "Client refused"
   }else if(x == 99){
-    out <- "Data not collected"
+    out <- NA #"Data not collected"
   }else if(x == 0){
     out <- "No"
   }else{
-    out <- "[undetermined]"
+    out <- NA#"[undetermined]"
   }
   return(out)
 }
