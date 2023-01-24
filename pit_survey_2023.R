@@ -149,6 +149,10 @@ a.client$age_calc     <- calc_age(dob = a.client$DOB)
 a.client$flag.age_too_old <- a.client$age_calc >= 80
 a.client$flag.DOB_na <- is.na(a.client$DOB) | is.na(a.client$DOBDataQuality)
 
+# a.client[a.client$PersonalID %in% c(1028147,1021469),c("flag.age_too_old", "flag.DOB_na", "PersonalID", 
+#                                                        "DOBDataQuality", "DOBDataQuality_def", "DOB")]
+
+
 
 a.client$hud_age_calc <- NA
 for(i in 1:nrow(a.client)){
@@ -167,7 +171,7 @@ for(i in 1:nrow(a.client)){
 }
 
 # FLAG - gender----
-a.client$flag.gender <- a.client$gender_calc == "[unknown]"
+a.client$flag.gender <- a.client$gender_calc == "[unknown]" | is.na(a.client$gender_calc)
 
 
 a.client$race_calc    <- NA
@@ -182,7 +186,9 @@ for(i in 1:nrow(a.client)){
 }
 
 # FLAG - race----
-a.client$flag.race <-  a.client$race_calc == "[unknown]"
+a.client$flag.race <-  a.client$race_calc == "[unknown]" | is.na(a.client$race_calc)
+table(a.client$flag.race, useNA = "always")
+
 
 a.client$ethnicity_def <- unlist(lapply(a.client$Ethnicity, fun_ethnicity_def))
 # FLAG - ethnicity----
@@ -1054,10 +1060,18 @@ output3 <- output2 %>%
   melt(., 
         id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region") , 
        variable.name = "DQ_flag_type") %>%
+  #.$calc_location_county %>% is.na() %>% table()
   as.data.frame() %>%
   as_tibble() %>%
   .[.$value == T,] %>%
   .[!colnames(.) %in% c("value")]
+
+# left_join(output3[!colnames(output3) %in% c("calc_location_county", "calc_region")],
+# output2[,c("EnrollmentID", "PersonalID", "calc_location_county", "calc_region")],
+# by = c("client_id" = "PersonalID", "EnrollmentID")) %>%
+#   group_by(na_co = is.na(calc_location_county), 
+#            na_reg = is.na(calc_region)) %>%
+#   summarise(n = n())
 
 
 output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
@@ -1103,10 +1117,20 @@ colnames(output3)
 
 #colnames(output3)[colnames(output3) == "County"] <- "project_county"
 
+# spot check nicole to andrea
+spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
+spot.check2 <- output2 %>%
+  .[.$EnrollmentID %in% spot.check3$EnrollmentID & 
+      .$PersonalID %in% spot.check3$client_id,] %>% 
+  group_by(EnrollmentID, 
+           PersonalID, calc_location_county, 
+           calc_region) %>%
+  summarise(n = n())
 
 # nicole changes----
 # remove enrolllmentID
 output3 <- output3[!colnames(output3) %in% c("EnrollmentID")]
+
 
 
 
