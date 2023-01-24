@@ -1,5 +1,51 @@
 
 # formulas developed in "nccounty_logic.R"
+is_household_CLS_nmfhh <- function(pid, eid, 
+                                   df_enr = a.enrollment, 
+                                   df_cls = a.currentlivingsituation){
+  
+  hhid <- df_enr$HouseholdID[df_enr$PersonalID == pid & 
+                               df_enr$EnrollmentID == eid] %>%
+    unique()
+  # is pid the hoh?
+  pid_is_hoh <- unique(df_enr$reltionshiptohoh_def[df_enr$PersonalID == pid & 
+                                                     df_enr$EnrollmentID == eid]) == 
+    "Self (head of household)"
+  
+  # if pid IS the HoH
+  if(pid_is_hoh){
+    # do this
+    pid_cls <- left_join(df_enr[,c("PersonalID", "EnrollmentID", "HouseholdID")], 
+                         df_cls[,c("PersonalID", "EnrollmentID", 
+                                   "CurrentLivingSituation")]) %>%
+      .[.$PersonalID == pid & 
+          .$EnrollmentID == eid,] %>%
+      .$CurrentLivingSituation %>% unique()
+    
+    hh_cls <- pid_cls
+  }else{
+    # do that
+    hoh_pid_cls <- left_join(df_enr[,c("PersonalID", "EnrollmentID", "HouseholdID")], 
+                             df_cls[,c("PersonalID", "EnrollmentID", 
+                                       "CurrentLivingSituation")]) %>%
+      .[.$HouseholdID == hhid & 
+          .$EnrollmentID == eid,] %>%
+      .$CurrentLivingSituation %>% unique()
+    hh_cls <- hoh_pid_cls
+  }
+  
+  out <- NA
+  if(length(hh_cls) != 1){
+    if(length(hh_cls) == 0){ out <- "no cls records found"}
+    if(length(hh_cls) > 1){ out <- "multiple cls records found"}
+  }else{
+    if(length(hh_cls) == 1 & hh_cls == 16 & !is.na(hh_cls)){ out <- "Place Not Meant for Human Habitation"}
+    if(length(hh_cls) == 1 & hh_cls != 16 & !is.na(hh_cls)){ out <- "other than NMFHH"}
+  }
+  return(out)
+}
+
+
 get.calc_location_county <- function(housingtype, proj.address.county, 
                                      nccounty){
   return(ifelse(test = housingtype %in% c(1,2) & !is.na(housingtype), 
