@@ -241,35 +241,7 @@ for(i in unique(a.enrollment$HouseholdID)){
   
   try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- enr.hoh_pid)
   
-  # #HoH_CLS
-  # enr.hoh_cls <- NA
-  # 
-  # 
-  # # try(enr.hoh_cls <- a.enrollment[a.enrollment$HouseholdID == i & 
-  # #                                   a.enrollment$reltionshiptohoh_def == "Self (head of household)",]$LivingSituation)
-  # 
-  # try(enr.hoh_cls <- a.currentlivingsituation$CurrentLivingSituation[a.currentlivingsituation$PersonalID == enr.hoh_pid])
-  # 
-  # if(length(enr.hoh_cls) != 1){
-  #   enr.hoh_cls <- NA
-  # }
-  # 
-  # #try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- fun_livingsituation_def(enr.hoh_cls))
-  # 
-  # #HoH_CLS_date
-  # enr.hoh_cls_date <- NA
-  # 
-  # # try(enr.hoh_cls_date <- a.enrollment[a.enrollment$HouseholdID == i & 
-  # #                                   a.enrollment$reltionshiptohoh_def == "Self (head of household)",]$PersonalID)
-  # 
-  # try(enr.hoh_cls_date <- a.currentlivingsituation$currentLivingSituation.Date_calc[a.currentlivingsituation$PersonalID == enr.hoh_pid])
-  # 
-  # if(length(enr.hoh_cls_date) != 1){
-  #   enr.hoh_cls_date <- NA
-  # }
-  # 
-  # try(a.enrollment$HoH_PersonalID[a.enrollment$HouseholdID == i] <- (enr.hoh_cls_date))
-  # 
+  
   
 }
 
@@ -311,8 +283,6 @@ full_join(a.projectcoc2,a.enrollment2, by = "ProjectID") %>%
 #             by = c("NCCounty" = "County"))
 
 rm(zip_co.cw)
-
-
 
 
 # living situation
@@ -373,52 +343,22 @@ a.enrollment <- left_join(a.enrollment,
 
 colnames(a.enrollment)
 
+# # test
+# test.hhid <- "s_1146500"
+# test.pid  <- 128731
+# test.eid <- a.enrollment$EnrollmentID[a.enrollment$HouseholdID == test.hhid]
+# 
+# 
+# 
+# is_household_CLS_nmfhh(pid = test.pid, 
+#                        eid = test.eid, 
+#                        df_enr = a.enrollment, 
+#                        df_cls = a.currentlivingsituation)
+# # /test
 
-is_household_CLS_nmfhh <- function(pid, eid, 
-                                   df_enr = a.enrollment, 
-                                   df_cls = a.currentlivingsituation){
-  
-  hhid <- df_enr$HouseholdID[df_enr$PersonalID == pid & 
-                               df_enr$EnrollmentID == eid] %>%
-    unique()
-  # is pid the hoh?
-  pid_is_hoh <- unique(df_enr$reltionshiptohoh_def[df_enr$PersonalID == pid & 
-                                                     df_enr$EnrollmentID == eid]) == 
-    "Self (head of household)"
-  
-  # if pid IS the HoH
-  if(pid_is_hoh){
-    # do this
-    pid_cls <- left_join(df_enr[,c("PersonalID", "EnrollmentID", "HouseholdID")], 
-                         df_cls[,c("PersonalID", "EnrollmentID", 
-                                   "CurrentLivingSituation")]) %>%
-      .[.$PersonalID == pid & 
-          .$EnrollmentID == eid,] %>%
-      .$CurrentLivingSituation %>% unique()
-    
-    hh_cls <- pid_cls
-  }else{
-    # do that
-    hoh_pid_cls <- left_join(df_enr[,c("PersonalID", "EnrollmentID", "HouseholdID")], 
-                             df_cls[,c("PersonalID", "EnrollmentID", 
-                                       "CurrentLivingSituation")]) %>%
-      .[.$HouseholdID == hhid & 
-          .$EnrollmentID == eid,] %>%
-      .$CurrentLivingSituation %>% unique()
-    hh_cls <- hoh_pid_cls
-  }
-  
-  out <- NA
-  if(length(hh_cls) != 1){
-    if(length(hh_cls) == 0){ out <- "no cls records found"}
-    if(length(hh_cls) > 1){ out <- "multiple cls records found"}
-  }else{
-    if(length(hh_cls) == 1 & hh_cls == 16 & !is.na(hh_cls)){ out <- "Place Not Meant for Human Habitation"}
-    if(length(hh_cls) == 1 & hh_cls != 16 & !is.na(hh_cls)){ out <- "other than NMFHH"}
-  }
-  return(out)
-}
 
+
+# 20 minute logic below vvv----
 a.enrollment$calc_household_currentlivingsituation <- NA
 for(i in 1:nrow(a.enrollment)){
   #if(i > 1000){break}
@@ -446,6 +386,28 @@ a.projectcoc$proj_county <- get.proj_county(proj_zip = a.projectcoc$ZIP,
 a.enrollment$calc_location_county <- NA
 a.enrollment$calc_region <- NA
 
+# # test
+#  test.hhid <- "h_1138910"
+#  test.pid  <- 1025651
+#  test.eid <- a.enrollment$EnrollmentID[a.enrollment$HouseholdID == test.hhid]
+# # /test
+#  
+# i <- which(a.enrollment$PersonalID == test.pid & 
+#         a.enrollment$EnrollmentID == test.eid)[1]
+
+
+
+
+#i <- sample(1:nrow(a.enrollment), size = 1)
+
+# a.enrollment$calc_region %>% table(., useNA = "always")
+# 
+# left_join(a.enrollment[is.na(a.enrollment$calc_location_county),c("calc_location_county", "calc_region", "PersonalID", "ProjectID", "EnrollmentID")], 
+#           a.project[,c("ProjectID", "ProjectName")]) %>%
+#   .[!is.na(.$calc_region),]
+# 
+# a.enrollment[i,c("PersonalID", "EnrollmentID")]
+ 
 for(i in 1:nrow(a.enrollment)){
   
   if(length(unique(a.project$HousingType[a.project$ProjectID == a.enrollment$ProjectID[i]])) > 1){
@@ -491,6 +453,8 @@ for(i in 1:nrow(a.enrollment)){
   
   
 }
+
+
 
 a.enrollment %>%
   group_by(NA_clc = is.na(calc_location_county), 
