@@ -330,45 +330,131 @@ a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentli
                                                                      fun_livingsituation_def))
 a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsituation$InformationDate
 
-latest.cls <- a.currentlivingsituation %>%
-  group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID, 
-           currentLivingSituation_def) %>%
-  summarise() %>%
-  group_by(EnrollmentID, HoH_PersonalID = PersonalID, 
-           HoH_currentLivingSituation_def = currentLivingSituation_def) %>%
-  slice_max(., order_by = HoH_CLS_date, n = 1)
 
-a.enrollment <- left_join(a.enrollment, 
-          latest.cls, by = c("EnrollmentID", "PersonalID" = "HoH_PersonalID" ))
+# latest.cls <- a.currentlivingsituation %>%
+#   group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID, 
+#            currentLivingSituation_def) %>%
+#   summarise() %>%
+#   group_by(EnrollmentID, HoH_PersonalID = PersonalID, 
+#            HoH_currentLivingSituation_def = currentLivingSituation_def) %>%
+#   slice_max(., order_by = HoH_CLS_date, n = 1)
+# 
+# a.enrollment <- left_join(a.enrollment, 
+#           latest.cls, by = c("EnrollmentID", "PersonalID" = "HoH_PersonalID" ))
+# 
+# colnames(a.enrollment)
 
-colnames(a.enrollment)
-
-# # test
-# test.hhid <- "s_1146500"
-# test.pid  <- 128731
-# test.eid <- a.enrollment$EnrollmentID[a.enrollment$HouseholdID == test.hhid]
+# # # test
+# # test.hhid <- "s_1146500"
+# # test.pid  <- 128731
+# # test.eid <- a.enrollment$EnrollmentID[a.enrollment$HouseholdID == test.hhid]
+# # 
+# # 
+# # 
+# # is_household_CLS_nmfhh(pid = test.pid, 
+# #                        eid = test.eid, 
+# #                        df_enr = a.enrollment, 
+# #                        df_cls = a.currentlivingsituation)
+# # # /test
 # 
 # 
 # 
-# is_household_CLS_nmfhh(pid = test.pid, 
-#                        eid = test.eid, 
-#                        df_enr = a.enrollment, 
-#                        df_cls = a.currentlivingsituation)
-# # /test
+# # 20 minute logic below vvv----
+# a.enrollment$calc_household_currentlivingsituation <- NA
+# for(i in 1:nrow(a.enrollment)){
+#   #if(i > 1000){break}
+#   a.enrollment$calc_household_currentlivingsituation[i] <- 
+#     is_household_CLS_nmfhh(pid = a.enrollment$PersonalID[i], 
+#                                    eid = a.enrollment$EnrollmentID[i],
+#                                    df_enr = a.enrollment, 
+#                                    df_cls = a.currentlivingsituation) 
+# }
 
+temp.hh.cls.info <- left_join(a.enrollment[,c("PersonalID", 
+                                              "EnrollmentID", 
+                                              "HouseholdID", 
+                                              "RelationshipToHoH")],
+                              a.currentlivingsituation[,c("EnrollmentID", 
+                                                          "PersonalID", 
+                                                          "InformationDate", 
+                                                          "CurrentLivingSituation")]) %>%
+  .[.$RelationshipToHoH == 1,
+    c("HouseholdID","EnrollmentID", "PersonalID",
+      "InformationDate", "CurrentLivingSituation")]
 
+colnames(temp.hh.cls.info)[3] <- "HoH_PersonalID_cls"
 
-# 20 minute logic below vvv----
-a.enrollment$calc_household_currentlivingsituation <- NA
-for(i in 1:nrow(a.enrollment)){
-  #if(i > 1000){break}
-  a.enrollment$calc_household_currentlivingsituation[i] <- 
-    is_household_CLS_nmfhh(pid = a.enrollment$PersonalID[i], 
-                                   eid = a.enrollment$EnrollmentID[i],
-                                   df_enr = a.enrollment, 
-                                   df_cls = a.currentlivingsituation) 
+temp.hh.cls.info <- left_join(a.enrollment, 
+                              temp.hh.cls.info, by = "EnrollmentID", "HouseholdID")
+
+temp.hh.cls.info$calc_household_currentlivingsituation <- NA
+
+for(i in 1:nrow(temp.hh.cls.info)){
+  if(!is.na(temp.hh.cls.info$CurrentLivingSituation[i])){
+    temp.hh.cls.info$calc_household_currentlivingsituation[i] <- is_household_CLS_nmfhh(pid = temp.hh.cls.info$PersonalID[i], 
+                                                                                        eid = temp.hh.cls.info$EnrollmentID[i],
+                                                                                        df_enr = a.enrollment, 
+                                                                                        df_cls = a.currentlivingsituation) 
+  }
 }
 
+# rename and drop columns
+# temp.hh.cls.info <- temp.hh.cls.info[!colnames(temp.hh.cls.info) %in% 
+#                                        c("PersonalID")]
+
+# colnames(temp.hh.cls.info)[colnames(temp.hh.cls.info) %in%
+#                              c("PersonalID")] <- "HoH_PersonalID"
+colnames(temp.hh.cls.info)[colnames(temp.hh.cls.info) %in%
+                             c("InformationDate")] <- "calc_CLS_date"
+colnames(temp.hh.cls.info)[colnames(temp.hh.cls.info) %in%
+                             c("CurrentLivingSituation")] <- "hh_CurrentLivingSituation"
+
+
+# join to a.enrollment
+
+# a.enrollment <- left_join(a.enrollment, 
+#           temp.hh.cls.info)
+
+a.enrollment <- temp.hh.cls.info
+
+#a.enrollment$hh_CurrentLivingSituation %>% table(., useNA = "always")
+
+a.enrollment[a.enrollment$HouseholdID == "h_1153894" & 
+               !is.na(a.enrollment$HouseholdID),
+             c("HouseholdID",
+               "PersonalID",
+               "RelationshipToHoH",
+               "hh_CurrentLivingSituation", 
+               #"HoH_CLS_date", 
+               "calc_CLS_date", 
+               "calc_household_currentlivingsituation")]
+
+
+possible.hhids <- a.enrollment %>%
+  group_by(HouseholdID) %>%
+  summarise(n_ppl = n_distinct(PersonalID), 
+            n_hoh = sum(RelationshipToHoH == 1)) %>%
+  .[.$n_ppl > 1 & 
+      .$n_hoh == 1,] %>%
+  .$HouseholdID
+
+
+# a.enrollment[a.enrollment$HouseholdID %in% possible.hhids & 
+#                !is.na(a.enrollment$HouseholdID),
+#              c("HouseholdID",
+#                "PersonalID",
+#                "RelationshipToHoH",
+#                "hh_CurrentLivingSituation", 
+#                #"HoH_CLS_date", 
+#                "calc_CLS_date", 
+#                "calc_household_currentlivingsituation")] %>%
+#   group_by(NA_cls = is.na(hh_CurrentLivingSituation), 
+#            NA_clsdate = is.na(calc_CLS_date), 
+#            NA_hhcls = is.na(calc_household_currentlivingsituation)) %>%
+#   summarise(n=n())
+
+# remove temp file
+rm(temp.hh.cls.info)
 
 
 # Project Checks----
@@ -456,11 +542,11 @@ for(i in 1:nrow(a.enrollment)){
 
 
 
-a.enrollment %>%
-  group_by(NA_clc = is.na(calc_location_county), 
-           na_reg = is.na(calc_region)) %>%
-  #group_by(calc_location_county, calc_region) %>%
-  summarise(n = n())
+# a.enrollment %>%
+#   group_by(NA_clc = is.na(calc_location_county), 
+#            na_reg = is.na(calc_region)) %>%
+#   #group_by(calc_location_county, calc_region) %>%
+#   summarise(n = n())
 
 # a.enrollment <- left_join(a.enrollment, 
 #           read_csv("https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/regionscrosswalk.csv"),
@@ -882,7 +968,7 @@ grep("county|calc", colnames(output), value = T, ignore.case = T)
 
 output2 <- output[,c("PersonalID", 
                      "reltionshiptohoh_def", 
-                     "HouseholdID", 
+                     #"HouseholdID", 
                      "vetStatus_def", 
                      "calc_location_county", 
                      "calc_location_county_flag",
@@ -911,9 +997,9 @@ output2 <- output[,c("PersonalID",
                      "householdType_def", 
                      "youth_type_hh", "veteran_type_hh", 
                      "livingSituation_def",
-                     'HoH_CLS_date',
+                     #'HoH_CLS_date',
                      "HoH_PersonalID", 
-                     "HoH_currentLivingSituation_def", 
+                     #"HoH_currentLivingSituation_def", 
                      "EnrollmentID", 
                      "ProjectName", 
                      "EntryDate", 
