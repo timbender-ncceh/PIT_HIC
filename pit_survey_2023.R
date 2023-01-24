@@ -192,11 +192,13 @@ table(a.client$flag.race, useNA = "always")
 
 a.client$ethnicity_def <- unlist(lapply(a.client$Ethnicity, fun_ethnicity_def))
 # FLAG - ethnicity----
-a.client$flag.ethnicity <- a.client$ethnicity_def == "[undetermined]"
+a.client$flag.ethnicity <- a.client$ethnicity_def == "[undetermined]" | is.na(a.client$ethnicity_def)
+
 
 a.client$vetStatus_def <- unlist(lapply(a.client$VeteranStatus, fun_1.8_def))
 # FLAG - veteran status----
-a.client$flag.vetstatus <- a.client$vetStatus_def == "[undetermined]"
+a.client$flag.vetstatus <- a.client$vetStatus_def == "[undetermined]" | is.na(a.client$vetStatus_def)
+
 
 # Enrollment Checks----
 a.enrollment <- read_csv("Enrollment.csv")
@@ -204,11 +206,13 @@ a.enrollment <- read_csv("Enrollment.csv")
 
 # FLAG - nccounty----
 a.enrollment$flag.nccounty_na <- is.na(a.enrollment$NCCounty)
+
+
 # FLAG - relationshiphoh----
-a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$RelationshipToHoH)
-
-
+#a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$RelationshipToHoH) | a.enrollment$RelationshipToHoH == 99
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
+a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$reltionshiptohoh_def)
+
 
 # FLAG - child HOH----
 flag.child.hoh <- left_join(a.enrollment[,c("PersonalID", "EnrollmentID", "reltionshiptohoh_def")], 
@@ -556,6 +560,10 @@ a.healthanddv$currentlyFleeingDV_def <- unlist(lapply(a.healthanddv$CurrentlyFle
 a.healthanddv$flag_dv <- is.na(a.healthanddv$domesticViolenceVictim_def) | 
   is.na(a.healthanddv$currentlyFleeingDV_def)
 
+# a.healthanddv[a.healthanddv$PersonalID %in% c(1019681), 
+#               c("domesticViolenceVictim_def", 
+#                 "currentlyFleeingDV_def", 
+#                 "flag_dv", "InformationDate")]
 
 # Inventory check----
 a.inventory <- read_csv("Inventory.csv")
