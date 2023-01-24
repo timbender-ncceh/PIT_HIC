@@ -173,17 +173,19 @@ search_county.names <- function(projname){
 
 
 fun_dob_dataqual <- function(x){
-  out <- data.frame(x_in = c(1,2,8,9,99), 
-                    x_txt = c("Full DOB reported", 
-                              "Approximate or partial DOB reported", 
-                              "Client doesn't know", 
-                              "Client refused", 
-                              "Data not collected"))
-  out1 <- out[out$x_in == x,]$x_txt
-  if(any(is.na(out1)) | length(out1) == 0){
-    out1 <- "[undetermined]"
+  # updated 1/24/23
+  if(is.na(x)){
+    out1 <- NA
+  }else{
+    out <- data.frame(x_in = c(1,2,8,9,99), 
+                      x_txt = c("Full DOB reported", 
+                                "Approximate or partial DOB reported", 
+                                "Client doesn't know", 
+                                "Client refused", 
+                                NA#"Data not collected"
+                      ))
+    out1 <- out[out$x_in == x & !is.na(out$x_in),]$x_txt
   }
-  
   return(out1)
 }
 
@@ -704,6 +706,7 @@ screened_positive_disability <- function(dis_df = c.disabilities,
 # }
 
 calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
+  # correct as of #1/24/23
   require(lubridate)
   require(dplyr)
   
@@ -727,6 +730,8 @@ calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
   }
   return(out)
 }
+
+
 
 hud_age_category <- function(age_yrs, 
                              breaks_upper = c(17,24,34,44,54,64,126)){
