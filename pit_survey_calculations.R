@@ -350,7 +350,6 @@ fun_race <- function(racenone=c(8,9,99,NA),
 }
 
 
-
 fun_gender <- function(male = c(0,1),
                        female = c(0,1),
                        nosingle = c(0,1),
@@ -374,8 +373,18 @@ fun_gender <- function(male = c(0,1),
   }else {
     out <- "[unknown]"
   }
+  
+  if((gendernone == c(99) | is.na(gendernone)) & out == "GenderNone"){
+    out <- NA
+  }
+  
+  if(out == "[unknown]"){
+    out <- NA
+  }
+  
   return(out)
 }
+
 
 fun_1.8_def <- function(x){
   if(is.na(x)){
