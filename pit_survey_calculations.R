@@ -303,7 +303,7 @@ fun_hhtype <- function(x){
 
 fun_rel2hoh <- function(x){
   if(is.na(x)){
-    out <- "Data not collected"
+    out <- NA#"Data not collected"
   }else if(x == 2){
     out <- "Head of household’s Child"
   }else if(x == 3){
@@ -313,11 +313,11 @@ fun_rel2hoh <- function(x){
   }else if(x == 5){
     out <- "Other: non-relation member "
   }else if(x == 99){
-    out <- "Data not collected"
+    out <- NA#"Data not collected"
   }else if(x == 1){
     out <- "Self (head of household)"
   }else{
-    out <- "[undetermined]"
+    out <- NA#"[undetermined]"
   }
   return(out)
 }
