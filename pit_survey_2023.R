@@ -325,9 +325,6 @@ out.cls <- calc_CLS_final(a.enr = a.enrollment,
 a.enrollment <- left_join(a.enrollment, 
           out.cls)
 
-
-# 2023-01-25 NOTE: works up to this point
-
 # 2023-01-25 removed vvv [CLS]----
 # a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentlivingsituation$CurrentLivingSituation, 
 #                                                                      fun_livingsituation_def))
@@ -460,6 +457,7 @@ a.enrollment <- left_join(a.enrollment,
 # rm(temp.hh.cls.info)
 # END 2023-01-25 [CLS]
 
+
 # Project Checks----
 a.project <- read_csv("Project.csv")
 a.project$provider_calc <- a.project$ProjectName
@@ -543,8 +541,6 @@ for(i in 1:nrow(a.enrollment)){
   
 }
 
-
-
 # a.enrollment %>%
 #   group_by(NA_clc = is.na(calc_location_county), 
 #            na_reg = is.na(calc_region)) %>%
@@ -622,6 +618,9 @@ a.healthanddv$flag_dv <- is.na(a.healthanddv$domesticViolenceVictim_def) |
 # Inventory check----
 a.inventory <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
+
+
+# 2023-01-25 NOTE: works up to this point
 
 # Output files, pre-join----
 
