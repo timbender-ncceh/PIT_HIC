@@ -319,11 +319,11 @@ pit.eids <- pit.eids[!colnames(pit.eids) %in% c("EntryDate", "ExitDate")]
 a.exit$destination_def <- unlist(lapply(a.exit$Destination, fun_livingsituation_def))
 table(a.exit$destination_def, useNA = "always")
 
-# CurrentLivingSituation Checks----
+# CurrentLivingSituation Checks (this is the last thing working on tuesday night)----
 a.currentlivingsituation <- read_csv("CurrentLivingSituation.csv")
 
-a.currentlivingsituation[,c("PersonalID", "CurrentLivingSituation", 
-                            "InformationDate")] %>% colnames
+# a.currentlivingsituation[,c("PersonalID", "CurrentLivingSituation", 
+#                             "InformationDate")] %>% colnames
 
 
 a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentlivingsituation$CurrentLivingSituation, 
@@ -332,10 +332,10 @@ a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsitu
 
 
 # latest.cls <- a.currentlivingsituation %>%
-#   group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID, 
+#   group_by(EnrollmentID, HoH_CLS_date = InformationDate, PersonalID,
 #            currentLivingSituation_def) %>%
 #   summarise() %>%
-#   group_by(EnrollmentID, HoH_PersonalID = PersonalID, 
+#   group_by(EnrollmentID, HoH_PersonalID = PersonalID,
 #            HoH_currentLivingSituation_def = currentLivingSituation_def) %>%
 #   slice_max(., order_by = HoH_CLS_date, n = 1)
 # 
@@ -621,9 +621,7 @@ a.inventory <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
 
 # Output files, pre-join----
-flag_colnames <- function(x){
-  grep("^flag", colnames(x), ignore.case = T, value = T)
-}
+
 flag_colnames(a.client)
 b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         "hud_age_calc", "gender_calc", "race_calc", 
