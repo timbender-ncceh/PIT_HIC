@@ -650,6 +650,7 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in%
                                  "calc_location_county_flag",
                                  "hh_cls", "hh_cls_infodate", 
                                  "HoH_PersonalID",
+                                 "InformationDate",
                                  flag_colnames(a.enrollment))]
 
 colnames(a.currentlivingsituation)
@@ -964,11 +965,6 @@ output <- left_join(c.enrollment, c.client) %>%
 # 
 # # / error
 
-
-
-
-
-
 # reorder to meet andrea's specs----
 "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
@@ -1024,7 +1020,7 @@ output2 <- output[,c("PersonalID",
                      "EnrollmentID", 
                      "ProjectName", 
                      "EntryDate", 
-                     
+                     "InformationDate",
                      flag_colnames(output))]
 
 output2 <- output2[!colnames(output2) %in% c("Region")]
@@ -1039,12 +1035,14 @@ grep("calc", colnames(output2), value = T, ignore.case = T)
 
 
 
+
+# 2022-01-25 [cls]: trying to do some summary stuff for andrea----
 args(data.table::between)
 
 data.frame(nrow = 1:nrow(output2), 
-           ind_infodate = output2$InfoDate,
-           NA.ind_infodate = is.na(output2$InfoDate),
-           between_ind_infodate = data.table::between(x = output2$InfoDate, 
+           ind_infodate = output2$InformationDate,
+           NA.ind_infodate = is.na(output2$InformationDate),
+           between_ind_infodate = data.table::between(x = output2$InformationDate, 
                                                       lower = ymd(20220127), 
                                                       upper = ymd(20220222)),
            hh_infodate = output2$hh_cls_infodate, 
@@ -1052,8 +1050,12 @@ data.frame(nrow = 1:nrow(output2),
            between_hh_infodate = data.table::between(x = output2$hh_cls_infodate, 
                                          lower = ymd(20220127), 
                                          upper = ymd(20220222))) %>%
-  group_by(NA.hh_infodate, 
-           between) %>%
+  as_tibble() %>%
+  group_by(NA.ind_infodate,
+           between_ind_infodate#,
+           #NA.hh_infodate, 
+           #between_hh_infodate
+           ) %>%
   summarise(n=n())
 
 
