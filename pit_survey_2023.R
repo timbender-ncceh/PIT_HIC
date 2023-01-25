@@ -620,33 +620,37 @@ a.inventory <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
 
 
-# 2023-01-25 NOTE: works up to this point
-
 # Output files, pre-join----
 
 flag_colnames(a.client)
+
 b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         "hud_age_calc", "gender_calc", "race_calc", 
                         "ethnicity_def", "vetStatus_def", 
                         flag_colnames(a.client))]
 
-colnames(a.enrollment)
+colnames(a.enrollment) %>%
+  .[order(.)] %>%
+  grep(pattern = "^calc_|^hh_cls|^HoH_", 
+       ., value = T, ignore.case = F)
 
-
-b.enrollment <- a.enrollment[colnames(a.enrollment) %in% c(grep("_def$|_calc$", colnames(a.enrollment), 
-                                                ignore.case = F, value = T), 
-                                           "EnrollmentID", "PersonalID", "ProjectID",
-                                           "NCCounty",
-                                           "HouseholdID", "HoH_PersonalID", 
-                                           "HoH_currentLivingSituation_def",
-                                           "HoH_CLS_date", "livingSituation_def", 
-                                           "relationshiptohoh_def", 
-                                           "EntryDate", 
-                                           "calc_household_currentlivingsituation",
-                                           "calc_location_county", 
-                                           "calc_region",
-                                           "calc_location_county_flag",
-                                           flag_colnames(a.enrollment))]
+b.enrollment <- a.enrollment[colnames(a.enrollment) %in% 
+                               c(grep("_def$|_calc$", colnames(a.enrollment), 
+                                      ignore.case = F, value = T), 
+                                 "EnrollmentID", "PersonalID", "ProjectID",
+                                 "NCCounty",
+                                 "HouseholdID", "HoH_PersonalID", 
+                                 "HoH_currentLivingSituation_def",
+                                 "HoH_CLS_date", "livingSituation_def", 
+                                 "relationshiptohoh_def", 
+                                 "EntryDate", 
+                                 "calc_household_currentlivingsituation",
+                                 "calc_location_county", 
+                                 "calc_region",
+                                 "calc_location_county_flag",
+                                 "hh_cls", "hh_cls_infodate", 
+                                 "HoH_PersonalID",
+                                 flag_colnames(a.enrollment))]
 
 colnames(a.currentlivingsituation)
 
@@ -689,22 +693,35 @@ screened.pos.disab_df
 
 
 colnames(a.healthanddv)
-b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in% c(grep("_def$|_calc$", colnames(a.healthanddv), 
-                                    ignore.case = F, value = T), 
-                               "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
-                               "ExitID", "ExitDate", 
-                               flag_colnames(a.healthanddv))]
+b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in% 
+                                 c(grep("_def$|_calc$", colnames(a.healthanddv), 
+                                        ignore.case = F, value = T), 
+                                   "EnrollmentID", "PersonalID", "ProjectID",
+                                   "HouseholdID", "HoH_PersonalID", 
+                                   "ExitID", "ExitDate", 
+                                   flag_colnames(a.healthanddv))]
 
 colnames(a.inventory)
-b.inventory <- a.inventory[colnames(a.inventory) %in% c(grep("_def$|_calc$", colnames(a.inventory), 
-                                                  ignore.case = F, value = T), 
-                                             "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
-                                             "ExitID", "ExitDate", "CoCCode", 
-                                             flag_colnames(a.inventory))]
+b.inventory <- a.inventory[colnames(a.inventory) %in% 
+                             c(grep("_def$|_calc$", colnames(a.inventory), 
+                                    ignore.case = F, value = T), 
+                               "EnrollmentID", "PersonalID", "ProjectID", 
+                               "HouseholdID", "HoH_PersonalID", 
+                               "ExitID", "ExitDate", "CoCCode", 
+                               flag_colnames(a.inventory))]
+
+
+
+# 2023-01-25 NOTE: works up to this point
 
 
 # keep only these enrollment_ids----
-#what is this???
+
+# 2023-01-25: NOTE: This vvv is where we deploy the pit night filter via eids. should this be by hhid instead?---- 
+
+#pit.eids----
+
+
 c.enrollment             <- inner_join(b.enrollment, pit.eids)
 c.exit                   <- inner_join(b.exit, pit.eids)
 c.currentlivingsituation <- inner_join(b.currentlivingsituation, pit.eids)
