@@ -1,4 +1,105 @@
 
+# most recent cls function: 
+calc_CLS_final <- function(a.enr, a.cls){
+  require(dplyr)
+  
+  a.enr <- a.enr[,c("HouseholdID", 
+                    "RelationshipToHoH",
+                    "EnrollmentID",
+                    "PersonalID",
+                    "ProjectID")]
+  
+  a.cls <- a.cls[,c("CurrentLivingSitID",
+                    "EnrollmentID",
+                    "PersonalID",
+                    "InformationDate",
+                    "CurrentLivingSituation")]
+  
+  # join datas
+  a.enrcls <- left_join(a.enr, a.cls, 
+                        by = c("EnrollmentID", "PersonalID")) %>%
+    # add new binary field for HoH 
+    mutate(., HoH = ifelse(RelationshipToHoH == 1, "HoH", "not HoH")) %>%
+    group_by(HouseholdID, RelationshipToHoH, 
+             EnrollmentID, PersonalID, ProjectID, InformationDate, 
+             CurrentLivingSituation) %>% 
+    summarise() %>%
+    .[order(.$HouseholdID,.$PersonalID),]
+  
+  # Prepare for loop
+  a.enrcls$hh_cls <- NA          # will be the household currentLivingSituation
+  a.enrcls$hh_cls_infodate <- NA # will be the household CLS InformationDate
+  a.enrcls$hoh_personalID <- NA  # will be the household HoH PersonalID
+  
+  # For each row in the joined data.frame
+  for(i in 1:nrow(a.enrcls)){
+    temp.hhid <- a.enrcls$HouseholdID[i]
+    temp.projid <- a.enrcls$ProjectID[i]
+    temp.infodate <- a.enrcls$InformationDate[i]
+    
+    # is "i" HoH?  
+    if(a.enrcls$RelationshipToHoH[i] == 1){
+      a.enrcls$hh_cls[i] <- a.enrcls$CurrentLivingSituation[i]
+      a.enrcls$hh_cls_infodate[i] <- a.enrcls$InformationDate[i]
+      a.enrcls$hoh_personalID[i] <- a.enrcls$PersonalID[i]
+    }else{
+      
+      temp.hoh.pid <- a.enrcls$PersonalID[a.enrcls$HouseholdID == temp.hhid & 
+                                            a.enrcls$ProjectID == temp.projid & 
+                                            a.enrcls$RelationshipToHoH == 1] %>% unique
+      if(length(temp.hoh.pid) == 0){
+        # there is no hoh
+        a.enrcls$hh_cls[i] <- "no HoH found"#NA
+        a.enrcls$hh_cls_infodate[i] <- "no HoH found"#NA
+        a.enrcls$hoh_personalID[i] <- "no HoH found"#NA
+      }else{
+        # carry on 
+        temp.hh_cls <- a.enrcls[a.enrcls$PersonalID %in% temp.hoh.pid & 
+                                  a.enrcls$HouseholdID == temp.hhid & 
+                                  a.enrcls$ProjectID == temp.projid,]
+        
+        if(nrow(temp.hh_cls) > 1 & 
+           all(!is.na(temp.hh_cls$InformationDate)) & 
+           !temp.infodate %in% temp.hh_cls$InformationDate){
+          # row [i] has no InformationDate to join with, so you're stuck
+          a.enrcls$hh_cls[i] <- "NA"
+          a.enrcls$hh_cls_infodate[i] <- "NA"
+          a.enrcls$hoh_personalID[i] <- "NA"
+        } 
+        if(nrow(temp.hh_cls) > 1 & 
+           all(!is.na(temp.hh_cls$InformationDate)) & 
+           temp.infodate %in% temp.hh_cls$InformationDate){
+          # row [i] has no InformationDate to join with, so you're stuck
+          temp.hh_cls <- temp.hh_cls[temp.hh_cls$InformationDate == temp.infodate,]
+          a.enrcls$hh_cls[i] <- temp.hh_cls$CurrentLivingSituation
+          a.enrcls$hh_cls_infodate[i] <- temp.hh_cls$InformationDate
+          a.enrcls$hoh_personalID[i] <- temp.hh_cls$hoh_personalID
+        } 
+        if(nrow(temp.hh_cls) == 1){
+          a.enrcls$hh_cls[i] <- temp.hh_cls$CurrentLivingSituation  
+          a.enrcls$hh_cls_infodate[i] <- temp.hh_cls$InformationDate
+          a.enrcls$hoh_personalID[i] <- temp.hh_cls$PersonalID
+        }
+        
+        # placed this logic here because was getting warning that there were
+        # multiple values trying to be assigned to a single var
+        if(is.na(a.enrcls$hh_cls[i])){a.enrcls$hh_cls[i] <- "error - multiple rows"}
+        if(is.na(a.enrcls$hh_cls_infodate[i]))  {a.enrcls$hh_cls_infodate[i] <- "error - multiple rows"}
+        if(is.na(a.enrcls$hoh_personalID[i])){ a.enrcls$hoh_personalID[i] <- "error - multiple rows"}
+        
+      }
+    }
+  }
+  
+  # peform a few fixes related to date formatting
+  a.enrcls$hh_cls_infodate.char <- a.enrcls$hh_cls_infodate
+  a.enrcls$hh_cls_infodate <- a.enrcls$hh_cls_infodate %>% 
+    as.numeric() %>%
+    lubridate::as_date()
+  
+  return(a.enrcls)
+}
+
 # formulas developed in "nccounty_logic.R"
 flag_colnames <- function(x){
   grep("^flag", colnames(x), ignore.case = T, value = T)
