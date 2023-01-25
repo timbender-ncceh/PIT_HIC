@@ -710,11 +710,6 @@ b.inventory <- a.inventory[colnames(a.inventory) %in%
                                "ExitID", "ExitDate", "CoCCode", 
                                flag_colnames(a.inventory))]
 
-
-
-# 2023-01-25 NOTE: works up to this point
-
-
 # keep only these enrollment_ids----
 
 # 2023-01-25: NOTE: This vvv is where we deploy the pit night filter via eids. should this be by hhid instead?---- 
@@ -731,20 +726,27 @@ c.screened.pos.disab_df  <- screened.pos.disab_df[screened.pos.disab_df$Enrollme
 c.healthanddv            <- b.healthanddv[b.healthanddv$EnrollmentID %in%
                                             pit.eids$EnrollmentID,]
 
-colnames(c.currentlivingsituation)
+
+
+# 2023-01-25 NOTE: works up to this point----
+
+colnames(c.currentlivingsituation) %>% grep("^hh|^hoh|date", ., value = T, ignore.case = T)
 # get last Information Date prior to or on pit night
 
-d.currentlivingsituation <- c.currentlivingsituation %>%
-  .[.$InformationDate <= pit.night & 
-      .$currentLivingSituation.Date_calc <= pit.night,] %>%
-  group_by(EnrollmentID, InformationDate) %>%
-  slice_max(., order_by= currentLivingSituation.Date_calc, 
-            n = 1) %>%
-  ungroup() %>%
-  group_by(EnrollmentID) %>%
-  slice_max(., 
-            order_by = InformationDate, n = 1)
 
+
+# 2023-01-25 removed vvv [cls]----
+# d.currentlivingsituation <- c.currentlivingsituation %>%
+#   .[.$InformationDate <= pit.night & 
+#       .$currentLivingSituation.Date_calc <= pit.night,] %>%
+#   group_by(EnrollmentID, InformationDate) %>%
+#   slice_max(., order_by= currentLivingSituation.Date_calc, 
+#             n = 1) %>%
+#   ungroup() %>%
+#   group_by(EnrollmentID) %>%
+#   slice_max(., 
+#             order_by = InformationDate, n = 1)
+# end 2023-01-25 removed [cls]
 
 b.projectcoc
 
@@ -1013,13 +1015,16 @@ output2 <- output[,c("PersonalID",
                      "currentlyFleeingDV_def",
                      "householdType_def", 
                      "youth_type_hh", "veteran_type_hh", 
-                     "livingSituation_def",
+                     #"livingSituation_def",
                      #'HoH_CLS_date',
                      "HoH_PersonalID", 
+                     "hh_cls"   ,
+                     "hh_cls_infodate" ,
                      #"HoH_currentLivingSituation_def", 
                      "EnrollmentID", 
                      "ProjectName", 
                      "EntryDate", 
+                     
                      flag_colnames(output))]
 
 output2 <- output2[!colnames(output2) %in% c("Region")]
@@ -1027,7 +1032,33 @@ output2 <- output2[!colnames(output2) %in% c("Region")]
 
 grep("calc", colnames(output2), value = T, ignore.case = T)
 
+# # check something
+# Test data has 1/26/22 as PIT night
+# 1/27/22-2/2/22 as PIT week
+# Are there any hh_cls_infodate data for dates outside of that range?
 
+
+
+args(data.table::between)
+
+data.frame(nrow = 1:nrow(output2), 
+           ind_infodate = output2$InfoDate,
+           NA.ind_infodate = is.na(output2$InfoDate),
+           between_ind_infodate = data.table::between(x = output2$InfoDate, 
+                                                      lower = ymd(20220127), 
+                                                      upper = ymd(20220222)),
+           hh_infodate = output2$hh_cls_infodate, 
+           NA.hh_infodate = is.na(output2$hh_cls_infodate),
+           between_hh_infodate = data.table::between(x = output2$hh_cls_infodate, 
+                                         lower = ymd(20220127), 
+                                         upper = ymd(20220222))) %>%
+  group_by(NA.hh_infodate, 
+           between) %>%
+  summarise(n=n())
+
+
+
+# # /check something
 
 
 out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
@@ -1080,7 +1111,7 @@ output2[is.na(output2$age_calc) &
 output2$issue_race <- output2$race_calc == "[unknown]"
 output2$householdType_def %>% unique()
 
-output2$livingSituation_def %>% unique()
+#output2$livingSituation_def %>% unique()
 output2$reltionshiptohoh_def
 
 output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_PersonalID & 
@@ -1142,7 +1173,10 @@ output3 <- output2 %>%
   as.data.frame() %>%
   as_tibble() %>%
   .[.$value == T,] %>%
-  .[!colnames(.) %in% c("value")]
+  .[!colnames(.) %in% c("value")] %>%
+  .[!is.na(.$EnrollmentID),]
+
+
 
 # left_join(output3[!colnames(output3) %in% c("calc_location_county", "calc_region")],
 # output2[,c("EnrollmentID", "PersonalID", "calc_location_county", "calc_region")],
@@ -1164,7 +1198,18 @@ output3 <- output3[!colnames(output3) %in% c("proj_county")]
 # change names----
 output3$DQ_flag_type <- output3$DQ_flag_type  %>% as.character()
 
-unique(output3$DQ_flag_type)
+unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
+
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.reltohoh_na", 
+                               "missing RelationshipToHoh", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.ethnicity", 
+                               "verify ethnicity", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.gender", 
+                               "verify gender", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.vetstatus", 
+                               "verify veteran status", output3$DQ_flag_type)
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag_dv", 
+                               "verify DV-fleeing and DV-victim", output3$DQ_flag_type)
 
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.nccounty_na", 
        "verify NCCounty", output3$DQ_flag_type)
@@ -1209,10 +1254,21 @@ spot.check2 <- output2 %>%
 # remove enrolllmentID
 output3 <- output3[!colnames(output3) %in% c("EnrollmentID")]
 
+# remove dv flag
+output3 <- output3[output3$DQ_flag_type != "verify DV-fleeing and DV-victim",]
 
 
 
 
+nicole.new <- output3 %>%
+  group_by(DQ_flag_type) %>%
+  summarise(current_n = n())
+
+nicole.old <- read.xlsx("nicole_output2023-01-23_HR16.xlsx")  %>%
+  group_by(DQ_flag_type) %>%
+  summarise(old_n = n())
+
+full_join(nicole.new, nicole.old)
 
 # write to file----
 getwd()
