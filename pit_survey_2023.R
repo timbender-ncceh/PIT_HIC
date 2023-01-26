@@ -15,7 +15,9 @@ gc()
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
-pit.night <- ymd(20220126)
+pit.night     <- ymd(20220126)
+pit.week_start <- ymd(20220127)
+pit.week_end   <- ymd(20220222)
 
 # /NOTE----
 
@@ -1136,6 +1138,12 @@ colnames(output) %>%
   grep("date", ., ignore.case = T, value = T)
 
 output3 <- output2 %>%
+  # filter out dates not during pit week [added 2022-01-25]
+  .[data.table::between(x = .$hh_cls_infodate, 
+                        lower = pit.week_start, upper =  pit.week_end) & 
+      !is.na(.$hh_cls_infodate),] %>%
+  # / 
+  
   group_by(client_id = PersonalID, 
            EnrollmentID, # THIS NEEDS TO BE REMOVED
            ProjectName,
@@ -1287,10 +1295,35 @@ write.xlsx(x = output3,
            file = out.name)
 
 
-library(readxl)
-read_xlsx(list.files(pattern = "^andrea_output2023-01-19")) %>%
-  colnames() %>%
-  grepl(pattern = "calc", x = ., 
-       #value = T, 
-       ignore.case = T) %>%
-  which()
+# library(readxl)
+# read_xlsx(list.files(pattern = "^andrea_output2023-01-19")) %>%
+#   colnames() %>%
+#   grepl(pattern = "calc", x = ., 
+#        #value = T, 
+#        ignore.case = T) %>%
+#   which()
+
+# summary validation vvv ----
+a.enrcls$hoh_personalID_temp <- ifelse(grepl(pattern = "\\d",
+                                             x = a.enrcls$HoH_PersonalID),
+                                       yes = "[valid value]",
+                                       no = a.enrcls$HoH_PersonalID)
+
+a.enrcls$hh_cls_temp <- ifelse(grepl(pattern = "\\d",
+                                     x = a.enrcls$hh_cls),
+                               yes = "[valid value]",
+                               no = a.enrcls$hh_cls)
+
+a.enrcls$hh_cls_infodate_temp <- ifelse(grepl(pattern = "\\d",
+                                              x = a.enrcls$hh_cls_infodate.char),
+                                        yes = "[valid value]",
+                                        no = a.enrcls$hh_cls_infodate.char)
+
+a.enrcls %>%
+  group_by(HoH_PersonalID_temp,
+           hh_cls_temp,
+           hh_cls_infodate_temp) %>%
+  summarise(n = n()) %>%
+  .[order(.$n,decreasing = T),]
+
+# summary validation ^^^ ----
