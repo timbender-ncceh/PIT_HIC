@@ -15,9 +15,9 @@ gc()
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
-pit.night     <- ymd(20220126)
-pit.week_start <- ymd(20220127)
-pit.week_end   <- ymd(20220222)
+pit.night     <- ymd(20220126) #20230125
+pit.week_start <- ymd(20220127) #20230126
+pit.week_end   <- ymd(20220222) #20230221
 
 # /NOTE----
 
@@ -1045,13 +1045,13 @@ data.frame(nrow = 1:nrow(output2),
            ind_infodate = output2$InformationDate,
            NA.ind_infodate = is.na(output2$InformationDate),
            between_ind_infodate = data.table::between(x = output2$InformationDate, 
-                                                      lower = ymd(20220127), 
-                                                      upper = ymd(20220222)),
+                                                      lower = pit.week_start, 
+                                                      upper = pit.week_end),
            hh_infodate = output2$hh_cls_infodate, 
            NA.hh_infodate = is.na(output2$hh_cls_infodate),
            between_hh_infodate = data.table::between(x = output2$hh_cls_infodate, 
-                                         lower = ymd(20220127), 
-                                         upper = ymd(20220222))) %>%
+                                         lower = pit.week_start, 
+                                         upper = pit.week_end)) %>%
   as_tibble() %>%
   group_by(NA.ind_infodate,
            between_ind_infodate#,
