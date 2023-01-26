@@ -1,4 +1,11 @@
 
+excel_nDate <- function(excelN = 44587){
+  require(lubridate)
+  require(dplyr)
+  # 44587 = 1-22-22
+  return(ymd(18991230) %m+% days(excelN))
+}
+
 # most recent cls function: 
 calc_CLS_final <- function(a.enr, a.cls){
   require(dplyr)
