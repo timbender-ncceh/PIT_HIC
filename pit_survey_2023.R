@@ -16,8 +16,8 @@ gc()
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
 pit.night     <- ymd(20220126) #20230125
-pit.week_start <- ymd(20220127) #20230126
-pit.week_end   <- ymd(20220222) #20230221
+pit.week_start <- pit.night %m+% days(1) #ymd(20220127) #20230126
+pit.week_end   <- pit.night %m+% days(7) #ymd(20220222) #20230221
 
 # /NOTE----
 
@@ -322,14 +322,21 @@ table(a.exit$destination_def, useNA = "always")
 a.currentlivingsituation <- read_csv("CurrentLivingSituation.csv")
 
 out.cls <- calc_CLS_final(a.enr = a.enrollment, 
-               a.cls = a.currentlivingsituation)
+                          a.cls = a.currentlivingsituation)
+
+out.cls$currentLivingSituation_def <- unlist(lapply(out.cls$CurrentLivingSituation,
+                                                    fun_livingsituation_def))
+out.cls$InformationDate_cls <- out.cls$InformationDate
+out.cls <- out.cls[!colnames(out.cls) %in% 
+                     c("CurrentLivingSituation", "InformationDate")]
 
 a.enrollment <- left_join(a.enrollment, 
-          out.cls)
+                          out.cls)
+
+
 
 # 2023-01-25 removed vvv [CLS]----
-# a.currentlivingsituation$currentLivingSituation_def <- unlist(lapply(a.currentlivingsituation$CurrentLivingSituation, 
-#                                                                      fun_livingsituation_def))
+
 # a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsituation$InformationDate
 # 
 # 
@@ -643,7 +650,7 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in%
                                  "NCCounty",
                                  "HouseholdID", "HoH_PersonalID", 
                                  "HoH_currentLivingSituation_def",
-                                 "HoH_CLS_date", "livingSituation_def", 
+                                 "HoH_CLS_date", #"livingSituation_def", 
                                  "relationshiptohoh_def", 
                                  "EntryDate", 
                                  "calc_household_currentlivingsituation",
@@ -652,11 +659,16 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in%
                                  "calc_location_county_flag",
                                  "hh_cls", "hh_cls_infodate", 
                                  "HoH_PersonalID",
-                                 "InformationDate",
+                                 "InformationDate_cls", #"InformationDate",
+                                 "currentLivingSituation_def", #"CurrentLivingSituation",
                                  flag_colnames(a.enrollment))]
 
-colnames(a.currentlivingsituation)
 
+colnames(a.currentlivingsituation)
+grep("_def|CurrentLivingSituation", colnames(a.enrollment), value = T, ignore.case = T)
+
+
+# this is fine VV.  it doesn't get joined to anything else
 b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% 
                                                         c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
                                                 ignore.case = F, value = T), 
@@ -1013,7 +1025,6 @@ output2 <- output[,c("PersonalID",
                      "currentlyFleeingDV_def",
                      "householdType_def", 
                      "youth_type_hh", "veteran_type_hh", 
-                     #"livingSituation_def",
                      #'HoH_CLS_date',
                      "HoH_PersonalID", 
                      "hh_cls"   ,
@@ -1022,10 +1033,16 @@ output2 <- output[,c("PersonalID",
                      "EnrollmentID", 
                      "ProjectName", 
                      "EntryDate", 
-                     "InformationDate",
+                     "currentLivingSituation_def",
+                     "InformationDate_cls",#"InformationDate",
                      flag_colnames(output))]
 
+
+
 output2 <- output2[!colnames(output2) %in% c("Region")]
+
+# colnames(output2)[colnames(output2) %in% c("livingSituation_def",
+#                                            "InformationDate")]
 
 
 grep("calc", colnames(output2), value = T, ignore.case = T)
@@ -1042,9 +1059,9 @@ grep("calc", colnames(output2), value = T, ignore.case = T)
 args(data.table::between)
 
 data.frame(nrow = 1:nrow(output2), 
-           ind_infodate = output2$InformationDate,
-           NA.ind_infodate = is.na(output2$InformationDate),
-           between_ind_infodate = data.table::between(x = output2$InformationDate, 
+           ind_infodate = output2$InformationDate_cls,
+           NA.ind_infodate = is.na(output2$InformationDate_cls),
+           between_ind_infodate = data.table::between(x = output2$InformationDate_cls, 
                                                       lower = pit.week_start, 
                                                       upper = pit.week_end),
            hh_infodate = output2$hh_cls_infodate, 
@@ -1068,6 +1085,12 @@ data.frame(nrow = 1:nrow(output2),
 out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 write.xlsx(x = output2, 
            file = out.name.andrea)
+
+if(!ncol(read.xlsx(glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx"))) == 
+  ncol(output2)){
+  stop("number of columns in xlsx output doesn't match number of columns in output2")
+}
+
 
 # identify data issues----
 colnames(output2) %>%
@@ -1138,6 +1161,7 @@ colnames(output) %>%
   grep("date", ., ignore.case = T, value = T)
 
 output3 <- output2 %>%
+  
   # filter out dates not during pit week [added 2022-01-25]
   .[data.table::between(x = .$hh_cls_infodate, 
                         lower = pit.week_start, upper =  pit.week_end) & 
@@ -1183,9 +1207,14 @@ output3 <- output2 %>%
   as.data.frame() %>%
   as_tibble() %>%
   .[.$value == T,] %>%
-  .[!colnames(.) %in% c("value")] %>%
-  .[!is.na(.$EnrollmentID),]
+  .[!is.na(.$EnrollmentID),] %>%
+  .[!colnames(.) %in% c("value","EnrollmentID")]
+  
+output3
 
+colnames(output3)
+output3$DQ_flag_type %>% unique()
+grep("^flag", colnames(output2), ignore.case = T, value = T)
 
 
 # left_join(output3[!colnames(output3) %in% c("calc_location_county", "calc_region")],
@@ -1253,9 +1282,9 @@ colnames(output3)
 # spot check nicole to andrea
 spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
 spot.check2 <- output2 %>%
-  .[.$EnrollmentID %in% spot.check3$EnrollmentID & 
+  .[#.$EnrollmentID %in% spot.check3$EnrollmentID & 
       .$PersonalID %in% spot.check3$client_id,] %>% 
-  group_by(EnrollmentID, 
+  group_by(#EnrollmentID, 
            PersonalID, calc_location_county, 
            calc_region) %>%
   summarise(n = n())
