@@ -1,10 +1,20 @@
 
-excel_nDate <- function(excelN = 44587){
+get_xl.date.numeric <- function(unix_date = ymd(20200501)){
   require(lubridate)
-  require(dplyr)
-  # 44587 = 1-22-22
-  return(ymd(18991230) %m+% days(excelN))
+  return(as.numeric(unix_date) + 25569)
 }
+
+get_unix.date.date <- function(excel_numeric = 43952){
+  require(lubridate)
+  return(as_date(excel_numeric-25569))
+}
+
+# excel_nDate <- function(excelN = 44587){
+#   require(lubridate)
+#   require(dplyr)
+#   # 44587 = 1-22-22
+#   return(ymd(18991230) %m+% days(excelN))
+# }
 
 # most recent cls function: 
 calc_CLS_final <- function(a.enr, a.cls){
