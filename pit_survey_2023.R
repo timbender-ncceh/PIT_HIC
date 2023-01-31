@@ -1088,9 +1088,27 @@ data.frame(nrow = 1:nrow(output2),
 
 # # /check something
 
+# melt output2 as a comparison to nicole's output3----
+#### remove before final deployment ####
+
+flag.colnames <- grep("^flag", colnames(output2), ignore.case = T, value = T) %>%
+  .[. != "flag_dv"]
+
+gc()
+
+andrea.flags.temp <- output2 %>%
+  .[!colnames(.) %in% "flag_dv"] %>%
+  .[!duplicated(.),] %>% 
+  as.data.table() %>%
+  melt(., 
+       measure.vars = flag.colnames) %>%
+  .[.$value == T,]
+
+# /melt output2----
+
 
 out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
-write.xlsx(x = output2, 
+write.xlsx(x = output2[!duplicated(output2),], 
            file = out.name.andrea)
 
 if(!ncol(read.xlsx(glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx"))) == 
@@ -1136,11 +1154,11 @@ output2$issue.DOB_vs_DOBDataQuality <- F
 output2[output2$DOBDataQuality_def %in% c("Client refused", "Data not collected") & 
   !is.na(output2$age_calc),]$issue.DOB_vs_DOBDataQuality <- T
 
-
 output2[is.na(output2$age_calc) & 
   output2$DOBDataQuality_def %in% 
   c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
-  
+
+table(output2$issue.DOB_vs_DOBDataQuality, useNA = "always")  
 
 output2$issue_race <- output2$race_calc == "[unknown]"
 output2$householdType_def %>% unique()
@@ -1161,19 +1179,17 @@ output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_Pers
 # }
 # output2[,10]
 
-
-
-
 colnames(output) %>%
   grep("date", ., ignore.case = T, value = T)
 
 output3 <- output2 %>%
   .[!duplicated(.),] %>%
-  
-  # filter out dates not during pit week [added 2022-01-25]
+  # filter out dates not during pit week [added 2023-01-25]
   .[data.table::between(x = .$hh_cls_infodate, 
-                        lower = pit.week_start, upper =  pit.week_end) & 
-      !is.na(.$hh_cls_infodate),] %>%
+                        #lower = pit.week_start, (commented out 2023-01-31)
+                        lower = pit.night,       #(added 2023-01-31)
+                        upper =  pit.week_end) & 
+      !is.na(.$hh_cls_infodate),] %>% 
   # / 
   
   group_by(client_id = PersonalID, 
