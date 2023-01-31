@@ -12,6 +12,13 @@ rm(list=ls())
 cat('\f')
 gc()
 
+# re-run 2023 pit data every friday morning until 3/31/2023
+
+fri.hmis.pulls.complete <- ymd(c(20230127)) # update this after you pull and export new data each friday
+
+as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Friday"
+
+
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
