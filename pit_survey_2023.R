@@ -1161,6 +1161,7 @@ colnames(output) %>%
   grep("date", ., ignore.case = T, value = T)
 
 output3 <- output2 %>%
+  .[!duplicated(.),] %>%
   
   # filter out dates not during pit week [added 2022-01-25]
   .[data.table::between(x = .$hh_cls_infodate, 
@@ -1225,6 +1226,7 @@ grep("^flag", colnames(output2), ignore.case = T, value = T)
 #   summarise(n = n())
 
 
+
 output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
 
 # narrow donw to just 1 field with a county in it
@@ -1249,7 +1251,6 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.vetstatus",
                                "verify veteran status", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag_dv", 
                                "verify DV-fleeing and DV-victim", output3$DQ_flag_type)
-
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.nccounty_na", 
        "verify NCCounty", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.child_hoh", 
@@ -1303,7 +1304,7 @@ nicole.new <- output3 %>%
   group_by(DQ_flag_type) %>%
   summarise(current_n = n())
 
-nicole.old <- read.xlsx("nicole_output2023-01-23_HR16.xlsx")  %>%
+nicole.old <- read.xlsx("nicole_output2023-01-27_HR14.xlsx")  %>% #read.xlsx("nicole_output2023-01-23_HR16.xlsx")  %>%
   group_by(DQ_flag_type) %>%
   summarise(old_n = n())
 
