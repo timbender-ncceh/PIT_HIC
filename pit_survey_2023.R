@@ -1358,7 +1358,7 @@ output3 #<-  do t he following filter:
 
 # filter 1: 
 
-output3[!nicole_filter1,]$DQ_flag_type
+#output3[!nicole_filter1,]$DQ_flag_type
 
 nicole_filter1 <- output3$hh_cls == 16 & 
   output3$hh_cls_infodate == pit.night & 
