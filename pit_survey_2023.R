@@ -1348,32 +1348,45 @@ grep("calc", colnames(output3), value = T, ignore.case = T)
 # Nicole final filter-----
 output3 #<-  do t he following filter: 
 
-# if the following 2 criteria are met, keep the following flags in nicole's report:
-#  criteria: 
-  # ---- hh_cls == 16 # and# hh_cls_infodate == pit.night
-# flags: 
-  # ---- flag.nccounty_na    flag.reltohoh_na    flag.child_hoh    flag.age_too_old    
-# flag.DOB_na    flag.gender    flag.race    flag.ethnicity    flag.vetstatus
+# filter 1: 
 
-colnames(output3)
-as.character(unique(output3$DQ_flag_type))
+output3[!nicole_filter1,]$DQ_flag_type
 
+nicole_filter1 <- output3$hh_cls == 16 & 
+  output3$hh_cls_infodate == pit.night & 
+  output3$DQ_flag_type %in% c("verify NCCounty", 
+                              "missing RelationshipToHoh",
+                              "Head Of Household aged 16 or under", 
+                              "older than 80 years old", 
+                              "missing Date of Birth or DOB_quality", 
+                              "verify gender", 
+                              "missing race", 
+                              "verify ethnicity", 
+                              "verify veteran status")
 
+nicole_filter2 <- output3$hh_cls == 16 & 
+  output3$hh_cls_infodate != pit.night & 
+  output3$DQ_flag_type %in% c("flag_nmfhh_and_1day_before.after_pitnight")
 
-keep.these.flags <- c("verify NCCounty","missing RelationshipToHoh",
-                      "Head Of Household aged 16 or under",    "older than 80 years old",    
-                      "missing Date of Birth or DOB_quality","verify gender",
-                      "missing race",    "verify ethnicity",    
-                      "verify veteran status")
-
-# keep.these.flags <- c("flag.nccounty_na","flag.reltohoh_na",
-#                       "flag.child_hoh",    "flag.age_too_old",    
-#                       "flag.DOB_na","flag.gender",
-#                       "flag.race",    "flag.ethnicity",    
-#                       "flag.vetstatus")
-
-output3 <- output3[(output3$hh_cls == 16 & 
-                      output3$hh_cls_infodate == pit.night),]
+# colnames(output3)
+# as.character(unique(output3$DQ_flag_type))
+# 
+# 
+# 
+# keep.these.flags <- c("verify NCCounty","missing RelationshipToHoh",
+#                       "Head Of Household aged 16 or under",    "older than 80 years old",    
+#                       "missing Date of Birth or DOB_quality","verify gender",
+#                       "missing race",    "verify ethnicity",    
+#                       "verify veteran status")
+# 
+# # keep.these.flags <- c("flag.nccounty_na","flag.reltohoh_na",
+# #                       "flag.child_hoh",    "flag.age_too_old",    
+# #                       "flag.DOB_na","flag.gender",
+# #                       "flag.race",    "flag.ethnicity",    
+# #                       "flag.vetstatus")
+# 
+# output3 <- output3[(output3$hh_cls == 16 & 
+#                       output3$hh_cls_infodate != pit.night),]
 
 # / nicole final filter----
 
