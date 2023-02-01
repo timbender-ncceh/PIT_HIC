@@ -340,8 +340,6 @@ out.cls <- out.cls[!colnames(out.cls) %in%
 a.enrollment <- left_join(a.enrollment, 
                           out.cls)
 
-
-
 # 2023-01-25 removed vvv [CLS]----
 
 # a.currentlivingsituation$currentLivingSituation.Date_calc <- a.currentlivingsituation$InformationDate
@@ -1084,27 +1082,24 @@ data.frame(nrow = 1:nrow(output2),
            ) %>%
   summarise(n=n())
 
-
-
 # # /check something
-
-# melt output2 as a comparison to nicole's output3----
-#### remove before final deployment ####
-
-flag.colnames <- grep("^flag", colnames(output2), ignore.case = T, value = T) %>%
-  .[. != "flag_dv"]
-
-gc()
-
-andrea.flags.temp <- output2 %>%
-  .[!colnames(.) %in% "flag_dv"] %>%
-  .[!duplicated(.),] %>% 
-  as.data.table() %>%
-  melt(., 
-       measure.vars = flag.colnames) %>%
-  .[.$value == T,]
-
-# /melt output2----
+# # melt output2 as a comparison to nicole's output3----
+# #### remove before final deployment ####
+# 
+# flag.colnames <- grep("^flag", colnames(output2), ignore.case = T, value = T) %>%
+#   .[. != "flag_dv"]
+# 
+# gc()
+# 
+# andrea.flags.temp <- output2 %>%
+#   .[!colnames(.) %in% "flag_dv"] %>%
+#   .[!duplicated(.),] %>% 
+#   as.data.table() %>%
+#   melt(., 
+#        measure.vars = flag.colnames) %>%
+#   .[.$value == T,]
+# 
+# # /melt output2----
 
 
 out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
@@ -1182,6 +1177,8 @@ output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_Pers
 colnames(output) %>%
   grep("date", ., ignore.case = T, value = T)
 
+colnames(output2) %>% grep("cls", ., ignore.case = T, value = T)
+
 output3 <- output2 %>%
   .[!duplicated(.),] %>%
   # filter out dates not during pit week [added 2023-01-25]
@@ -1209,6 +1206,8 @@ output3 <- output2 %>%
            #Region,
            #County, 
            #NCCounty,
+           hh_cls, 
+           hh_cls_infodate,
            flag.nccounty_na, 
            flag.reltohoh_na, 
            flag.child_hoh, 
@@ -1225,7 +1224,8 @@ output3 <- output2 %>%
   #           by = c("County" )) %>%
   as.data.table() %>%
   melt(., 
-        id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region") , 
+        id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region", 
+                    "hh_cls", "hh_cls_infodate") , 
        variable.name = "DQ_flag_type") %>%
   #.$calc_location_county %>% is.na() %>% table()
   as.data.frame() %>%
@@ -1331,6 +1331,8 @@ nicole.old <- read.xlsx("nicole_output2023-01-27_HR14.xlsx")  %>% #read.xlsx("ni
   group_by(DQ_flag_type) %>%
   summarise(old_n = n())
 
+gc()
+
 full_join(nicole.new, nicole.old)
 
 # write to file----
@@ -1343,9 +1345,47 @@ grep("calc", colnames(output3), value = T, ignore.case = T)
 #stop("notes:  1) remove enrollment_ID\n2) one county column,\n3)??? see chat")
 
 
+# Nicole final filter-----
+output3 #<-  do t he following filter: 
+
+# if the following 2 criteria are met, keep the following flags in nicole's report:
+#  criteria: 
+  # ---- hh_cls == 16 # and# hh_cls_infodate == pit.night
+# flags: 
+  # ---- flag.nccounty_na    flag.reltohoh_na    flag.child_hoh    flag.age_too_old    
+# flag.DOB_na    flag.gender    flag.race    flag.ethnicity    flag.vetstatus
+
+colnames(output3)
+as.character(unique(output3$DQ_flag_type))
+
+
+
+keep.these.flags <- c("verify NCCounty","missing RelationshipToHoh",
+                      "Head Of Household aged 16 or under",    "older than 80 years old",    
+                      "missing Date of Birth or DOB_quality","verify gender",
+                      "missing race",    "verify ethnicity",    
+                      "verify veteran status")
+
+# keep.these.flags <- c("flag.nccounty_na","flag.reltohoh_na",
+#                       "flag.child_hoh",    "flag.age_too_old",    
+#                       "flag.DOB_na","flag.gender",
+#                       "flag.race",    "flag.ethnicity",    
+#                       "flag.vetstatus")
+
+output3 <- output3[(output3$hh_cls == 16 & 
+                      output3$hh_cls_infodate == pit.night),]
+
+# / nicole final filter----
+
+
+
+
+
 out.name <- glue("nicole_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 write.xlsx(x = output3, 
            file = out.name)
+
+
 
 
 # library(readxl)
