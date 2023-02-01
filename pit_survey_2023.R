@@ -1046,6 +1046,10 @@ output2 <- output[,c("PersonalID",
 
 output2 <- output2[!colnames(output2) %in% c("Region")]
 
+output2$flag_nmfhh_and_1day_before.after_pitnight <- fun_flag_nmfhh_and_1day_before.after_pitnight(hh_cls1 = output2$hh_cls, 
+                                                                                                   hh_cls_infodate1 = output2$hh_cls_infodate, 
+                                                                                                   pit.night1 = pit.night)
+
 # colnames(output2)[colnames(output2) %in% c("livingSituation_def",
 #                                            "InformationDate")]
 
@@ -1101,6 +1105,7 @@ data.frame(nrow = 1:nrow(output2),
 # 
 # # /melt output2----
 
+output2 <- output2[!duplicated(output2),]
 
 out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 write.xlsx(x = output2[!duplicated(output2),], 
@@ -1217,7 +1222,8 @@ output3 <- output2 %>%
            flag.race, 
            flag.ethnicity, 
            flag.vetstatus, 
-           flag_dv) %>%
+           flag_dv,
+           flag_nmfhh_and_1day_before.after_pitnight) %>%
   summarise() %>%
   # left_join(., 
   #           read_csv("regionscrosswalk.csv"), 
@@ -1266,6 +1272,11 @@ unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
 
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.reltohoh_na", 
                                "missing RelationshipToHoh", output3$DQ_flag_type)
+
+output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag_nmfhh_and_1day_before.after_pitnight", 
+                               "verify Current Living Situation Date", output3$DQ_flag_type)
+
+
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.ethnicity", 
                                "verify ethnicity", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.gender", 
@@ -1320,20 +1331,17 @@ output3 <- output3[!colnames(output3) %in% c("EnrollmentID")]
 # remove dv flag
 output3 <- output3[output3$DQ_flag_type != "verify DV-fleeing and DV-victim",]
 
-
-
-
-nicole.new <- output3 %>%
-  group_by(DQ_flag_type) %>%
-  summarise(current_n = n())
-
-nicole.old <- read.xlsx("nicole_output2023-01-27_HR14.xlsx")  %>% #read.xlsx("nicole_output2023-01-23_HR16.xlsx")  %>%
-  group_by(DQ_flag_type) %>%
-  summarise(old_n = n())
-
-gc()
-
-full_join(nicole.new, nicole.old)
+# nicole.new <- output3 %>%
+#   group_by(DQ_flag_type) %>%
+#   summarise(current_n = n())
+# 
+# nicole.old <- read.xlsx("nicole_output2023-01-27_HR14.xlsx")  %>% #read.xlsx("nicole_output2023-01-23_HR16.xlsx")  %>%
+#   group_by(DQ_flag_type) %>%
+#   summarise(old_n = n())
+# 
+# gc()
+# 
+# full_join(nicole.new, nicole.old)
 
 # write to file----
 getwd()
@@ -1366,7 +1374,22 @@ nicole_filter1 <- output3$hh_cls == 16 &
 
 nicole_filter2 <- output3$hh_cls == 16 & 
   output3$hh_cls_infodate != pit.night & 
-  output3$DQ_flag_type %in% c("flag_nmfhh_and_1day_before.after_pitnight")
+  output3$DQ_flag_type %in% c("verify Current Living Situation Date")
+
+table(nicole_filter1, 
+      useNA = "always")
+table(nicole_filter2, 
+      useNA = "always")
+table(nicole_filter1 | nicole_filter2, 
+      useNA = "always")
+
+output3 <- output3[nicole_filter1 | nicole_filter2,]
+
+output3 %>%
+  group_by(DQ_flag_type) %>%
+  summarise(current_n = n())
+
+output3$hh_cls
 
 # colnames(output3)
 # as.character(unique(output3$DQ_flag_type))
