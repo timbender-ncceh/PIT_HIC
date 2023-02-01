@@ -22,7 +22,7 @@ as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Friday"
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
 
-pit.night     <- ymd(20220126) #20230125
+pit.night     <- ymd(20230125) #20230125 or 20220126
 pit.week_start <- pit.night %m+% days(1) #ymd(20220127) #20230126
 pit.week_end   <- pit.night %m+% days(7) #ymd(20220222) #20230221
 
@@ -35,6 +35,7 @@ out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5
 # Setup----
 #csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/data/coc_by_ffy/bos_2022"
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/test_data"
+csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
 #devtools::source_url(url = "https://github.com/timbender-ncceh/R-scripts/blob/main/format_phone_email.R?raw=TRUE")
@@ -1107,14 +1108,21 @@ data.frame(nrow = 1:nrow(output2),
 
 output2 <- output2[!duplicated(output2),]
 
-out.name.andrea <- glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+if(year(pit.night) == 2023){
+  out.name.andrea <- glue("andrea_output2023__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+}else{
+  out.name.andrea <- glue("andrea_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+}
+
+
+
 write.xlsx(x = output2[!duplicated(output2),], 
            file = out.name.andrea)
 
-if(!ncol(read.xlsx(glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx"))) == 
-  ncol(output2)){
-  stop("number of columns in xlsx output doesn't match number of columns in output2")
-}
+# if(!ncol(read.xlsx(glue("andrea_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx"))) == 
+#   ncol(output2)){
+#   stop("number of columns in xlsx output doesn't match number of columns in output2")
+# }
 
 
 # identify data issues----
@@ -1415,44 +1423,48 @@ output3$hh_cls
 
 
 
+if(year(pit.night) == 2023){
+  out.name <- glue("nicole_output2023__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+}else{
+  out.name <- glue("nicole_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+}
 
 
-out.name <- glue("nicole_output{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 write.xlsx(x = output3, 
            file = out.name)
 
 
 
 
-# library(readxl)
-# read_xlsx(list.files(pattern = "^andrea_output2023-01-19")) %>%
-#   colnames() %>%
-#   grepl(pattern = "calc", x = ., 
-#        #value = T, 
-#        ignore.case = T) %>%
-#   which()
-
-# summary validation vvv ----
-a.enrcls$hoh_personalID_temp <- ifelse(grepl(pattern = "\\d",
-                                             x = a.enrcls$HoH_PersonalID),
-                                       yes = "[valid value]",
-                                       no = a.enrcls$HoH_PersonalID)
-
-a.enrcls$hh_cls_temp <- ifelse(grepl(pattern = "\\d",
-                                     x = a.enrcls$hh_cls),
-                               yes = "[valid value]",
-                               no = a.enrcls$hh_cls)
-
-a.enrcls$hh_cls_infodate_temp <- ifelse(grepl(pattern = "\\d",
-                                              x = a.enrcls$hh_cls_infodate.char),
-                                        yes = "[valid value]",
-                                        no = a.enrcls$hh_cls_infodate.char)
-
-a.enrcls %>%
-  group_by(HoH_PersonalID_temp,
-           hh_cls_temp,
-           hh_cls_infodate_temp) %>%
-  summarise(n = n()) %>%
-  .[order(.$n,decreasing = T),]
-
-# summary validation ^^^ ----
+# # library(readxl)
+# # read_xlsx(list.files(pattern = "^andrea_output2023-01-19")) %>%
+# #   colnames() %>%
+# #   grepl(pattern = "calc", x = ., 
+# #        #value = T, 
+# #        ignore.case = T) %>%
+# #   which()
+# 
+# # summary validation vvv ----
+# a.enrcls$hoh_personalID_temp <- ifelse(grepl(pattern = "\\d",
+#                                              x = a.enrcls$HoH_PersonalID),
+#                                        yes = "[valid value]",
+#                                        no = a.enrcls$HoH_PersonalID)
+# 
+# a.enrcls$hh_cls_temp <- ifelse(grepl(pattern = "\\d",
+#                                      x = a.enrcls$hh_cls),
+#                                yes = "[valid value]",
+#                                no = a.enrcls$hh_cls)
+# 
+# a.enrcls$hh_cls_infodate_temp <- ifelse(grepl(pattern = "\\d",
+#                                               x = a.enrcls$hh_cls_infodate.char),
+#                                         yes = "[valid value]",
+#                                         no = a.enrcls$hh_cls_infodate.char)
+# 
+# a.enrcls %>%
+#   group_by(HoH_PersonalID_temp,
+#            hh_cls_temp,
+#            hh_cls_infodate_temp) %>%
+#   summarise(n = n()) %>%
+#   .[order(.$n,decreasing = T),]
+# 
+# # summary validation ^^^ ----
