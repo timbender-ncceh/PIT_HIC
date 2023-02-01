@@ -1,4 +1,10 @@
 
+fun_flag_nmfhh_and_1day_before.after_pitnight <- function(hh_cls1, hh_cls_infodate1, 
+                                                          pit.night1){
+  ((hh_cls1 == "16" | hh_cls1 == 16) & !is.na(hh_cls1)) & 
+    hh_cls_infodate1 != pit.night1
+}
+
 get_xl.date.numeric <- function(unix_date = ymd(20200501)){
   require(lubridate)
   return(as.numeric(unix_date) + 25569)
