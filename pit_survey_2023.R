@@ -12,18 +12,19 @@ rm(list=ls())
 cat('\f')
 gc()
 
-# re-run 2023 pit data every friday morning until 3/31/2023
+# re-run 2023 pit data every thursday morning until 3/31/2023
 
-fri.hmis.pulls.complete <- ymd(c(20230127)) # update this after you pull and export new data each friday
+thurs.hmis.pulls.complete <- ymd(c(20230202)) # update this after you pull and export new data each thursday
 
-as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Friday"
-
-# build hmis search: 
+if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
+   !Sys.Date() %in% thurs.hmis.pulls.complete){
+  # build hmis search: 
 # BoS FY 2022 unsheltered whole CoC reporting group (2504)
 # Unsheltered PIT Custom CSV 1/22/23 - 2/4/23 (For Tim!)
 # 1/22/2023 - 2/04/2023
-
-
+  print("https://app.smartsheet.com/sheets/9gH67xJw5FXM2FvWr5j9MmJWqX53qp5qXPcQ7V51?view=grid")
+  stop("Upload new export Today")
+}
 
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
@@ -892,6 +893,9 @@ nicole_filter2 <- output3$hh_cls == 16 &
 
 output3 <- output3[nicole_filter1 | nicole_filter2,]
 
+output3$hh_cls <- lapply(X = output3$hh_cls, 
+       FUN = fun_livingsituation_def) %>% unlist()
+
 # output3 %>%
 #   group_by(DQ_flag_type) %>%
 #   summarise(current_n = n())
@@ -904,7 +908,7 @@ output3 <- output3[nicole_filter1 | nicole_filter2,]
 
 
 if(year(pit.night) == 2023){
-  out.name <- glue("nicole_output2023__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
+  out.name <- glue("DQ_Flag2023__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }else{
   out.name <- glue("nicole_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }
