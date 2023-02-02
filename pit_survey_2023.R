@@ -18,6 +18,12 @@ fri.hmis.pulls.complete <- ymd(c(20230127)) # update this after you pull and exp
 
 as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Friday"
 
+# build hmis search: 
+# BoS FY 2022 unsheltered whole CoC reporting group (2504)
+# Unsheltered PIT Custom CSV 1/22/23 - 2/4/23 (For Tim!)
+# 1/22/2023 - 2/04/2023
+
+
 
 # NOTE----
 print("For hud pit survey for the night of Jan 26th, Entered on January 26th, Exited on Jaunary 27th")
@@ -136,15 +142,22 @@ a.rando.key <- paste(sample(c(letters,LETTERS,0:9), size = 100,replace = T),sep=
 
 if(sum(is_hashed(a.client$SSN),na.rm = T)== 0){
   a.client$SSN <- openssl::sha256(x = as.character(a.client$SSN), key = a.rando.key)
+  write_csv(x = a.client, 
+            file = "Client.csv")
 }
 
 if(sum(is_hashed(a.client$FirstName),na.rm = T)== 0){
   a.client$FirstName <- openssl::sha256(x = as.character(a.client$FirstName), key = a.rando.key)
+  write_csv(x = a.client, 
+            file = "Client.csv")
 }
 
 if(sum(is_hashed(a.client$LastName),na.rm = T)== 0){
   a.client$LastName <- openssl::sha256(x = as.character(a.client$LastName), key = a.rando.key)
+  write_csv(x = a.client, 
+            file = "Client.csv")
 }
+
 
 rm(a.rando.key)
 # /pii hash check
@@ -1114,7 +1127,9 @@ if(year(pit.night) == 2023){
   out.name.andrea <- glue("andrea_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }
 
-
+# temp
+dropped.pids <- c(1012525,1038814,1038813,1017964)
+#output2[output2$PersonalID %in% c(1012525,1038814,1038813,1017964),]
 
 write.xlsx(x = output2[!duplicated(output2),], 
            file = out.name.andrea)
@@ -1192,6 +1207,8 @@ colnames(output) %>%
 
 colnames(output2) %>% grep("cls", ., ignore.case = T, value = T)
 
+table(output2$PersonalID %in% dropped.pids)
+
 output3 <- output2 %>%
   .[!duplicated(.),] %>%
   # filter out dates not during pit week [added 2023-01-25]
@@ -1248,8 +1265,8 @@ output3 <- output2 %>%
   .[!is.na(.$EnrollmentID),] %>%
   .[!colnames(.) %in% c("value","EnrollmentID")]
   
-output3
-
+#output3[output3$PersonalID %in% dropped.pids,]$PersonalID %>% unique()
+output2[output2$PersonalID %in% dropped.pids,]$hh_cls_infodate
 colnames(output3)
 output3$DQ_flag_type %>% unique()
 grep("^flag", colnames(output2), ignore.case = T, value = T)
