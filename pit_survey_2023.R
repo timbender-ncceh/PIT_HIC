@@ -14,7 +14,7 @@ gc()
 
 # re-run 2023 pit data every thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230202)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230209)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
@@ -23,7 +23,7 @@ if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" &
 # Unsheltered PIT Custom CSV 1/22/23 - 2/4/23 (For Tim!)
 # 1/22/2023 - 2/04/2023
   print("https://app.smartsheet.com/sheets/9gH67xJw5FXM2FvWr5j9MmJWqX53qp5qXPcQ7V51?view=grid")
-  stop("Upload new export Today")
+  stop("Upload new export Today") # stops the code unless you've uploaded weeklies
 }
 
 # NOTE----
