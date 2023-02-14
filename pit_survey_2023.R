@@ -299,11 +299,38 @@ a.exit$destination_def <- unlist(lapply(a.exit$Destination, fun_livingsituation_
 table(a.exit$destination_def, useNA = "always")
 
 # CurrentLivingSituation Checks (this is the last thing working on tuesday night)----
+
+# TO-DO----
+
+# TO DO:  (AS OF 2-10-2023): THERE IS AN ISSUE WITH THE OUTPUT2A (ANDREA'S
+# OUTPUT) GENEREATING A REALLY SMALL # OF UNSHELETERED PEOPLE ON PIT NIGHT (LIKE
+# 25) WHEN A LARGER NUMBER IS EXPECTED (I.E. 867).  THE RAW DATA ENROLLMENT.CSV
+# AT THE INDIVIDUAL LEVEL SHOWS CLOSER TO 867 WHEN CALCULATED FROM SCRATCH
+# OUTSIDE OF THIS CODE, SO WE NEED TO TRACK DOWN WHERE THE PROBLEM IS HAPPENING.
+# SIDE-NOTE: LOOK INTO DATE FILTERS BECAUSE THE HMIS EXPORT IS DOING THAT
+# AUTOMATICALLY, AND ANY DATE FILTERS IN HERE MAY BE GUMMING UP THE WORKS.
+# Related to hh_cls
+
+
 a.currentlivingsituation <- read_csv("CurrentLivingSituation.csv")
 
 out.cls <- calc_CLS_final(a.enr = a.enrollment, 
                           a.cls = a.currentlivingsituation)
 
+# the number below should be roughly equal to the smartsheet total figure: 
+out.cls %>%
+  group_by(HouseholdID, hh_cls, 
+           hh_cls_infodate) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  .$n_pid %>% sum
+  
+
+# TO-DO: (2-10-2020)----
+# somewhere individual CurrentLivingSituation is being over-written bc/ of andrea pivot table in chat on 2/10/23 at 12:00 noon
 out.cls$currentLivingSituation_def <- unlist(lapply(out.cls$CurrentLivingSituation,
                                                     fun_livingsituation_def))
 out.cls$InformationDate_cls <- out.cls$InformationDate
@@ -312,7 +339,16 @@ out.cls <- out.cls[!colnames(out.cls) %in%
 
 a.enrollment <- left_join(a.enrollment, 
                           out.cls)
-
+# the number below should be roughly the same as the total number in the smartsheet tracker:
+a.enrollment %>%
+  group_by(HouseholdID, hh_cls, 
+           hh_cls_infodate) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  .$n_pid %>% sum
 
 # Project Checks----
 a.project <- read_csv("Project.csv")
@@ -329,8 +365,6 @@ a.projectcoc$proj_county <- get.proj_county(proj_zip = a.projectcoc$ZIP,
 a.enrollment$calc_location_county <- NA
 a.enrollment$calc_region <- NA
 
-
- 
 for(i in 1:nrow(a.enrollment)){
   
   if(length(unique(a.project$HousingType[a.project$ProjectID == a.enrollment$ProjectID[i]])) > 1){
@@ -377,6 +411,17 @@ for(i in 1:nrow(a.enrollment)){
   
 }
 
+# the number below should be roughly the same as the total number in the smartsheet tracker:
+a.enrollment %>%
+  group_by(HouseholdID, hh_cls, 
+           hh_cls_infodate) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  .$n_pid %>% sum
+
 a.enrollment$calc_location_county_flag <- NA
 for(i in unique(a.enrollment$HouseholdID)){
   
@@ -404,6 +449,18 @@ for(i in unique(a.enrollment$HouseholdID)){
   rm(flag1,flag2a,flag2b,flag3,n_hh_pids,n_hh_hoh,hoh_loc_co)
   
 }
+
+# the number below should be roughly the same as the total number in the smartsheet tracker:
+a.enrollment %>%
+  group_by(HouseholdID, hh_cls, 
+           hh_cls_infodate) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  .$n_pid %>% sum
+
 
 # dropping in some code developed from "nccounty_logic.R"
 
@@ -467,6 +524,16 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in%
                                  "currentLivingSituation_def", #"CurrentLivingSituation",
                                  flag_colnames(a.enrollment))]
 
+# the number below should be roughly the same as the total number in the smartsheet tracker:
+b.enrollment %>%
+  group_by(HouseholdID, hh_cls, 
+           hh_cls_infodate) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  .$n_pid %>% sum
 
 colnames(a.currentlivingsituation)
 grep("_def|CurrentLivingSituation", colnames(a.enrollment), value = T, ignore.case = T)
@@ -535,16 +602,43 @@ b.inventory <- a.inventory[colnames(a.inventory) %in%
 
 #pit.eids----
 
+# this is where the ERROR is happening (20230214)----
 
-c.enrollment             <- inner_join(b.enrollment, pit.eids)
-c.exit                   <- inner_join(b.exit, pit.eids)
-c.currentlivingsituation <- inner_join(b.currentlivingsituation, pit.eids)
-c.client                 <- b.client[b.client$PersonalID %in% c.enrollment$PersonalID,]
-c.screened.pos.disab_df  <- screened.pos.disab_df[screened.pos.disab_df$EnrollmentID %in% 
-                                                    pit.eids$EnrollmentID,]
-c.healthanddv            <- b.healthanddv[b.healthanddv$EnrollmentID %in%
-                                            pit.eids$EnrollmentID,]
+# no need to join to pit.eids because that is a table that attempts to filter
+# down to pit-night but the dataset already does that implicitly.
 
+#c.enrollment             <- inner_join(b.enrollment, pit.eids) 
+c.enrollment              <- b.enrollment
+
+# the number below should be roughly the same as the total number in the smartsheet tracker:
+c.enrollment %>%
+  group_by(HouseholdID, hh_cls, 
+           hh_cls_infodate) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  .$n_pid %>% sum
+# it's not
+
+# what is pit.eids? 
+
+
+
+#c.exit                   <- inner_join(b.exit, pit.eids)
+c.exit                    <- b.exit
+#c.currentlivingsituation <- inner_join(b.currentlivingsituation, pit.eids)
+c.currentlivingsituation <- b.currentlivingsituation
+#c.client                 <- b.client[b.client$PersonalID %in% c.enrollment$PersonalID,]
+c.client                  <- b.client
+# c.screened.pos.disab_df  <- screened.pos.disab_df[screened.pos.disab_df$EnrollmentID %in% 
+#                                                     pit.eids$EnrollmentID,]
+c.screened.pos.disab_df  <- screened.pos.disab_df
+
+# c.healthanddv            <- b.healthanddv[b.healthanddv$EnrollmentID %in%
+#                                             pit.eids$EnrollmentID,]
+c.healthanddv            <- b.healthanddv
 
 
 # 2023-01-25 NOTE: works up to this point----
@@ -781,6 +875,17 @@ andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
                "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
 
 # / 2023-02-07: change col orders for andrea: 
+
+output2A %>%
+  .[!duplicated(.),] %>%
+  .[.$hh_cls == 16 & 
+      !is.na(.$hh_cls),] %>%
+  .[!is.na(.$hh_cls_infodate) & 
+      .$hh_cls_infodate == pit.night,] %>%
+  group_by(PersonalID) %>%
+  summarise(n = n())
+  
+
 
 
 write.xlsx(x = output2A[!duplicated(output2A),], 
