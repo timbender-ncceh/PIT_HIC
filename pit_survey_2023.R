@@ -14,12 +14,12 @@ gc()
 
 # re-run 2023 pit data every thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230209)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230216)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
   # build hmis search: 
-# BoS FY 2022 unsheltered whole CoC reporting group (2504)
+# BoS FY 2022 unsheltered whole CoC reporting group (2507)
 # Unsheltered PIT Custom CSV 1/22/23 - 2/4/23 (For Tim!)
 # 1/22/2023 - 2/04/2023
   print("https://app.smartsheet.com/sheets/9gH67xJw5FXM2FvWr5j9MmJWqX53qp5qXPcQ7V51?view=grid")
