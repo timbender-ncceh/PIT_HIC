@@ -202,13 +202,17 @@ get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036),
   return(out)
 }
 
-get.calc_region <- function(calc_location_county){
+get.calc_region <- function(calc_location_county = NA){
   require(dplyr)
-  
+  out <- NA
   # case_correct
   clc <- tolower(calc_location_county)
-  clc <- paste(toupper(substr(clc,1,1)), substr(clc,2,nchar(clc)), 
-               sep = "", collapse = "")
+  
+  if(!is.na(clc)){
+    clc <- paste(toupper(substr(clc,1,1)), substr(clc,2,nchar(clc)), 
+                 sep = "", collapse = "")
+  }
+  
   
   try(calc_location_county <- clc)
   
