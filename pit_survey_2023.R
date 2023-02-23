@@ -27,6 +27,7 @@ if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" &
   # START DATE: 1/22/2023  
   # END DATE: 2/04/2023
   
+  print("Data goes in C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data")
   print("https://app.smartsheet.com/sheets/9gH67xJw5FXM2FvWr5j9MmJWqX53qp5qXPcQ7V51?view=grid")
   stop("Upload new export Today") # stops the code unless you've uploaded weeklies
 }
@@ -1124,3 +1125,5 @@ if(year(pit.night) == 2023){
 write.xlsx(x = output3, 
            file = out.name)
 
+
+# TO DO: backup most recent data inputs and outputs to network----
