@@ -404,8 +404,12 @@ for(i in 1:nrow(a.enrollment)){
   # if you don't get a region back (i.e. NA returned above)
   if(is.na(a.enrollment$calc_region[i])){
     # see if you can extract county from project name
-    temp <- search_region.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
-      unique()
+    temp <- search_county.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
+      unique() %>%
+      gsub("county$|co$| co.*$", "", ., ignore.case = T) %>%
+      trimws() %>%
+      get.calc_region()
+    
     
     if(length(temp) == 1 & 
        !is.na(temp)){
@@ -416,6 +420,13 @@ for(i in 1:nrow(a.enrollment)){
   
   
 }
+
+# id missing regions (20230223)----
+a.enrollment[is.na(a.enrollment$calc_region),]$ProjectID
+
+a.project[a.project$ProjectID %in% a.enrollment[is.na(a.enrollment$calc_region),]$ProjectID,]$ProjectName
+
+
 
 # the number below should be roughly the same as the total number in the smartsheet tracker:
 a.enrollment %>%
