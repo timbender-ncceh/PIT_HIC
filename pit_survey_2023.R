@@ -403,43 +403,44 @@ for(i in 1:nrow(a.enrollment)){
   a.enrollment$calc_region[i] <- get.calc_region(a.enrollment$calc_location_county[i])
   # if you don't get a region back (i.e. NA returned above)
   if(is.na(a.enrollment$calc_region[i])){
-    # see if you can extract county from project name
+    # see if you can extract county from project name, then join region<-->county table
     
-    # problem for 20230224 -----
-    # this VVVV code is trying to search county name instead of region name.  i need it to do a regex  search of the text for region.
+    # this code vvv is trying to get region by first getting county name from
+    # project name, then doing the join. that's 1 way, but sometimes this
+    # doesn't work, so when it doesn't work, we'll have to do a different way
+    # (see below it)
     temp <- search_county.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
       unique() %>%
       gsub("county$|co$| co.*$", "", ., ignore.case = T) %>%
       trimws() %>%
       get.calc_region()
     
+    # the other way is to skip county name altogether and search for region name
+    # in project name as below vvv
+    temp2 <- search_region.names(projname = a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
+      unique()
     
-    if(length(temp) == 1 & 
-       !is.na(temp)){
+    # figure out which is better - method 1 or method 2
+    
+    if(identical(x = temp, y = temp2) & # ... if temp and temp2 are identical AND length == 1
+      identical(length(temp) == 1, length(temp2) == 1)) {
       a.enrollment$calc_region[i] <- temp
+    }else if( !is.na(temp) & length(temp) == 1 ){ # ... if temp is not NA AND temp is length == 1
+      a.enrollment$calc_region[i] <- temp
+    }else if(!is.na(temp2) & length(temp2) == 1){ # ... if temp2 is not NA AND temp2 is length == 1
+      a.enrollment$calc_region[i] <- temp2
+    }else if( sum(grepl("Region", unique(c(temp,temp2)))) == 1 ) {  # ... if, out of all of the unique values of temp and temp2, there is only 1 that contains "Region", use that one
+      a.enrollment$calc_region[i] <- grep("Region", unique(c(temp,temp2)), value = T)
     }
-    rm(temp)
+    
+    
+    # if(length(temp) == 1 & 
+    #    !is.na(temp)){
+    #   a.enrollment$calc_region[i] <- temp
+    # }
+    rm(temp,temp2)
   }
-  
-  
 }
-
-# id missing regions and counties (20230223) (you are here right now)----
-a.enrollment[is.na(a.enrollment$calc_region),]$ProjectID
-
-a.project[a.project$ProjectID %in% a.enrollment[is.na(a.enrollment$calc_region),]$ProjectID,]$ProjectName
-a.enrollment$NCCounty
-
-a.enrollment[a.enrollment$PersonalID %in% 
-               c("65373", "189243", "1035429", "1039216", "1039267", "1039201", "1013072",
-                 "1013071", "1013070", "1013069", "1036054", "1036053", "1013073", "1030457", "1030456", 
-                 "1030454", "1036142", "1036141", "1036854", 
-                 "1030469", "1030467", "1036003", "1030482", "1039171", "1039226"),
-             c("PersonalID", "ProjectID",
-               "NCCounty", "calc_location_county", "calc_region")] %>%
-  left_join(., a.project[,c("ProjectID", "ProjectName")])
-
-
 
 # the number below should be roughly the same as the total number in the smartsheet tracker:
 a.enrollment %>%
