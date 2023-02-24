@@ -1208,4 +1208,28 @@ write.xlsx(x = output3,
            file = out.name)
 
 
-# TO DO: backup most recent data inputs and outputs to network----
+#backup most recent data inputs and outputs to network----
+backup.dir   <- "C:/Users/TimBender/North Carolina Coalition to End Homelessness/PM Data Center - Documents/Reporting/Reporting  PIT HIC/2023 PIT HIC/05 - Data Analysis/Unsheltered_Report_Outputs"
+csv.file.dir
+
+# In output dir
+setwd(backup.dir)
+
+already.backed.up.files <- list.files(pattern = "\\.xlsx$")
+  
+setwd(csv.file.dir)
+backup.these.files <- list.files(pattern = "\\.xlsx$")
+
+if(length(already.backed.up.files) > 0){
+  # select files which aren't already there
+  backup.these.files <- backup.these.files[!backup.these.files %in% already.backed.up.files]
+}
+  # move files
+  #getwd() == csv.file.dir
+
+if(length(backup.these.files) > 0){
+  file.copy(backup.these.files, 
+            paste(backup.dir, backup.these.files, sep = "/"), overwrite = T)
+}
+  
+setwd(csv.file.dir)
