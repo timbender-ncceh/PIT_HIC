@@ -905,20 +905,77 @@ colnames(output2A)
 andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested", 
                "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
 
-# / 2023-02-07: change col orders for andrea: 
+# # / 2023-02-07: change col orders for andrea: 
+# 
+# output2A %>%
+#   .[!duplicated(.),] %>%
+#   .[.$hh_cls == 16 & 
+#       !is.na(.$hh_cls),] %>%
+#   .[!is.na(.$hh_cls_infodate) & 
+#       .$hh_cls_infodate == pit.night,] %>%
+#   group_by(PersonalID) %>%
+#   summarise(n = n())
+#   
 
-output2A %>%
-  .[!duplicated(.),] %>%
-  .[.$hh_cls == 16 & 
-      !is.na(.$hh_cls),] %>%
-  .[!is.na(.$hh_cls_infodate) & 
-      .$hh_cls_infodate == pit.night,] %>%
-  group_by(PersonalID) %>%
-  summarise(n = n())
+# added new logic related to [negate flag_nmfhh_and_1day_before.after_pitnight when hh_cls == 16 and hh_cls_infodate == pit.night]----
+# treat NA values as though they are 99
+
+
+#output2A$flag_nmfhh_and_1day_before.after_pitnight2 <- output2A$flag_nmfhh_and_1day_before.after_pitnight
+
+for(i in unique(output2A$PersonalID)){
+  temp <- output2A[output2A$PersonalID %in% i,]
+ 
+  if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
+    (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
+    #output2A$flag_nmfhh_and_1day_before.after_pitnight2[output2A$PersonalID %in% i] <- F
+    output2A$flag_nmfhh_and_1day_before.after_pitnight[output2A$PersonalID %in% i] <- F
+  }
   
+  rm(temp)
+}
 
+# output2A %>%
+#   group_by(flag_nmfhh_and_1day_before.after_pitnight, 
+#            flag_nmfhh_and_1day_before.after_pitnight2) %>%
+#   summarise(n = n())
+# 
 
+# temp.pids.eids2 <- data.frame(problem_id = NA, 
+#                               PersonalID   = c(118037,192303,211462,273622,275889,277824), 
+#                               EnrollmentID = c(1099292,1185122,1184346,1181370,1161864,1149230)) %>%
+#   as_tibble() %>%
+#   mutate(., 
+#          pid_eid = paste(PersonalID,EnrollmentID,sep = "_"))
+# 
+# gen.pid_eid(temp.pids.eids2$PersonalID, 
+#             temp.pids.eids2$EnrollmentID)
+# 
+# temp.pids.eids2$problem_id <- 1:nrow(temp.pids.eids2)
+# temp.pids.eids2
+# 
+# grep(pattern = "", x = colnames(output2A), ignore.case =  T, value = T)
+# 
+# output2A %>%
+#   .[.$PersonalID == 118037 & .$EnrollmentID == 1099292,
+#     c("PersonalID", "EnrollmentID", "hh_cls", "hh_cls_infodate", 
+#       "flag_nmfhh_and_1day_before.after_pitnight")]
+# 
+# table(output2A$flag_nmfhh_and_1day_before.after_pitnight)
+# table(ifelse(unlist(lapply(X = output2A$hh_cls, identical, "16")) & 
+#                unlist(lapply(X = output2A$hh_cls_infodate, identical, pit.night)),F,output2A$flag_nmfhh_and_1day_before.after_pitnight))
+# 
+# output2A$flag_nmfhh_and_1day_before.after_pitnight[(output2A$hh_cls == "16" & !is.na(output2A$hh_cls)) & 
+#   (output2A$hh_cls_infodate == pit.night & !is.na(output2A$hh_cls_infodate))] 
+# 
+# ifelse(unlist(lapply(X = output2A$hh_cls, identical, "16")) & 
+#   unlist(lapply(X = output2A$hh_cls_infodate, identical, pit.night)),F,output2A$flag_nmfhh_and_1day_before.after_pitnight)
+# 
+# sum(output2A$flag_nmfhh_and_1day_before.after_pitnight) - 
+#   sum(ifelse(unlist(lapply(X = output2A$hh_cls, identical, "16")) & 
+#                unlist(lapply(X = output2A$hh_cls_infodate, identical, pit.night)),F,output2A$flag_nmfhh_and_1day_before.after_pitnight))
 
+# write output to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
            file = out.name.andrea)
 
