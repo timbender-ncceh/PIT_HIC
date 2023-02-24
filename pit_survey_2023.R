@@ -404,6 +404,9 @@ for(i in 1:nrow(a.enrollment)){
   # if you don't get a region back (i.e. NA returned above)
   if(is.na(a.enrollment$calc_region[i])){
     # see if you can extract county from project name
+    
+    # problem for 20230224 -----
+    # this VVVV code is trying to search county name instead of region name.  i need it to do a regex  search of the text for region.
     temp <- search_county.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
       unique() %>%
       gsub("county$|co$| co.*$", "", ., ignore.case = T) %>%
@@ -421,10 +424,20 @@ for(i in 1:nrow(a.enrollment)){
   
 }
 
-# id missing regions (20230223)----
+# id missing regions and counties (20230223) (you are here right now)----
 a.enrollment[is.na(a.enrollment$calc_region),]$ProjectID
 
 a.project[a.project$ProjectID %in% a.enrollment[is.na(a.enrollment$calc_region),]$ProjectID,]$ProjectName
+a.enrollment$NCCounty
+
+a.enrollment[a.enrollment$PersonalID %in% 
+               c("65373", "189243", "1035429", "1039216", "1039267", "1039201", "1013072",
+                 "1013071", "1013070", "1013069", "1036054", "1036053", "1013073", "1030457", "1030456", 
+                 "1030454", "1036142", "1036141", "1036854", 
+                 "1030469", "1030467", "1036003", "1030482", "1039171", "1039226"),
+             c("PersonalID", "ProjectID",
+               "NCCounty", "calc_location_county", "calc_region")] %>%
+  left_join(., a.project[,c("ProjectID", "ProjectName")])
 
 
 
