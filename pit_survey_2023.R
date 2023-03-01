@@ -396,6 +396,11 @@ for(i in unique(a.enrollment$HouseholdID)){
   
 }
 
+# remove clc suffix
+a.enrollment$calc_location_county <- a.enrollment$calc_location_county %>% 
+  gsub("County", "", .) %>%
+  trimws()
+
 # # the number below should be roughly the same as the total number in the smartsheet tracker:
 # a.enrollment %>%
 #   group_by(HouseholdID, hh_cls, 
