@@ -14,7 +14,7 @@ gc()
 
 # re-run 2023 pit data every thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230223)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230302)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
@@ -753,13 +753,27 @@ andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
 
 # added new logic related to [dealing with hh_cls and  hh_cls_infodate duplication]---- 
 
+# do this once for output2A
 for(i in unique(output2A$PersonalID)){
+ 
   temp <- output2A[output2A$PersonalID %in% i,]
  
   if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
     (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
-    #output2A$flag_nmfhh_and_1day_before.after_pitnight2[output2A$PersonalID %in% i] <- F
     output2A$flag_nmfhh_and_1day_before.after_pitnight[output2A$PersonalID %in% i] <- F
+  }
+  
+  rm(temp)
+}
+
+# do it again for output2 so that it gets carried down to DQ_Flag...
+for(i in unique(output2$PersonalID)){
+  
+  temp <- output2[output2$PersonalID %in% i,]
+  
+  if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
+         (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
+    output2$flag_nmfhh_and_1day_before.after_pitnight[output2$PersonalID %in% i] <- F
   }
   
   rm(temp)
