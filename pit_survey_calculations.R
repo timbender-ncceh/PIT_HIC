@@ -1,4 +1,41 @@
 
+pit_xls_info <- function(filenames){
+  require(lubridate)
+  require(dplyr)
+  filenames <- filenames[which(unlist(lapply(strsplit(the.xls.files, "2023__"), first)) %in% 
+                                 c("andrea_output", "DQ_Flag"))]
+  
+  
+  
+  df.out <- data.frame(which_file =  unlist(lapply(strsplit(x = filenames, 
+                                                            split = "2023__"), 
+                                                   first)), 
+                       file_name = filenames, 
+                       file_date = ymd(gsub("_HR.*$", "", 
+                                            gsub("\\.xlsx$", "", 
+                                                 unlist(lapply(strsplit(x = filenames, 
+                                                                        split = "2023__"), 
+                                                               last)))))) %>%
+    as_tibble()
+  
+  df.out$file_datetime <- as_datetime(df.out$file_date) %m+% 
+    hours(as.numeric(unlist(lapply(strsplit(gsub("\\.xlsx$", "", 
+                                                 unlist(lapply(strsplit(x = filenames, 
+                                                                        split = "2023__"), 
+                                                               last))), 
+                                            split = "_HR"), 
+                                   last)))) %>%
+    force_tz(., tzone = Sys.timezone())
+  
+  df.out <- mutate(df.out, 
+                   year = year(file_date),
+                   month = lubridate::month(file_date, abbr = T, label = F), 
+                   mday = mday(file_date),
+                   dow   = lubridate::wday(file_date, label = T, abbr = T), 
+                   hr.day = as.numeric(strftime(file_datetime, format = "%H")))
+  return(df.out)
+}
+
 fun_flag_nmfhh_and_1day_before.after_pitnight <- function(hh_cls1, hh_cls_infodate1, 
                                                           pit.night1){
   ((hh_cls1 == "16" | hh_cls1 == 16) & !is.na(hh_cls1)) & 
@@ -304,6 +341,7 @@ get.calc_region <- function(calc_location_county = NA){
   
   return(out1)
 }
+
 
 
 search_region.names <- function(projname = "Greenville Community Shelters - (Region 1) Pitt County - Emergency Shelter - ES - State ESG CV"){
