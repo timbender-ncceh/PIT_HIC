@@ -992,6 +992,66 @@ write.xlsx(x = output3,
            file = out.name)
 
 
+# plot flags by thursday file pulldown----
+
+dqfiles <- list.files(pattern = "\\.xlsx$") %>%
+  grep("^DQ_Flag", ., value = T)
+
+dq.flag.count <- NULL
+
+for(i in dqfiles){
+  temp <- read.xlsx(i) %>% 
+    as_tibble() %>%
+    group_by(filename = i,
+             #calc_region,
+             DQ_flag_type) %>%
+    summarise(n = n())
+  
+  dq.flag.count <- rbind(dq.flag.count, 
+                         temp)
+  rm(temp)
+  
+}
+
+
+dq.file.info <- pit_xls_info(dqfiles) %>%
+  .[.$which_file == "DQ_Flag",]
+
+
+plot.data <- as_tibble(dq.flag.count) %>%
+  group_by(filename, 
+           #calc_region
+  ) %>%
+  summarise(t_flags = sum(n)) %>%
+  right_join(., dq.file.info, 
+             by = c("filename" = "file_name")) %>%
+  .[.$dow == "Thu",] %>%
+  group_by(file_date) %>%
+  slice_max(., order_by = file_datetime, n = 1)
+
+ggplot() +
+  geom_vline(aes(xintercept = ymd_hm("20230125 12:00"), 
+                 color = "pit night"), linetype = 2, size = 1) + 
+  geom_line(data = plot.data, 
+            aes(x = file_datetime, y = t_flags, 
+                color = "thursday reports")) +
+  geom_point(data = plot.data,size = 5,
+             aes(x = file_datetime, y = t_flags, 
+                 color = "thursday reports")) +
+  scale_color_discrete(name = "Legend")+
+  scale_x_datetime(limits = c(ymd_hm("20230101 01:00", NA)), 
+                   date_breaks = "1 week", 
+                   date_labels = "%b %d (%a)", 
+                   name = "Date")+
+  scale_y_continuous(breaks = seq(0,1000,by=100), 
+                     name = "Total Flags")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1), 
+        legend.position = "right")+
+  labs(title = "Total Flags - DQ_Flag....xlsx files by date of file generation")+
+  geom_vline(aes(xintercept = Sys.time(), color = "today"), linetype = 2, size = 1)
+
+
+
 #backup most recent data inputs and outputs to network----
 backup.dir   <- "C:/Users/TimBender/North Carolina Coalition to End Homelessness/PM Data Center - Documents/Reporting/Reporting  PIT HIC/2023 PIT HIC/05 - Data Analysis/Unsheltered_Report_Outputs"
 csv.file.dir
