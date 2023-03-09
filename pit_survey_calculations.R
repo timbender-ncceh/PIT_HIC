@@ -2,7 +2,7 @@
 pit_xls_info <- function(filenames){
   require(lubridate)
   require(dplyr)
-  filenames <- filenames[which(unlist(lapply(strsplit(the.xls.files, "2023__"), first)) %in% 
+  filenames <- filenames[which(unlist(lapply(strsplit(filenames, "2023__"), first)) %in% 
                                  c("andrea_output", "DQ_Flag"))]
   
   
