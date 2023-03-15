@@ -18,6 +18,11 @@ rm(list=ls())
 cat('\f')
 gc()
 
+
+
+# note:  veterans are not alaways hoh so don't encode logic to account for hoh
+# necessarily
+
 # funs----
 
 get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
