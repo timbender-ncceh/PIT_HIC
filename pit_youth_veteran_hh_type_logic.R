@@ -156,7 +156,7 @@ is.parentchild <- ifelse(length(some.ages) > 1 & any(some.ages > 17) & any(some.
 get_youth.hh.info(hh_pid_ages.v = some.ages, 
                   with_parent.child = is.parentchild)
 
-# EXAMPLE 1: ----
+# EXAMPLE 1:
 
 # AGES:	2 11 22
 # PARENT:	FALSE
@@ -176,7 +176,7 @@ get_youth.hh.info(hh_pid_ages.v = c(2,11,22),
 
 
 
-# EXAMPLE 2:----
+# EXAMPLE 2:
 
 # AGES:	7 36
 # PARENT:	TRUE
@@ -193,3 +193,9 @@ get_youth.hh.info(hh_pid_ages.v = c(7,36),
 # 
 # $youth.hh.subtype
 # [1] NA  (not yet finished)
+
+# QA Quality Check on full dataset----
+
+# to do:  when you run the full hmis data through this, complete a summary of
+# outputs so we have an idea of relative sizes of each category as a quality
+# check.
