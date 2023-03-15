@@ -20,7 +20,7 @@ gc()
 
 # funs----
 
-get_youth.hh.info <- function(hh_pid_ages.v, 
+get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
                               with_parent.child = F){
   require(dplyr)
   require(data.table)
@@ -30,12 +30,21 @@ get_youth.hh.info <- function(hh_pid_ages.v,
   hh_pid_ages.v <- hh_pid_ages.v %>%
     .[order(.)]
   
+  # error checking
+  # if is.null(age.hoh) & length(hh_pid_ages) > 1
+  
+  # possible flags
+  poss.flags <- NULL
+  
+  
+  
+  
   # need to return
   is_youth_hh      <- c(T,F)
-  youth_hh_type    <- c("Households without children",
-                        "Households with at least 1 adult and 1 child",
-                        "Households with only children")
-  youth_hh_subtype <- c("Unaccompanied youth (18-24)",
+  youth_hh_type    <- c("Households without children (18+)",  # children =/= youth
+                        "Households with at least 1 adult and 1 child (<18 & 18+ in one hh)",
+                        "Households with only children (<18)")
+  youth_hh_subtype <- c("Unaccompanied youth (18-24)",        # children =/= youth
                         "Parenting youth (18-24)",
                         "Children of parenting youth",
                         "Unaccompanied youth (<18 & 18-24 in one hh)",
@@ -99,13 +108,15 @@ get_youth.hh.info <- function(hh_pid_ages.v,
     "Other people (18-24)")
   
   
-  
+  # step 1: age grouping 
   if(all(between(x = hh_pid_ages.v, 
              lower = 18, 
              upper = 24))){
+    # step 2a: hh size = 1 AND parent-child
     if(length(hh_pid_ages.v) > 1 & 
        with_parent.child == T){
-      youth_hh_subtype <- "Unaccompanied youth (18-24)"
+      youth_hh_subtype <- c("<ERROR - this would be a hh with a parent and child, but everybody is 18-24>")
+      # else hh size != 1 AND not parent-child
     }else{
       youth_hh_subtype <- "Unaccompanied youth (18-24)"
     }
@@ -139,11 +150,11 @@ some.ages <- sample(1:45, size = sample(1:3, size = 1), replace = T)
 
 # decide (randomly, but with some logic) whether there is a parent-child
 # relationship in household
-is.parent <- ifelse(length(some.ages) > 1 & any(some.ages > 17) & any(some.ages <= 17), sample(c(T,F), size = 1), F)
+is.parentchild <- ifelse(length(some.ages) > 1 & any(some.ages > 17) & any(some.ages <= 17), sample(c(T,F), size = 1), F)
 
 # run script
 get_youth.hh.info(hh_pid_ages.v = some.ages, 
-                  with_parent.child = is.parent)
+                  with_parent.child = is.parentchild)
 
 # EXAMPLE 1: ----
 
