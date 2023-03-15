@@ -23,8 +23,8 @@ gc()
 
 # funs----
 
-hh_pid_ages.v <- c(24,2,32)
-age.hoh <- 32
+hh_pid_ages.v <- c(21)
+age.hoh <- 21
 
 get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL){
   require(dplyr)
@@ -93,7 +93,7 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL){
     }
     # hh with only children [all ages < 18 or]
     if(all(hh_pid_ages.v < 18)){
-      youth_hh_type <- "Housholds with only children"
+      youth_hh_type <- "Households with only children"
     }
   }else{
     # cannot be hh with at least 1 adult and 1 child
@@ -107,7 +107,7 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL){
     }
     # hh with only children [all ages < 18]
     if(all(hh_pid_ages.v < 18)){
-      youth_hh_type <- "Housholds with only children"
+      youth_hh_type <- "Households with only children"
     }
   }
   
@@ -173,6 +173,9 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL){
   if(is_youth_hh){
     if(youth_hh_type == "Households with at least 1 adult and 1 child"){
       youth_hh_subtype <- c("Parenting youth", "Children of parenting youth")
+    }else if(youth_hh_type %in% c("Households with only children", 
+                                  "Households without children")){
+      youth_hh_subtype <- "Unaccompanied youth"
     }else{
       youth_hh_subtype <- NA # this needs to eventually go away.  it's a catch-all for missing logic
     }
@@ -185,9 +188,10 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL){
                             "(18-24)", 
                             "(<18 & 18-24 in one hh)")){
       youth_hh_subtype <- "<ERROR - not possible for house to be not_youth_hh but have all people under 25>"
-    }
-    if(temp.out.age == ("(>=25)")){
+    }else if(temp.out.age == ("(>=25)")){
       youth_hh_subtype <- "Other people (>=25)"
+    }else{
+      youth_hh_subtype <- "<ERROR - this isn't possible - search for 's3a9qm' in code"
     }
     
   }
@@ -242,7 +246,7 @@ for(i in 1:10000){
   test.out <- get_youth.hh.info(hh_pid_ages.v = some.ages, 
                                 age.hoh = hohage)
   
-  if(is.na(test.out$youth.hh.type) | is.na(test.out$youth.hh.subtype)){
+  if(is.na(test.out$youth.hh.type) | any(is.na(test.out$youth.hh.subtype))){
     print(i);get_youth.hh.info(hh_pid_ages.v = some.ages, 
                                age.hoh =  hohage)
     break
@@ -251,46 +255,4 @@ for(i in 1:10000){
 
 get_youth.hh.info(some.ages, hohage)
 
-# EXAMPLE 1:
-
-# AGES:	2 11 22
-# PARENT:	FALSE
-get_youth.hh.info(hh_pid_ages.v = c(2,11,22), 
-                  with_parent.child = FALSE)
-
-# RETURNS:
-#
-# $is.youth.hh
-# [1] TRUE
-# 
-# $youth.hh.type
-# [1] "Housholds with only children"
-# 
-# $youth.hh.subtype
-# [1] "Unaccompanied youth (<18 & 18-24 in one hh)"
-
-
-
-# EXAMPLE 2:
-
-# AGES:	7 36
-# PARENT:	TRUE
-get_youth.hh.info(hh_pid_ages.v = c(7,36), 
-                  with_parent.child = TRUE)
-
-# Returns: 
-#
-# $is.youth.hh
-# [1] FALSE
-# 
-# $youth.hh.type
-# [1] "Households with at least 1 adult and 1 child"
-# 
-# $youth.hh.subtype
-# [1] NA  (not yet finished)
-
-# QA Quality Check on full dataset----
-
-# to do:  when you run the full hmis data through this, complete a summary of
-# outputs so we have an idea of relative sizes of each category as a quality
-# check.
+get_youth.hh.info(c(28,38,38), 28)
