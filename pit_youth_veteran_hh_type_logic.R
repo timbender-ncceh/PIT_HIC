@@ -39,7 +39,7 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
   
   # it's ok for age_of_hoh to be null if the HH size is one;
   # you can imply it.  otherwise it's required.
-  if(!(is.null(age.hoh) & length(hh_pid_ages.v) == 1)){
+  if((is.null(age.hoh) & length(hh_pid_ages.v) > 1)){
     stop("age of Head of Household (age.hoh) must be provided when household size is greater than 1")
   }
   
@@ -83,31 +83,31 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
   
   # hh_type
   if(length(hh_pid_ages.v) > 1){
-    # could be hh with at least 1 adult and 1 child, or [min(age) < 25 & max(age) >= 25 ]
-    if(min(hh_pid_ages.v) < 25 & 
-       max(hh_pid_ages.v) >= 25){
+    # could be hh with at least 1 adult and 1 child, or [min(age) < 18 & max(age) >= 18 ]
+    if(min(hh_pid_ages.v) < 18 & 
+       max(hh_pid_ages.v) >= 18){
       youth_hh_type <- "Households with at least 1 adult and 1 child"
     }
-    # hh without children, or [all ages >= 25] 
+    # hh without children, or [all ages >= 18] 
     if(all(hh_pid_ages.v >= 18)) {
       youth_hh_type <- "Households without children"
     }
-    # hh with only children [all ages < 25 or]
-    if(all(hh_pid_ages.v < 25)){
+    # hh with only children [all ages < 18 or]
+    if(all(hh_pid_ages.v < 18)){
       youth_hh_type <- "Housholds with only children"
     }
   }else{
     # cannot be hh with at least 1 adult and 1 child
-    if(min(hh_pid_ages.v) < 25 & 
-       max(hh_pid_ages.v) >= 25){
+    if(min(hh_pid_ages.v) < 18 & 
+       max(hh_pid_ages.v) >= 18){
       youth_hh_type <- "<ERROR>"
     }
-    # either hh without children or [all ages >= 25]
-    if(all(hh_pid_ages.v >= 25)) {
+    # either hh without children or [all ages >= 18]
+    if(all(hh_pid_ages.v >= 18)) {
       youth_hh_type <- "Households without children"
     }
-    # hh with only children [all ages < 25]
-    if(all(hh_pid_ages.v < 25)){
+    # hh with only children [all ages < 18]
+    if(all(hh_pid_ages.v < 18)){
       youth_hh_type <- "Housholds with only children"
     }
   }
@@ -122,7 +122,6 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
     "Other people (>=25)", 
     "Other people (<18)", 
     "Other people (18-24)")
-  
   
   # step 1: age grouping 
   if(all(between(x = hh_pid_ages.v, 
@@ -160,11 +159,19 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
 }
 
 
+
+
 # testing----
 
 # generate random household of ages and size
 for(i in 1:10000){
+  rm(hohage)
   some.ages <- sample(1:45, size = sample(1:3, size = 1), replace = T)
+  if(length(some.ages) > 1){
+    hohage <- max(some.ages)
+  }else{
+    hohage <- NULL
+  }
   
   # decide (randomly, but with some logic) whether there is a parent-child
   # relationship in household
@@ -172,15 +179,15 @@ for(i in 1:10000){
   
   # run script
   test.out <- get_youth.hh.info(hh_pid_ages.v = some.ages, 
+                                age.hoh = hohage,
                                 with_parent.child = is.parentchild)
   
   if(is.na(test.out$youth.hh.type) | is.na(test.out$youth.hh.subtype)){
-    cat('\f');print(i);get_youth.hh.info(hh_pid_ages.v = some.ages, 
+    print(i);get_youth.hh.info(hh_pid_ages.v = some.ages, 
+                               age.hoh =  hohage,
                                          with_parent.child = is.parentchild)
-    
     break
   }
-  
 }
 
 
