@@ -1,4 +1,45 @@
 
+make_abbr <- function(string = "go on without and me"){
+  require(dplyr)
+  # returns an abbreviation for a multi-word string in by taking the first
+  # letter of each word, making them upper-case and pasting together to form a
+  # single word string output
+  
+  # error checking
+  if(length(string) != 1){
+    stop("Arg \"string\" must be exactly length() 1")
+  }
+  
+  out <- strsplit(string, " ") %>%
+    unlist()
+  # special case: 'and' to '&'
+  out[out == "and"] <- "&"
+  out <- out %>%
+    strsplit(., "") %>%
+    lapply(., first) %>%
+    unlist()
+  out <- out %>% toupper()
+  
+  # special cases----
+  # make 'of' lowercase
+  # if(grepl("\\bof\\b", string, ignore.case = T)){
+  #   of.which <- strsplit(x = string, split = " ") %>%
+  #     unlist() %>% tolower()
+  #   of.which <- which(of.which == "of")
+  #   out[of.which] <- "o"
+  # }
+  
+  # without to w/o (lowercase)
+  if(grepl("\\bwithout\\b", string, ignore.case = T)){
+    without.which <- strsplit(x = string, split = " ") %>%
+      unlist() %>% tolower()
+    without.which <- which(without.which == "without")
+    out[without.which] <- "w/o"
+  }
+  out <- out %>% paste(., sep = "", collapse = "")
+  return(out)
+}
+
 pit_xls_info <- function(filenames){
   require(lubridate)
   require(dplyr)
@@ -675,7 +716,7 @@ fun_ethnicity_def <- function(x){
 screened_positive_disability <- function(dis_df = c.disabilities, 
                                          enr_df = c.enrollment, 
                                          exit_df = c.exit, 
-                                         pit_date = ymd(20220126)){
+                                         pit_date = ymd(20230125)){
   
   
   # final score:----
