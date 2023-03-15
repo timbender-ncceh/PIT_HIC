@@ -18,140 +18,180 @@ rm(list=ls())
 cat('\f')
 gc()
 
-# define household types and household subtypes----
+# funs----
 
-hh_youth_types <- expand.grid(hh_type = c("Households without children",
+get_youth.hh.info <- function(hh_pid_ages.v){
+  # tidy
+  hh_pid_ages.v <- hh_pid_ages.v %>%
+    .[order(.)]
+  
+  # need to return
+  is_youth_hh      <- c(T,F)
+  youth_hh_type    <- c("Households without children",
                         "Households with at least 1 adult and 1 child",
-                        "Households with only children"),
-            hh_subtype = c("Unaccompanied youth (18-24)",
-                           "Parenting youth (18-24)",
-                           "Children of parenting youth",
-                           "Unaccompanied youth (<18 & 18-24 in one hh)",
-                           "Parenting youth (<18)",
-                           "Unaccompanied youth (<18)"),
-            stringsAsFactors = F) %>%
-  as_tibble() %>%
-  mutate(.,
-         hh_subtype_present = F)
+                        "Households with only children")
+  youth_hh_subtype <- c("Unaccompanied youth (18-24)",
+                        "Parenting youth (18-24)",
+                        "Children of parenting youth",
+                        "Unaccompanied youth (<18 & 18-24 in one hh)",
+                        "Parenting youth (<18)",
+                        "Unaccompanied youth (<18)", 
+                        "Other people (>=25)", 
+                        "Other people (<18)", 
+                        "Other people (18-24)")
+  is_youth_hh      <- NA
+  youth_hh_subtype <- NA
+  youth_hh_type <- NA
+  
+  # is_youth_hh
+  if(min(hh_pid_ages.v) <= 24 & 
+     max(hh_pid_ages.v) <= 24) {
+    is_youth_hh <- T
+  }else{
+    is_youth_hh <- F
+  }
+  
+  # hh_type
+  if(length(hh_pid_ages.v) > 1){
+    # could be hh with at least 1 adult and 1 child, or [min(age) < 25 & max(age) >= 25 ]
+    if(min(hh_pid_ages.v) < 25 & 
+       max(hh_pid_ages.v) >= 25){
+      youth_hh_type <- "Households with at least 1 adult and 1 child"
+    }
+    # hh without children, or [all ages >= 25] 
+    if(all(hh_pid_ages.v >= 25)) {
+      youth_hh_type <- "Households without children"
+    }
+    # hh with only children [all ages < 25 or]
+    if(all(hh_pid_ages.v < 25)){
+      youth_hh_type <- "Housholds with only children"
+    }
+  }else{
+    # cannot be hh with at least 1 adult and 1 child
+    if(min(hh_pid_ages.v) < 25 & 
+       max(hh_pid_ages.v) >= 25){
+      youth_hh_type <- "<ERROR>"
+    }
+    # either hh without children or [all ages >= 25]
+    if(all(hh_pid_ages.v >= 25)) {
+      youth_hh_type <- "Households without children"
+    }
+    # hh with only children [all ages < 25]
+    if(all(hh_pid_ages.v < 25)){
+      youth_hh_type <- "Housholds with only children"
+    }
+  }
+  
+  print(hh_pid_ages.v)
+  
+  out <- c(is.youth.hh = is_youth_hh, 
+           youth.hh.type = youth_hh_type, 
+           youth.hh.subtype = youth_hh_subtype)
+  
+  return(out)
+  
+}
 
-hh_youth_types[hh_youth_types$hh_type ==
-                 "Households without children" &
-                 hh_youth_types$hh_subtype %in%
-                 c("Unaccompanied youth (18-24)"),]$hh_subtype_present <- T
-hh_youth_types[hh_youth_types$hh_type ==
-                 "Households with at least 1 adult and 1 child" &
-                 hh_youth_types$hh_subtype %in%
-                 c("Parenting youth (18-24)",
-                   "Children of parenting youth",
-                   "Unaccompanied youth (<18 & 18-24 in one hh)"),]$hh_subtype_present <- T
-hh_youth_types[hh_youth_types$hh_type ==
-                 "Households with only children" &
-                 hh_youth_types$hh_subtype %in%
-                 c("Parenting youth (<18)",
-                   "Children of parenting youth",
-                   "Unaccompanied youth (<18)"),]$hh_subtype_present <- T
+get_youth.hh.info(hh_pid_ages.v = sample(1:45, size = sample(1:3, size = 1), replace = T))
 
-hh_youth_types %>%
-  as.data.table() %>%
-  dcast(hh_subtype ~ hh_type) %>%
-  as.data.frame() %>%
+
+
+
+
+
+
+
+
+
+
+make_abbr <- function(string = "go on without and me"){
+  require(dplyr)
+  # returns an abbreviation for a multi-word string in by taking the first
+  # letter of each word, making them upper-case and pasting together to form a
+  # single word string output
+  
+  # error checking
+  if(length(string) != 1){
+    stop("Arg \"string\" must be exactly length() 1")
+  }
+  
+  out <- strsplit(string, " ") %>%
+    unlist() 
+  # special case: 'and' to '&'
+  out[out == "and"] <- "&"
+  out <- out %>%
+    strsplit(., "") %>%
+    lapply(., first) %>% 
+    unlist() 
+  out <- out %>% toupper()
+  
+  # special cases----
+  
+  
+  
+  
+  # # make 'of' lowercase
+  # if(grepl("\\bof\\b", string, ignore.case = T)){
+  #   of.which <- strsplit(x = string, split = " ") %>%
+  #     unlist() %>% tolower() 
+  #   of.which <- which(of.which == "of")
+  #   out[of.which] <- "o"
+  # }
+  
+  # without to w/o (lowercase)
+  if(grepl("\\bwithout\\b", string, ignore.case = T)){
+    without.which <- strsplit(x = string, split = " ") %>%
+      unlist() %>% tolower() 
+    without.which <- which(without.which == "without")
+    out[without.which] <- "w/o"
+  }
+  out <- out %>% paste(., sep = "", collapse = "") 
+  return(out)
+}
+
+
+
+# define youth household types and household subtypes----
+
+hh_youth_types <- expand.grid(hh_category = c("youth type", "not youth type"), 
+                              hh_type     = c("Households without children",
+                                              "Households with at least 1 adult and 1 child",
+                                              "Households with only children"),
+                              hh_subtype  = c("Unaccompanied youth (18-24)",
+                                              "Parenting youth (18-24)",
+                                              "Children of parenting youth",
+                                              "Unaccompanied youth (<18 & 18-24 in one hh)",
+                                              "Parenting youth (<18)",
+                                              "Unaccompanied youth (<18)", 
+                                              "Other people (>=25)", 
+                                              "Other people (<18)", 
+                                              "Other people (18-24)"),
+                              stringsAsFactors = F) %>%
   as_tibble()
 
+hh_youth_types$hhcategory.abbr <- unlist(lapply(X = hh_youth_types$hh_category, FUN = make_abbr))
+hh_youth_types$hhtype.abbr     <- unlist(lapply(X = hh_youth_types$hh_type, FUN = make_abbr)) 
+hh_youth_types$hhsubtype.abbr  <- unlist(lapply(X = hh_youth_types$hh_subtype, FUN = make_abbr)) %>%
+  gsub(pattern = "\\(.*$", replacement = "", x = .)
 
-# Households without children:  must have 1 HoH aged 18-24 unaccompanied youth
-hh_youth_types2 <- expand.grid(category                   = c("youth_type",
-                                                              "vet_type",
-                                                              "regular_type"),
-                               hh_type                    = c("hh without children",
-                                                              "hh with at least 1 adult and 1 child",
-                                                              "hh with only children"),
-                               hh_subtype                 = c("unaccompanied youth",
-                                                              "parenting youth",
-                                                              "children of parenting youth",
-                                                              "everyone else",
-                                                              "veteran"),
-                               hh_age_group               = c("<18",
-                                                              "18-24",
-                                                              "25+",
-                                                              "18+"),
-                               whole_house                = NA,
-                               possible_subtypeXage_group = NA,
-                               permitted                  = NA,
-                               required                   = NA,
-                               stringsAsFactors = F) %>% as_tibble()
+hh_youth_types.archive <- hh_youth_types
 
-hh_youth_types2$hh_subtype_f <- factor(hh_youth_types2$hh_subtype,
-                                    levels = c("unaccompanied youth", "parenting youth",
-                                               "children of parenting youth",
-                                               "veteran",
-                                               "everyone else"))
-# plot
-
-library(ggplot2)
-ggplot() +
-  geom_point(data = hh_youth_types2, size = 4,
-             aes(y = hh_subtype_f, x = hh_age_group))+
-  facet_grid(category~hh_type)+
-  theme(axis.text.x = element_text(angle = 0, hjust = 1, vjust = 1),
-        strip.text.y = element_text(angle = 0))
-
-# filters----
-# everyone_else in regular_type households:
-# and with 1 adult and 1 child
-hh_youth_types2[hh_youth_types2$hh_subtype_f == "everyone else" &
-                  hh_youth_types2$category == "regular_type" &
-                  hh_youth_types2$hh_type == "hh with at least 1 adult and 1 child" &
-                  hh_youth_types2$hh_age_group %in% c("<18", "18+", "18-24", "25+"),]$permitted <- T
-hh_youth_types2[hh_youth_types2$hh_subtype_f == "everyone else" &
-                  hh_youth_types2$category == "regular_type" &
-                  hh_youth_types2$hh_type == "hh with at least 1 adult and 1 child" &
-                  hh_youth_types2$hh_age_group %in% c("<18", "18+", "18-24", "25+"),]$permitted <- T
-
-# hh w/o chidlren age < 18 = not permitted
-
-# hh w only children & age > 18 = not permitted
-
-hh_youth_types2[hh_youth_types2$hh_subtype %in% c("unaccompanied youth", "parenting youth", "children of parenting youth") &
-                  hh_youth_types2$hh_age_group == "25+",]$permitted <- F
+hh_youth_types$age_U18    <- grepl(pattern = "<18", x = hh_youth_types$hh_subtype)
+hh_youth_types$age_18to25 <- grepl(pattern = "18-24", x = hh_youth_types$hh_subtype)
+hh_youth_types$age_25PLUS <- grepl(pattern = ">=25", x = hh_youth_types$hh_subtype)
 
 
-hh_youth_types2[hh_youth_types2$hh_subtype %in% c("unaccompanied youth", "parenting youth", "children of parenting youth") &
-                  hh_youth_types2$category %in%
-                  c("regular_type", "vet_type"),]$permitted <- F
+# evaluate for category, type and subtype matches
 
-hh_youth_types2[hh_youth_types2$category == "youth_type" &
-                  hh_youth_types2$hh_subtype == "everyone else",]$permitted <- F
+# is_youth_cat
+hh_youth_types$is_youth.cat <- NA
 
-hh_youth_types2[hh_youth_types2$category == "youth_type" &
-                  hh_youth_types2$hh_age_group == "25+",]$permitted <- F
+library(igraph)
 
-hh_youth_types2[hh_youth_types2$category == "youth_type" &
-                  hh_youth_types2$hh_type == "hh without children" &
-                  hh_youth_types2$hh_age_group == "<18" &
-                  is.na(hh_youth_types2$permitted),]$permitted <- F
+a.flow.gr <- data.frame(from = c("is youth category?"), 
+                        to   = c()) %>%
+  graph_from_data_frame()
 
-hh_youth_types2[is.na(hh_youth_types2$permitted) &
-                   hh_youth_types2$category == "youth_type" &
-                  hh_youth_types2$hh_type == "hh without children" &
-                  hh_youth_types2$hh_subtype == "unaccompanied youth",]$permitted <- T
-
-hh_youth_types2[is.na(hh_youth_types2$permitted),]
-
-
-list(youth_hh_without_children = c("must have 1 HoH aged 18-24 and unaccompanied youth",
-                                   "can have no "))
-
-
-
-# Households with at least 1 adult and 1 child
-
-
-
-
-
-
-# next steps----
-
-# picking the variables to calculate the logic for these categories ^^^
-
+# hh_youth_types <- hh_youth_types[!colnames(hh_youth_types) %in% 
+#                                    c("hh_category","hh_type", "hh_subtype")]
 
