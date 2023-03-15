@@ -35,14 +35,25 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
   hh_pid_ages.v <- hh_pid_ages.v %>%
     .[order(.)]
   
-  # error checking
-  # if is.null(age.hoh) & length(hh_pid_ages) > 1
+  # error checking---- 
   
-  # possible flags
-  poss.flags <- NULL
+  # it's ok for age_of_hoh to be null if the HH size is one;
+  # you can imply it.  otherwise it's required.
+  if(!(is.null(age.hoh) & length(hh_pid_ages.v) == 1)){
+    stop("age of Head of Household (age.hoh) must be provided when household size is greater than 1")
+  }
   
+  # calculate age.hoh
+  if(is.null(age.hoh)){
+    age.hoh <- hh_pid_ages.v
+  }
   
-  
+  # possible flags----
+  poss_flags <- NULL
+  # age of hoh < max.age
+  if(age.hoh < max(hh_pid_ages.v)){
+    poss_flags <- c(poss_flags, "HoH younger than oldest household member")
+  }
   
   # need to return
   is_youth_hh      <- c(T,F)
@@ -138,7 +149,8 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
   # generate output
   out <- list(is.youth.hh = is_youth_hh, 
               youth.hh.type = youth_hh_type, 
-              youth.hh.subtype = youth_hh_subtype)
+              youth.hh.subtype = youth_hh_subtype, 
+              poss.flags       = poss_flags)
   
   # print inputs to help with debugging
   cat(inverse(glue("AGES:\t{paste(hh_pid_ages.v,sep=\" \", collapse = \" \")}\nPARENT:\t{with_parent.child}\n\n")))
