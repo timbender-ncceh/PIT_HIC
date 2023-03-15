@@ -115,8 +115,8 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
   
   # step 1: age grouping 
   if(all(between(x = hh_pid_ages.v, 
-             lower = 18, 
-             upper = 24))){
+                 lower = 18, 
+                 upper = 24))){
     # step 2a: hh size = 1 AND parent-child
     if(length(hh_pid_ages.v) > 1 & 
        with_parent.child == T){
@@ -137,8 +137,8 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
   
   # generate output
   out <- list(is.youth.hh = is_youth_hh, 
-           youth.hh.type = youth_hh_type, 
-           youth.hh.subtype = youth_hh_subtype)
+              youth.hh.type = youth_hh_type, 
+              youth.hh.subtype = youth_hh_subtype)
   
   # print inputs to help with debugging
   cat(inverse(glue("AGES:\t{paste(hh_pid_ages.v,sep=\" \", collapse = \" \")}\nPARENT:\t{with_parent.child}\n\n")))
@@ -151,15 +151,26 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
 # testing----
 
 # generate random household of ages and size
-some.ages <- sample(1:45, size = sample(1:3, size = 1), replace = T)
+for(i in 1:10000){
+  some.ages <- sample(1:45, size = sample(1:3, size = 1), replace = T)
+  
+  # decide (randomly, but with some logic) whether there is a parent-child
+  # relationship in household
+  is.parentchild <- ifelse(length(some.ages) > 1 & any(some.ages > 17) & any(some.ages <= 17), sample(c(T,F), size = 1), F)
+  
+  # run script
+  test.out <- get_youth.hh.info(hh_pid_ages.v = some.ages, 
+                                with_parent.child = is.parentchild)
+  
+  if(is.na(test.out$youth.hh.type) | is.na(test.out$youth.hh.subtype)){
+    cat('\f');print(i);get_youth.hh.info(hh_pid_ages.v = some.ages, 
+                                         with_parent.child = is.parentchild)
+    
+    break
+  }
+  
+}
 
-# decide (randomly, but with some logic) whether there is a parent-child
-# relationship in household
-is.parentchild <- ifelse(length(some.ages) > 1 & any(some.ages > 17) & any(some.ages <= 17), sample(c(T,F), size = 1), F)
-
-# run script
-get_youth.hh.info(hh_pid_ages.v = some.ages, 
-                  with_parent.child = is.parentchild)
 
 # EXAMPLE 1:
 
