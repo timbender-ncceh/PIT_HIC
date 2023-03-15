@@ -119,75 +119,66 @@ get_youth.hh.info <- function(hh_pid_ages.v,
   }
   
   
-  
-  
-  
+  # generate output
   out <- list(is.youth.hh = is_youth_hh, 
            youth.hh.type = youth_hh_type, 
            youth.hh.subtype = youth_hh_subtype)
   
+  # print inputs to help with debugging
   cat(inverse(glue("AGES:\t{paste(hh_pid_ages.v,sep=\" \", collapse = \" \")}\nPARENT:\t{with_parent.child}\n\n")))
   
   return(out)
   
 }
 
+
+# testing----
+
+# generate random household of ages and size
 some.ages <- sample(1:45, size = sample(1:3, size = 1), replace = T)
+
+# decide (randomly, but with some logic) whether there is a parent-child
+# relationship in household
 is.parent <- ifelse(length(some.ages) > 1 & any(some.ages > 17) & any(some.ages <= 17), sample(c(T,F), size = 1), F)
 
+# run script
 get_youth.hh.info(hh_pid_ages.v = some.ages, 
                   with_parent.child = is.parent)
 
+# EXAMPLE 1: ----
+
+# AGES:	2 11 22
+# PARENT:	FALSE
+get_youth.hh.info(hh_pid_ages.v = c(2,11,22), 
+                  with_parent.child = FALSE)
+
+# RETURNS:
+#
+# $is.youth.hh
+# [1] TRUE
+# 
+# $youth.hh.type
+# [1] "Housholds with only children"
+# 
+# $youth.hh.subtype
+# [1] "Unaccompanied youth (<18 & 18-24 in one hh)"
 
 
 
+# EXAMPLE 2:----
 
+# AGES:	7 36
+# PARENT:	TRUE
+get_youth.hh.info(hh_pid_ages.v = c(7,36), 
+                  with_parent.child = TRUE)
 
-
-
-
-
-
-make_abbr <- function(string = "go on without and me"){
-  require(dplyr)
-  # returns an abbreviation for a multi-word string in by taking the first
-  # letter of each word, making them upper-case and pasting together to form a
-  # single word string output
-
-  # error checking
-  if(length(string) != 1){
-    stop("Arg \"string\" must be exactly length() 1")
-  }
-
-  out <- strsplit(string, " ") %>%
-    unlist()
-  # special case: 'and' to '&'
-  out[out == "and"] <- "&"
-  out <- out %>%
-    strsplit(., "") %>%
-    lapply(., first) %>%
-    unlist()
-  out <- out %>% toupper()
-
-  # special cases----
-  # make 'of' lowercase
-  # if(grepl("\\bof\\b", string, ignore.case = T)){
-  #   of.which <- strsplit(x = string, split = " ") %>%
-  #     unlist() %>% tolower()
-  #   of.which <- which(of.which == "of")
-  #   out[of.which] <- "o"
-  # }
-
-  # without to w/o (lowercase)
-  if(grepl("\\bwithout\\b", string, ignore.case = T)){
-    without.which <- strsplit(x = string, split = " ") %>%
-      unlist() %>% tolower()
-    without.which <- which(without.which == "without")
-    out[without.which] <- "w/o"
-  }
-  out <- out %>% paste(., sep = "", collapse = "")
-  return(out)
-}
-
-
-
+# Returns: 
+#
+# $is.youth.hh
+# [1] FALSE
+# 
+# $youth.hh.type
+# [1] "Households with at least 1 adult and 1 child"
+# 
+# $youth.hh.subtype
+# [1] NA  (not yet finished)
