@@ -78,7 +78,7 @@ get_youth.hh.info <- function(hh_pid_ages.v, age.hoh = NULL,
       youth_hh_type <- "Households with at least 1 adult and 1 child"
     }
     # hh without children, or [all ages >= 25] 
-    if(all(hh_pid_ages.v >= 25)) {
+    if(all(hh_pid_ages.v >= 18)) {
       youth_hh_type <- "Households without children"
     }
     # hh with only children [all ages < 25 or]
