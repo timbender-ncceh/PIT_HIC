@@ -154,7 +154,7 @@ enrcli             <- full_join(a.client, a.enrollment) %>%
 get_youth.hh.info <- function(hh_pid.ages.v = c(17,19), 
                                #age.hoh, 
                                relations2hoh.v, 
-                               n.veterans){
+                               vetstatus.v){
   out <- NULL
   # Parenting youth - households with at least 1 adult and 1 child----
   if(all(hh_pid.ages.v < 25) & 
@@ -195,7 +195,7 @@ get_youth.hh.info <- function(hh_pid.ages.v = c(17,19),
   }
   
   # veteran
-  if(any(vetz,na.rm = T)){
+  if(any(vetstatus.v == "Yes",na.rm = T)){
     out <- paste("VETERAN - ", 
                  out, 
                  sep = "", collapse = "")
@@ -211,6 +211,7 @@ args(get_youth.hh.info)
 
 a.hhid <- sample(enrcli$HouseholdID[!is.na(enrcli$HouseholdID)],size=1) #h_1186802 is a good one to try for multi-person family
 
+
 ages <- enrcli$age[enrcli$HouseholdID == a.hhid]
 rels <- enrcli$rel2hoh[enrcli$HouseholdID == a.hhid]
 vetz <- enrcli$vetstatus[enrcli$HouseholdID == a.hhid]
@@ -219,7 +220,38 @@ glue("AGES: {paste(ages,sep=\", \",collapse=\", \")}\nRELS: {paste(rels,sep=\", 
 
 get_youth.hh.info(hh_pid.ages.v    = ages, 
                    relations2hoh.v = rels, 
-                   n.veterans      = vets)
+                   vetstatus.v     = vets)
 
 
+summary.out <- data.frame(hhid = unique(enrcli$HouseholdID), 
+                          youth_vet_hh_type = NA) %>%
+  as_tibble()
 
+
+for(i in 1:nrow(summary.out)){
+  try(summary.out$youth_vet_hh_type[i] <- get_youth.hh.info(hh_pid.ages.v   = enrcli$age[enrcli$HouseholdID == summary.out$hhid[i]], 
+                                                        relations2hoh.v = enrcli$rel2hoh[enrcli$HouseholdID == summary.out$hhid[i]], 
+                                                        vetstatus.v     = enrcli$vetstatus[enrcli$HouseholdID == summary.out$hhid[i]]))
+}
+
+summary.out$youth_vet_hh_type %>% table
+
+summary.out %>%
+  mutate(., 
+         is_YOUTH = grepl(pattern = "^YOUTH -|- YOUTH -", x = youth_vet_hh_type, 
+                          ignore.case = F), 
+         is_VETERAN     = grepl("VETERAN", youth_vet_hh_type, ignore.case = F), 
+         is_hhw1Aand1C  = grepl("households with at least 1 adult and 1 child", youth_vet_hh_type, ignore.case = F), 
+         is_hhwithoutC  = grepl("households without children", youth_vet_hh_type, ignore.case = T), 
+         is_hhwithONLYC = grepl("households with only children", youth_vet_hh_type, ignore.case = T), 
+         is_parentingY  = grepl("Parenting youth", youth_vet_hh_type, ignore.case = T), 
+         is_unaccompaniedY = grepl("Unaccompanied youth", youth_vet_hh_type, ignore.case = T), 
+         has_error = is.na(youth_vet_hh_type)) %>%
+  group_by(is_YOUTH, is_VETERAN, 
+           is_hhw1Aand1C, 
+           is_hhwithoutC,
+           is_hhwithONLYC,
+           is_parentingY,
+           is_unaccompaniedY,
+           has_error) %>%
+  summarise(n_households = n_distinct(hhid)) 
