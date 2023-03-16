@@ -1035,7 +1035,8 @@ ggplot() +
   geom_line(data = plot.data, 
             aes(x = file_datetime, y = t_flags, 
                 color = "thursday reports")) +
-  geom_point(data = plot.data,size = 5,
+  geom_point(data = plot.data,
+             size = 5,
              aes(x = file_datetime, y = t_flags, 
                  color = "thursday reports")) +
   scale_color_discrete(name = "Legend")+
