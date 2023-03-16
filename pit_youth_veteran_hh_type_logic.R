@@ -20,7 +20,69 @@ gc()
 
 # note:  veterans are not alaways hoh so don't encode logic to account for hoh
 # necessarily
-
+calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
+  # correct as of #1/24/23
+  require(lubridate)
+  require(dplyr)
+  
+  # check class of dob - expected to be class 'Date'.  If Character, change to
+  # 'Date'
+  if(!is.Date(dob)){
+    if(is.numeric(dob)){
+      dob <- as.character(dob)
+    }
+    dob <- as_date(dob)
+  }
+  age <- interval(dob,age_on_date) %>%
+    as.period(., unit = "years")
+  age.year    <- age@year
+  age.decimal <- round(age@year + age@month/12,2)
+  
+  if(decimal.month) {
+    out <- age.decimal
+  }else{
+    out <- age.year
+  }
+  return(out)
+}
+fun_rel2hoh <- function(x){
+  if(is.na(x)){
+    out <- NA#"Data not collected"
+  }else if(x == 2){
+    out <- "Head of household’s Child"
+  }else if(x == 3){
+    out <- "Head of household’s spouse or partner"
+  }else if(x == 4){
+    out <- "Head of household’s other relation member"
+  }else if(x == 5){
+    out <- "Other: non-relation member "
+  }else if(x == 99){
+    out <- NA#"Data not collected"
+  }else if(x == 1){
+    out <- "Self (head of household)"
+  }else{
+    out <- NA#"[undetermined]"
+  }
+  return(out)
+}
+fun_1.8_def <- function(x){
+  if(is.na(x)){
+    out <- NA#"Data not collected"
+  }else if(x == 1){
+    out <- "Yes"
+  }else if(x == 8){
+    out <- "Client doesn't Know"
+  }else if(x == 9){
+    out <- "Client refused"
+  }else if(x == 99){
+    out <- NA #"Data not collected"
+  }else if(x == 0){
+    out <- "No"
+  }else{
+    out <- NA#"[undetermined]"
+  }
+  return(out)
+}
 
 # veteran definition----
 # source: https://www.hud.gov/sites/dfiles/CPD/documents/2022_HIC_and_PIT_Data_Collection_Notice.pdf
@@ -31,6 +93,8 @@ might be presenting with other persons. Please note that data for the gender, ra
 non-veterans in veteran households will only be reported under “All Households” population data in
 Appendix C. CoCs should not include veterans in VADOM or VA-funded CWT/TR facilities in
 their PIT count."
+
+vet.info_return <- c("veteran_hh", "t_veterans_in_hh", "t_hh_members")
 
 # youth definition----
 # source: https://www.hud.gov/sites/dfiles/CPD/documents/2022_HIC_and_PIT_Data_Collection_Notice.pdf
@@ -55,34 +119,42 @@ one adult and one child if the household includes at least one household member 
 one member between 18 and 24, and no members over age 24. They are a subset of households with
 only children if all household members are under 18. "
 
+youth.info.return <- c("youth_hh", "parenting_youth or unaccompanied_youth", "age_cohort")
 
-youth.type.appendixC <- expand.grid(hh_category = "youth", 
-                                   hh_type     = c("unaccompanied youth households", 
-                                                   "parenting youth households"), 
-                                   shelter_type = c("Sheltered ES", "Sheltered TH", 
-                                                    "Sheltered SH", "Unsheltered"), 
-                                   count_of     = c("total households", 
-                                                    "total youth <18", 
-                                                    "total youth 18-24", 
-                                                    "gender-female", 
-                                                    "gender-male", 
-                                                    "gender-transgender", 
-                                                    "gender-other.than.singularity...",
-                                                    "gender-questioning", 
-                                                    "ethnicity-Non-Hispanic/Non-Latin(a)(o)(x)", 
-                                                    "ethnicity-Hispanic/Latin(a)(o)(x)",
-                                                    "race-white", 
-                                                    "race-black",
-                                                    "race-asian",
-                                                    "race_american.indian", 
-                                                    "race_native.hawaiian", 
-                                                    "race_multiple"), 
-                                   stringsAsFactors = F) %>% as_tibble()
+# files----
+a.client     <- read_csv("C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data/Client.csv")
+a.enrollment <- read_csv("C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data/Enrollment.csv")
 
+a.enrollment$rel2hoh <- lapply(X = a.enrollment$RelationshipToHoH, 
+                               FUN = fun_rel2hoh) %>% unlist()
+
+a.enrollment <- a.enrollment[,c("EnrollmentID", "PersonalID", "HouseholdID", "ProjectID",
+                                "rel2hoh")]
+a.client           <- a.client[,c("PersonalID", "DOB", "VeteranStatus")] 
+a.client$vetstatus <- unlist(lapply(a.client$VeteranStatus, fun_1.8_def))
+a.client$age       <- unlist(lapply(X = a.client$DOB, 
+                              FUN = calc_age))
+
+enrcli             <- full_join(a.client, a.enrollment) %>%
+                       .[! colnames(.) %in% c("DOB", "VeteranStatus")]
+
+enrcli %>%
+  group_by(HouseholdID) %>%
+  summarise(n_eid = n_distinct(EnrollmentID), 
+            n_pid = n_distinct(PersonalID),
+            n_projid = n_distinct(ProjectID),
+            n = n()) %>%
+  #.[.$n_pid != .$n_eid,] %>%
+  ggplot(data = ., 
+         aes(x = n_eid, y = n_pid)) + 
+  geom_jitter() +
+    scale_x_continuous(breaks = seq(0,1000,by=1), 
+                       minor_breaks = seq(0,1000,by=1))+
+    scale_y_continuous(breaks = seq(0,1000,by=1), 
+                       minor_breaks = seq(0,1000,by=1))
 
 
 # funs----
-
 hh_pid_ages.v <- c(21)
 age.hoh <- 21
 
@@ -349,9 +421,9 @@ get_youth.hh.info(c(28,38,38), 28)
 
 # scenario testing ----
 
-age.scenarios <- expand.grid(pid1 = c(1:25,NA), 
-                             pid2 = c(1:25,NA), 
-                             pid3 = c(1:25,NA)) %>%
+age.scenarios <- expand.grid(pid1 = c(1,4, 15:25,NA), 
+                             pid2 = c(4, 15:25, 32, 42,NA), 
+                             pid3 = c(15:25, 27, 31)) %>%
   as_tibble()
 
 age.scenarios$n_pid <- ifelse(is.na(age.scenarios$pid1), 0, 1) +
@@ -379,7 +451,8 @@ for(i in 1:nrow(age.scenarios)) {
     .[!is.na(.)]
   
   temp.funout <- get_youth.hh.info(hh_pid_ages.v = temp.ages, 
-                                   age.hoh = age.scenarios$hoh_age[i])
+                                   age.hoh       = age.scenarios$hoh_age[i], 
+                                   n.veterans    = ifelse(any(temp.ages > 20),sample(c(T,F), size = 1, prob = c(0.3,0.7)),0))
   rm(temp.ages)
   
   if(length(temp.funout$youth.hh.subtype) > 1 & 
@@ -395,7 +468,7 @@ for(i in 1:nrow(age.scenarios)) {
   
   
   age.scenarios$is_youth_hh[i] <- temp.funout$is.youth.hh
-  age.scenarios$is_vet_hh[i]   <- NA
+  age.scenarios$is_vet_hh[i]   <- temp.funout$is.veteran.hh
   age.scenarios$hh_type[i]     <- temp.funout$youth.hh.type
   age.scenarios$hh_subtype[i]  <- paste(temp.funout$youth.hh.subtype, 
                                         sep = ", ", collapse = ", ")
@@ -417,6 +490,7 @@ age.scenarios %>%
   as_tibble() %>%
   .[!is.na(.$age),] %>%
   group_by(is_youth_hh, 
+           is_vet_hh,
            hh_agetype,
            hh_type, 
            hh_size = ifelse(n_pid > 1, "2+", as.character(n_pid)),
