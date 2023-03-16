@@ -248,10 +248,22 @@ summary.out %>%
          is_unaccompaniedY = grepl("Unaccompanied youth", youth_vet_hh_type, ignore.case = T), 
          has_error = is.na(youth_vet_hh_type)) %>%
   group_by(is_YOUTH, is_VETERAN, 
-           is_hhw1Aand1C, 
-           is_hhwithoutC,
-           is_hhwithONLYC,
-           is_parentingY,
-           is_unaccompaniedY,
-           has_error) %>%
+           youth_vet_hh_type) %>%
   summarise(n_households = n_distinct(hhid)) 
+
+summary.out %>%
+  mutate(., 
+         is_YOUTH = grepl(pattern = "^YOUTH -|- YOUTH -", x = youth_vet_hh_type, 
+                          ignore.case = F), 
+         is_VETERAN     = grepl("VETERAN", youth_vet_hh_type, ignore.case = F), 
+         is_hhw1Aand1C  = grepl("households with at least 1 adult and 1 child", youth_vet_hh_type, ignore.case = F), 
+         is_hhwithoutC  = grepl("households without children", youth_vet_hh_type, ignore.case = T), 
+         is_hhwithONLYC = grepl("households with only children", youth_vet_hh_type, ignore.case = T), 
+         is_parentingY  = grepl("Parenting youth", youth_vet_hh_type, ignore.case = T), 
+         is_unaccompaniedY = grepl("Unaccompanied youth", youth_vet_hh_type, ignore.case = T), 
+         has_error = is.na(youth_vet_hh_type)) %>%
+  group_by(youth_vet_hh_type) %>%
+  summarise(n_households = n_distinct(hhid)) %>%
+  ungroup() %>%
+  mutate(., 
+         pct_t.hh = scales::percent(n_households/sum(n_households),accuracy = 0.1))
