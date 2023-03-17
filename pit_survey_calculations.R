@@ -1,4 +1,34 @@
 
+disability_type.1.3.def <- function(disability.type.val){
+  # error check
+  if(!disability.type.val %in% c(5:10)|
+     is.na(disability.type.val)){
+    stop("disability.type.val must be one of 5,6,7,8,9,10 or NA")
+  }
+  
+  if(disability.type.val == 5){
+    out <- "Physical disability"
+  }
+  if(disability.type.val == 6){
+    out <- "Developmental disability"
+  }
+  if(disability.type.val == 7){
+    out <- "Chronic health condition"
+  }
+  if(disability.type.val == 8){
+    out <- "HIV/AIDS"
+  }
+  if(disability.type.val == 9){
+    out <- "Mental health disorder"
+  }
+  if(disability.type.val == 10){
+    out <- "Substance use disorder"
+  }
+  if(is.na(disability.type.val)){
+    out <- NA
+  }
+  return(out)
+}
 
 disability_response.4.10.2.def <- function(disab.response.val, 
                                            disabilityType){
@@ -827,7 +857,6 @@ screened_positive_disability <- function(dis_df = c.disabilities,
     hmis_join(., 
               exit_df, jtype = "left") 
   
-  
   # filter out all information dates that occur after the PIT survey date and
   # then find the latest InformationDate for each enrollment - that becomes
   # your most recent and thus most applicable date for disability inventory
@@ -839,8 +868,7 @@ screened_positive_disability <- function(dis_df = c.disabilities,
               order_by = InformationDate_disab, 
               n = 1)
   
-  
-  jd <- join_dates %>%
+  join_dates <- join_dates %>%
     left_join(., 
               data.frame(DisabilityType = 5:10, 
                          dt_name = c("physical_D", 
@@ -848,8 +876,33 @@ screened_positive_disability <- function(dis_df = c.disabilities,
                                      "chronic_hlth_C", 
                                      "HIV.AIDS", 
                                      "mental_health_D", 
-                                     "substance_use_D"))) %>%
-    as.data.table() %>%
+                                     "substance_use_D"))) %>% as_tibble() %>% 
+    .[colnames(.) %in% c("PersonalID", "EnrollmentID", "InformationDate_disab", "dt_name", "is_disab", 
+                         "destination_def", 
+                         "DisabilityType", "DisabilityResponse", "IndefiniteAndImpairs", "DataCollectionStage",
+                         "DisabilityResponse_text", "DisabilitiesID")]
+  
+  #troublesome.records 
+  
+  trouble.ids <- join_dates %>%
+    group_by(PersonalID, EnrollmentID, InformationDate_disab, 
+             dt_name, is_disab) %>%
+    summarise(n = n(), 
+              n_DR_txt = n_distinct(DisabilityResponse_text),
+              n_DisabID = n_distinct(DisabilitiesID)) %>%
+    .[.$n != .$n_DisabID,] %>%
+    mutate(., 
+           trouble_id = paste(PersonalID, 
+                              EnrollmentID, 
+                              as.character(InformationDate_disab), 
+                              sep = "-", collapse = "-")) %>%
+    .$trouble_id %>%
+    unique()
+  
+  
+  
+  jd <- join_dates %>%
+      as.data.table() %>%
     dcast(., 
           PersonalID + EnrollmentID + #is_disab +
             InformationDate_disab ~ dt_name, 
@@ -858,7 +911,7 @@ screened_positive_disability <- function(dis_df = c.disabilities,
   
   # There are NA values in this table and it's not clear why----- VVVV
   
-  jd[jd$developmental_D == T & jd$chronic_hlth_C == T,]
+  jd[jd$developmental_D == T & jd$chronic_hlth_C == T,]  # this code is wrong - testing for logicals on numeric class
   
   jd %>%
     group_by(developmental_D, HIV.AIDS, chronic_hlth_C, 
