@@ -1,5 +1,63 @@
 
-make_abbr <- function(string = "go on without and me"){
+
+disability_response.4.10.2.def <- function(disab.response.val, 
+                                           disabilityType){
+  # logic
+  # if DisabilityType is '10' (Substance Abuse Disorder)
+  if(disabilityType == 10){
+    if(disab.response.val == 0){
+      out <- "Not disabled"
+    }
+    if(disab.response.val == 1){
+      out <- "Alcohol use disorder"
+    }
+    if(disab.response.val == 2){
+      out <- "Drug use disorder"
+    }
+    if(disab.response.val == 3){
+      out <- "Both alcohol and drug use disorders"
+    }
+    if(disab.response.val == 8){
+      # 8 = Client doesn't know
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 9){
+      # 9 = Client refused
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 99 |
+       # 99 = Data not collected
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+  }else{
+    # else DisabilityType is NOT '10' (Substance Abuse Disorder)
+    if(disab.response.val == 0){
+      out <- "Not disabled"
+    }
+    if(disab.response.val == 1){
+      out <- "Disabled"
+    }
+    if(disab.response.val == 8 |
+       # 8 = Client doesn't know
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 9 |
+       # 9 = Client refused
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 99 |
+       # 99 = Data not collected
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+  }
+  return(out)
+}
+
+make_abbr <- function(string = "go ahead and make my day without me"){
   require(dplyr)
   # returns an abbreviation for a multi-word string in by taking the first
   # letter of each word, making them upper-case and pasting together to form a
@@ -12,7 +70,7 @@ make_abbr <- function(string = "go on without and me"){
   
   out <- strsplit(string, " ") %>%
     unlist()
-  # special case: 'and' to '&'
+  # special case: 'and' >>> '&'
   out[out == "and"] <- "&"
   out <- out %>%
     strsplit(., "") %>%
@@ -39,6 +97,8 @@ make_abbr <- function(string = "go on without and me"){
   out <- out %>% paste(., sep = "", collapse = "")
   return(out)
 }
+
+make_abbr()
 
 pit_xls_info <- function(filenames){
   require(lubridate)
@@ -738,7 +798,7 @@ screened_positive_disability <- function(dis_df = c.disabilities,
            !is.na(dis_df$IndefiniteAndImpairs),]$is_disab <- "not disabled"
   dis_df[dis_df$DisabilityResponse == 1 & 
            (dis_df$IndefiniteAndImpairs %in% c(8,9,99) | 
-           is.na(dis_df$IndefiniteAndImpairs)),]$is_disab <- "unknown or cannot tell"
+              is.na(dis_df$IndefiniteAndImpairs)),]$is_disab <- "unknown or cannot tell"
   
   #dis_df[is.na(dis_df$is_disab),]$is_disab <- "unknown or cannot tell"
   
@@ -768,19 +828,6 @@ screened_positive_disability <- function(dis_df = c.disabilities,
               exit_df, jtype = "left") 
   
   
-  # join_dates$enr_during_surv <- NA
-  # join_dates$enr_during_surv[(join_dates$EntryDate > pit_date | 
-  #   join_dates$ExitDate < pit_date) | !is.na(join_dates$EntryDate > pit_date | 
-  #                                              join_dates$ExitDate < pit_date)] <- F
-  # 
-  # 
-  # table(join_dates$enr_during_surv, useNA = "always")
-  # join_dates[is.na(join_dates$enr_during_surv),]
-  # 
-  # table(join_dates$EntryDate > pit_date, useNA = "always")
-  # table(join_dates$EntryDate == pit_date, useNA = "always")
-  # table(join_dates$EntryDate < pit_date, useNA = "always")
-  
   # filter out all information dates that occur after the PIT survey date and
   # then find the latest InformationDate for each enrollment - that becomes
   # your most recent and thus most applicable date for disability inventory
@@ -791,30 +838,6 @@ screened_positive_disability <- function(dis_df = c.disabilities,
     slice_max(., 
               order_by = InformationDate_disab, 
               n = 1)
-  
-  
-  
-  
-  #  library(ggplot2)
-  #  
-  #  plot.this <- mutate(join_dates[sample(1:nrow(join_dates), size = 200, replace = F),], 
-  #                      rid = 1:length(EntryDate), 
-  #                      color = "normal")
-  #  
-  #  plot.this[is.na(plot.this$ExitDate),]$color <- "NA - exit"
-  #  
-  # ggplot() + 
-  #   geom_segment(data = plot.this, 
-  #                aes(x = EntryDate, xend = ExitDate, 
-  #                    y = rid, yend = rid, 
-  #                    color = color))+
-  #   geom_point(data = plot.this[is.na(plot.this$ExitDate),], 
-  #              aes(x = EntryDate, y = rid, color = color), 
-  #              size = 0.8) + 
-  #   geom_vline(aes(xintercept = Sys.Date()), 
-  #              color = "blue")+
-  #   geom_vline(aes(xintercept = pit_date), 
-  #              linetype = 2232, color = "red")
   
   
   jd <- join_dates %>%
@@ -847,143 +870,6 @@ screened_positive_disability <- function(dis_df = c.disabilities,
   
 }
 
-
-# screened_positive_disability <- function(dr0 = c.disabilities$DisabilityResponse,
-#                                          ii0 = c.disabilities$IndefiniteAndImpairs, 
-#                                          dt0 = c.disabilities$DisabilityType, 
-#                                          dis_df = c.disabilities) {
-#   require(data.table)
-#   
-#   # To Do----
-#   
-#   # add the non-disabled clients back into the output table
-#   
-#   # there is a problem in the logic of the output table - there should not be
-#   # multiple of any one disability type per each enrollment_ID
-#   
-#   "https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf"
-#   "Working with Ncceh Data report.docx"
-#   
-#     # DisabilityResponse (0,1,2,3,8,9,99,NA)----
-#   # 1 = yes
-#   # 0 = no
-#   # 2,3,8,9,99,NA = "unknown or cannot tell"
-#   
-#   dis_df$DisabilityResponse
-#   
-#   dr1 <- ifelse(dr0 %in% c(0,1), dr0, NA) %>%
-#     as.logical()
-#   
-#   # IndefiniteAndImpairs (0,1,2,8,9,99,NA)
-#   # 1 = yes
-#   # 0 = no
-#   # 2,8,9,99,NA = "unknown or cannot tell"
-#   
-#   ii1 <- ifelse(ii0 %in% c(0,1), ii0, NA) %>%
-#     as.logical()
-#   
-#    
-#   # # step1: if either DR or II = NA then that record is "unknwon or cannot tell" ---- 
-#   
-#   # Logic:
-#   # DisabiltyResponse & IndefiniteAndImpairs 
-#   
-#   
-#   is_disab <- dr1 & ii1
-#   is_disab <- ifelse(is_disab, "Disabled", 
-#          "Not Disabled") 
-#   
-#   is_disab <- ifelse(is.na(is_disab), 
-#                      "Unknown or Cannot Tell", 
-#                      is_disab)
-#   
-#  
-#   
-#   dis_df$spd <- dr1 & ii1
-#   dis_df$disab_status_calc <- is_disab
-#   
-#   dis_df$disab_count <- ifelse(dis_df$disab_status_calc == "Disabled", 1, 0)
-#   
-#   
-#   
-#   
-#   # DisabilityType----
-#   
-#   # read_csv("Disabilities.csv") %>%
-#   #   #c.disabilities %>%
-#   #   .[.$PersonalID %in% 713 & 
-#   #       .$EnrollmentID %in% 1155687 & 
-#   #       .$DisabilityType == 7,] %>%
-#   #   group_by(PersonalID,EnrollmentID,DisabilitiesID, 
-#   #            InformationDate) %>%
-#   #   summarise(n = n())
-#   # 
-#   # 
-#   # read_csv("Disabilities.csv") %>%
-#   # #c.disabilities %>%
-#   #   .[.$PersonalID %in% 713 & 
-#   #       .$EnrollmentID %in% 1155687 & 
-#   #       .$DisabilityType == 7,] %>%
-#   #   group_by(PersonalID, EnrollmentID, 
-#   #            InformationDate,
-#   #            DataCollectionStage,
-#   #            DisabilityType,
-#   #            DisabilityResponse, IndefiniteAndImpairs) %>%
-#   #   summarise()
-#   
-#   library(ggplot2)
-#   
-#   # x <- read_csv("Disabilities.csv") %>%
-#   #   #c.disabilities %>%
-#   #   .[.$PersonalID %in% 713 & 
-#   #       .$EnrollmentID %in% 1155687,]
-#   
-#   x <- c.disabilities
-#   
-#   x <- x[,!grepl(pattern = "^TCell|^Viral|^Anti|^UserID$|^ExportID$|^Date", x = colnames(x))] 
-#   x %>%
-#     group_by(PersonalID, 
-#              EnrollmentID, 
-#              #InformationDate, 
-#              DataCollectionStage, 
-#              DisabilityType, 
-#              DisabilityResponse, 
-#              IndefiniteAndImpairs) %>%
-#     summarise() %>%
-#     mutate(., 
-#            dr_plus_ii = paste(DisabilityResponse, IndefiniteAndImpairs, sep = "-")) %>%
-#     as.data.table() %>%
-#     dcast(., 
-#           PersonalID + EnrollmentID + DisabilityType ~ DataCollectionStage, value.var = "dr_plus_ii")
-#   
-#   
-#   
-#   dis_df <- dis_df %>%
-#     #.[.$spd == T & !is.na(.$spd),] %>%
-#     left_join(., 
-#               data.frame(DisabilityType = c(5:10), 
-#                          DisabilityTypeName = c("physical_disab", 
-#                                                 "developmental_disab", 
-#                                                 "chronic_health_cond", 
-#                                                 "hiv_aids", 
-#                                                 "mental_health_disord", 
-#                                                 "substance_use_disord"))) %>%
-#     as.data.table() %>%
-#     dcast(., 
-#           PersonalID + EnrollmentID + disab_status_calc ~ DisabilityTypeName, 
-#           fun.aggregate = sum, 
-#           value.var = "disab_count")
-#     #dcast(., PersonalID + EnrollmentID ~ DisabilityTypeName, fun.aggregate = length) %>%
-#     mutate(., 
-#            total_disabilities = chronic_health_cond + 
-#              developmental_disab + 
-#              hiv_aids + 
-#              mental_health_disord + 
-#              physical_disab +
-#              substance_use_disord) %>% 
-#     as.data.frame()
-#   return(dis_df)
-# }
 
 calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
   # correct as of #1/24/23
