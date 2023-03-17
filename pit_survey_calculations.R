@@ -1,4 +1,40 @@
 
+calc_disabling_condition <- function(physical.disab, 
+                                     chronic.health.cond, 
+                                     mental.health.disord, 
+                                     substance.use.disord, 
+                                     developmental.disab, 
+                                     hiv_aids){
+  # The Data Standards allow systems to auto populate the disabling condition
+  # field with “yes” when a client answers “Yes” (Dependent Field A = “Yes”) to
+  # one of the disability criteria data elements: Physical Disability, Chronic
+  # Health Condition, Mental Health Disorder, and/or Substance Use Disorder
+  # (4.05, 4.07, 4.09, 4.10), or if Developmental disability (4.06) or HIV/AIDS
+  # (4.08) = “Yes” (Field 2 = “Yes”). Reporting should always count these
+  # clients as having a Disabling Condition. Though the programming instructions
+  # below only directly reference [disabling condition], it is expected that
+  # this field is consistent with the auto-population option in the HMIS. So,
+  # for projects or systems where auto-population is not used, tests for each of
+  # the separate Dependent Field A for 4.05, 4.07, 4.09 and 4.10, as well as
+  # Field 2 for 4.06 and 4.08, must occur within the programming logic of each
+  # relevant question.
+  
+  # see:
+  # https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf
+  
+  if(any(physical.disab, 
+         chronic.health.cond, 
+         mental.health.disord, 
+         substance.use.disord, 
+         developmental.disab, 
+         hiv_aids)){
+    out <- T
+  }else{
+    out <- F
+  }
+  return(out)
+}
+
 disability_type.1.3.def <- function(disability.type.val){
   # error check
   if(!disability.type.val %in% c(5:10)|
@@ -798,10 +834,102 @@ fun_ethnicity_def <- function(x){
 
 # calculated fields----
 
-# cast down to 1 row per enrolllment with 8 columns (1 per disability)
-# sometimes there might be 2+ enrollments on 1 date for 1 person (service + shelter) so we need to look at those and see how to handle them.  
+# cast down to 1 row per enrollment with 8 columns (1 per disability). Sometimes
+# there might be 2+ enrollments on 1 date for 1 person (service + shelter) so we
+# need to look at those and see how to handle them.
 
+ # dis_df <- a.disabilities
+ # enr_df <- a.enrollment
+ # exit_df <- a.exit
+ # pit_date <- ymd(20230125)
 
+screened_positive_disability2 <- function(dis_df, 
+                                          enr_df, 
+                                          exit_df, 
+                                          pit_date){
+  # work down to the columns we need
+  dis_df <- dis_df[colnames(dis_df) %in% 
+           grep(pattern = "disab|Disab|^Disab.*ID$|^Enr.*ID$|^Pers.*ID$|Date_disab$|Stage$|^Indef", 
+                x = colnames(dis_df), ignore.case = F, 
+                value = T)] 
+  
+  # bring in text values for dr and dt
+  dis_df$DisabilityResponse_text <- unlist(mapply(FUN = disability_response.4.10.2.def, 
+                                                   dis_df$DisabilityResponse, 
+                                                   dis_df$DisabilityType))
+  dis_df$DisabilityType_text <-  unlist(lapply(X = dis_df$DisabilityType, 
+                                               FUN = disability_type.1.3.def))
+  dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
+                                                   FUN = fun_1.8_def))
+  
+  # identify most recent informationDate for each client-enrollment----
+  join_dates <- hmis_join(dis_df,  
+                          enr_df[colnames(enr_df) %in% 
+                                   c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
+                                     "RelationshipToHoH", 
+                                     #"DisablingCondition", "DisabledHoH", 
+                                     #"MentalHealthDisorderFam", "PhysicalDisabilityFam",
+                                     #"AlcoholDrugUseDisorderFam",
+                                     "EntryDate")], 
+                          jtype = "left") %>%
+    hmis_join(., 
+              exit_df[colnames(exit_df) %in% 
+                        c("ExitID", "EnrollmentID", "PersonalID", "ExitDate" )], 
+              jtype = "left") 
+  
+  # filter out all information dates that occur after the PIT survey date and
+  # then find the latest InformationDate for each enrollment - that becomes
+  # your most recent and thus most applicable date for disability inventory
+  
+  join_dates <- join_dates %>%
+    .[.$InformationDate_disab <= pit_date,] %>%
+    group_by(PersonalID, EnrollmentID) %>%
+    slice_max(., 
+              order_by = as.numeric(InformationDate_disab), 
+              n = 1)
+  
+  
+  
+  # join_dates %>%
+  #   group_by(PersonalID, EnrollmentID) %>%
+  #   summarise(n = n(), 
+  #             n_infodates = n_distinct(InformationDate_disab), 
+  #             n_projID    = n_distinct(ProjectID)) %>%
+  #   .[order(.$n_infodates,decreasing = T),]
+  
+  
+  # cast table to show [something - define here]
+  #jd <- 
+  join_dates %>% 
+    as.data.table() %>%
+    dcast(., 
+          PersonalID + EnrollmentID + 
+            #InformationDate_disab ~ dt_name, 
+            InformationDate_disab ~
+           DisabilityType_text +  DisabilityResponse_text,
+          #value.var = "is_disab") 
+          value.var = "DisabilityType_text", 
+          sep = "_._") 
+  
+ join_dates %>%
+   group_by(EnrollmentID, PersonalID, InformationDate_disab) %>%
+   summarise(n_dtt = n_distinct(DisabilityType_text)) %>%
+   .$n_dtt %>% table()
+  
+  duplicated(join_dates) %>% table()
+  join_dates %>%
+    .[!duplicated(.),] %>%
+    group_by(PersonalID, EnrollmentID, InformationDate_disab, 
+             DisabilityResponse_text, 
+             DisabilityType_text, 
+             IndefiniteAndImpairs_txt) %>%
+    summarise(n = n(), 
+              n_projid = n_distinct(ProjectID)) %>%
+    .[.$n > 1 | 
+        .$n_projid > 1,] %>%
+    .[order(.$n_projid, decreasing = T),]
+  
+}
 
 screened_positive_disability <- function(dis_df = c.disabilities, 
                                          enr_df = c.enrollment, 
@@ -882,22 +1010,22 @@ screened_positive_disability <- function(dis_df = c.disabilities,
                          "DisabilityType", "DisabilityResponse", "IndefiniteAndImpairs", "DataCollectionStage",
                          "DisabilityResponse_text", "DisabilitiesID")]
   
-  #troublesome.records 
-  
-  trouble.ids <- join_dates %>%
-    group_by(PersonalID, EnrollmentID, InformationDate_disab, 
-             dt_name, is_disab) %>%
-    summarise(n = n(), 
-              n_DR_txt = n_distinct(DisabilityResponse_text),
-              n_DisabID = n_distinct(DisabilitiesID)) %>%
-    .[.$n != .$n_DisabID,] %>%
-    mutate(., 
-           trouble_id = paste(PersonalID, 
-                              EnrollmentID, 
-                              as.character(InformationDate_disab), 
-                              sep = "-", collapse = "-")) %>%
-    .$trouble_id %>%
-    unique()
+  # #troublesome.records 
+  # 
+  # trouble.ids <- join_dates %>%
+  #   group_by(PersonalID, EnrollmentID, InformationDate_disab, 
+  #            dt_name, is_disab) %>%
+  #   summarise(n = n(), 
+  #             n_DR_txt = n_distinct(DisabilityResponse_text),
+  #             n_DisabID = n_distinct(DisabilitiesID)) %>%
+  #   .[.$n != .$n_DisabID,] %>%
+  #   mutate(., 
+  #          trouble_id = paste(PersonalID, 
+  #                             EnrollmentID, 
+  #                             as.character(InformationDate_disab), 
+  #                             sep = "-", collapse = "-")) %>%
+  #   .$trouble_id %>%
+  #   unique()
   
   
   
