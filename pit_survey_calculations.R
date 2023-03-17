@@ -723,6 +723,7 @@ screened_positive_disability <- function(dis_df = c.disabilities,
   dis_df$is_disab <- "unknown or cannot tell"
   
   dis_df[dis_df$DisabilityResponse > 1 | 
+           dis_df$DisabilityResponse == 99 | # added 3/17/23 but probably redundant
            is.na(dis_df$DisabilityResponse),]$is_disab <- "unknown or cannot tell"
   dis_df[dis_df$DisabilityResponse == 0 & 
            !is.na(dis_df$DisabilityResponse),]$is_disab <- "not disabled"
@@ -735,6 +736,9 @@ screened_positive_disability <- function(dis_df = c.disabilities,
            !is.na(dis_df$DisabilityResponse) & 
            dis_df$IndefiniteAndImpairs == 0 & 
            !is.na(dis_df$IndefiniteAndImpairs),]$is_disab <- "not disabled"
+  dis_df[dis_df$DisabilityResponse == 1 & 
+           (dis_df$IndefiniteAndImpairs %in% c(8,9,99) | 
+           is.na(dis_df$IndefiniteAndImpairs)),]$is_disab <- "unknown or cannot tell"
   
   #dis_df[is.na(dis_df$is_disab),]$is_disab <- "unknown or cannot tell"
   
