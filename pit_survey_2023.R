@@ -14,7 +14,7 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230309)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230316)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
@@ -416,8 +416,15 @@ a.enrollment$calc_location_county <- a.enrollment$calc_location_county %>%
 # dropping in some code developed from "nccounty_logic.R"
 # Disabilities Check----
 a.disabilities <- read_csv("Disabilities.csv")
+
+a.disabilities$DisabilityResponse_text <- unlist(mapply(FUN = disability_response.4.10.2.def, 
+                                                        disab.response.val = a.disabilities$DisabilityResponse,
+                                                        disabilityType = a.disabilities$DisabilityType))
+
 a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
 screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
+
+
 
 # Healthanddv check----
 a.healthanddv <- read_csv("HealthAndDV.csv")
