@@ -1,4 +1,13 @@
 
+current_folder <- function() {
+  path_name <- rstudioapi::getSourceEditorContext()$path
+  if (path_name == "") {
+    return("File not saved")
+  } else {
+    utils::browseURL(dirname(path_name))
+  }
+}
+
 calc_disabling_condition <- function(physical.disab, 
                                      chronic.health.cond, 
                                      mental.health.disord, 
@@ -856,6 +865,58 @@ hud_disabling_condition <- function(){
   # NOTE: regardless of anything else mentioned above, if a client has a Physical Disability 
 }
 
+parse_DisabilitiesID <- function(dID, return_disability.type = T){
+  require(dplyr)
+  #print(dID)
+  split.temp <- strsplit(x = dID, 
+                         split = "_") %>%
+    unlist()
+  
+  # eid
+  temp.eid <- split.temp[1]
+  
+  # suffix_num
+  # suffix_char
+  if(length(split.temp) == 3){
+    temp.suffix_num  <- split.temp[2]
+    temp.suffix_char <- split.temp[3]
+  }else if(length(split.temp) == 2){
+    temp.suffix_num  <- ifelse(!is.na(as.numeric(split.temp[2])), 
+                               yes = split.temp[2], # the number
+                               no  = NA)            # the the character
+    temp.suffix_char <- ifelse(is.na(as.numeric(split.temp[2])), 
+                               yes = split.temp[2], # the character
+                               no  = NA)            # the number
+  }else{
+    temp.suffix_num  <- NA
+    temp.suffix_char <- NA
+  }
+  
+  out <- c("EnrollmentID" = temp.eid, 
+           "suffix_number" = temp.suffix_num, 
+           "suffix_character" = temp.suffix_char)
+  
+  if(return_disability.type){
+    if(out["suffix_character"] == "C"){
+      out["suffix_character"] <- "Chronic Health Condition"
+    }else if(out["suffix_character"] == "D"){
+      out["suffix_character"] <- "Developmental Disability"
+    }else if(out["suffix_character"] == "H"){
+      out["suffix_character"] <- "HIV/AIDS"
+    }else if(out["suffix_character"] == "M"){
+      out["suffix_character"] <- "Mental Health Disorder"
+    }else if(out["suffix_character"] == "P"){
+      out["suffix_character"] <- "Physical Disability"
+    }else if(out["suffix_character"] == "S"){
+      out["suffix_character"] <- "Substance Use Disorder"
+    }else{
+      out["suffix_character"] <- NA
+    }
+  }
+  
+  return(out)
+}
+
 
 # dis_df <- a.disabilities
 # enr_df <- a.enrollment
@@ -867,14 +928,15 @@ screened_positive_disability2 <- function(dis_df,
                                           exit_df, 
                                           pit_date){
   # desired outputs (multiple select from following list): 
-  # Mental Health Disorder               (DisabilityType 9), 
+  # (M)ental Health Disorder               (DisabilityType 9), 
+  # (S)ubstance Use Disorder                (Disability Type 10)
   # Alcohol Use Disorder                 (DisabilityType 10; DisabilityResponse [??]), 
   # Drug Use Disorder                    (DisabilityType 10; DisabilityResponse [??]), 
   # Both Alcohol and Drug Use Disorders  (DisabilityType 10; DisabilityResponse [??]),
-  # Chronic Health Condition             (DisabilityType 7),
-  # HIV/AIDS                             (DisabilityType 8),
-  # Development Disability               (DisabilityType 6), 
-  # Physical Disability                  (DisabilityType 5)
+  # (C)hronic Health Condition             (DisabilityType 7),
+  # (H)IV/AIDS                             (DisabilityType 8),
+  # (D)evelopment Disability               (DisabilityType 6), 
+  # (P)hysical Disability                  (DisabilityType 5)
 
   # NOTE: Everyone will have a response for all of the above Types.  The
   # response will be listed in DisabilityResponse,   you will need to filter
@@ -910,7 +972,7 @@ screened_positive_disability2 <- function(dis_df,
          yes = "unknown or cannot tell", 
          no = .)
   
-  # # indefinite and impairing verification
+ # # indefinite and impairing verification
   # dis_df$IndefiniteAndImpairs_verify <- NA
   # 
   # dis_df[(dis_df$DisabilityType == 5 & dis_df$DisabilityResponse == 1) | 
@@ -932,12 +994,10 @@ screened_positive_disability2 <- function(dis_df,
                                                                "Both alcohol and drug use disorders"), 
                                                            yes = "DisabResp_YES", 
                                                            no = dis_df$DisabilityResponse_text.categories_calc)
-  
   dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
                                                              c("Not disabled"), 
                                                            yes = "DisabResp_NOorUNKNOWN", 
                                                            no = dis_df$DisabilityResponse_text.categories_calc)
-  
   dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
                                                              c("unknown or cannot tell if disabled"), 
                                                            yes = "DisabResp_NOorUNKNOWN", 
@@ -952,6 +1012,21 @@ screened_positive_disability2 <- function(dis_df,
                                                               c("No", "unknown or cannot tell"), 
                                                             yes = "IndefImpairs_NOorUNKNOWN", 
                                                             no = dis_df$IndefiniteAndImpairs_txt.categories_calc)
+  
+  dis_df %>%
+    group_by(IndefiniteAndImpairs_txt, 
+             IndefiniteAndImpairs_txt.categories_calc,
+             IndefiniteAndImpairs) %>%
+    summarise(n  =n())
+  
+  dis_df %>%
+    group_by(DisabilityType_text) %>%
+    summarise(n = n())
+  
+  dis_df %>%
+    group_by(DisabilitiesID) %>%
+    summarise(n = n())
+  
   
   dis_df %>%
     group_by(DisabilityType, 
