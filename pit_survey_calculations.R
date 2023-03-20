@@ -867,10 +867,19 @@ screened_positive_disability2 <- function(dis_df,
                                           exit_df, 
                                           pit_date){
   # desired outputs (multiple select from following list): 
-  # Mental Health Disorder, Alcohol Use Disorder, Drug Use Disorder, 
-  # Both Alcohol and Drug Use Disorders, Chronic Health Condition, HIV/AIDS, 
-  # Development Disability, and/or Physical Disability,
+  # Mental Health Disorder               (DisabilityType 9), 
+  # Alcohol Use Disorder                 (DisabilityType 10; DisabilityResponse [??]), 
+  # Drug Use Disorder                    (DisabilityType 10; DisabilityResponse [??]), 
+  # Both Alcohol and Drug Use Disorders  (DisabilityType 10; DisabilityResponse [??]),
+  # Chronic Health Condition             (DisabilityType 7),
+  # HIV/AIDS                             (DisabilityType 8),
+  # Development Disability               (DisabilityType 6), 
+  # Physical Disability                  (DisabilityType 5)
 
+  # NOTE: Everyone will have a response for all of the above Types.  The
+  # response will be listed in DisabilityResponse,   you will need to filter
+  # down after that to make sense of who has what.
+  
   
   # work down to the columns we need
   dis_df <- dis_df[colnames(dis_df) %in% 
@@ -879,11 +888,13 @@ screened_positive_disability2 <- function(dis_df,
                 value = T)] 
   
   # bring in text values for dr and dt
+  dis_df$DisabilityType_text <-  unlist(lapply(X = dis_df$DisabilityType, 
+                                               FUN = disability_type.1.3.def))
   dis_df$DisabilityResponse_text <- unlist(mapply(FUN = disability_response.4.10.2.def, 
                                                    dis_df$DisabilityResponse, 
                                                    dis_df$DisabilityType))
-  dis_df$DisabilityType_text <-  unlist(lapply(X = dis_df$DisabilityType, 
-                                               FUN = disability_type.1.3.def))
+  
+  # TO DO:  look up what "indefinite and impairing definition means and put it here----
   dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
                                                    FUN = fun_1.8_def)) %>%
     ifelse(. %in% 
@@ -893,9 +904,8 @@ screened_positive_disability2 <- function(dis_df,
          yes = "unknown or cannot tell", 
          no = .)
   
-  dis_df %>%
-    group_by(DisabilitiesID) %>%
-    summarise(n = n()) 
+  dis_df$DisabilityResponse_text %>% unique()
+  
   
   dis_df %>%
     group_by(DisabilityResponse_text, DisabilityResponse,
