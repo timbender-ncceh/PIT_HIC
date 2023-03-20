@@ -35,6 +35,9 @@ calc_disabling_condition <- function(physical.disab,
   return(out)
 }
 
+
+
+
 disability_type.1.3.def <- function(disability.type.val){
   # error check
   if(!disability.type.val %in% c(5:10)|
@@ -861,6 +864,8 @@ screened_positive_disability2 <- function(dis_df,
                                                FUN = disability_type.1.3.def))
   dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
                                                    FUN = fun_1.8_def))
+  
+  
   
   # identify most recent informationDate for each client-enrollment----
   join_dates <- hmis_join(dis_df,  
