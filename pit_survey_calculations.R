@@ -841,15 +841,37 @@ fun_ethnicity_def <- function(x){
 # there might be 2+ enrollments on 1 date for 1 person (service + shelter) so we
 # need to look at those and see how to handle them.
 
- # dis_df <- a.disabilities
- # enr_df <- a.enrollment
- # exit_df <- a.exit
- # pit_date <- ymd(20230125)
+hud_disabling_condition <- function(){
+  # see: https://files.hudexchange.info/resources/documents/FY-2022-HMIS-Data-Dictionary.pdf
+  # see: 3.08 disabling condition
+  # see: Enrollments.csv$DisablingCondition
+  # see: 1.8 (0=no,1=yes,8.9.99 = "unknown or cannot tell")
+  
+  # NOTE: this value may be set to "YES" independent of any other data element. 
+  
+  # NOTE: this value may be inferred by the responses to "ability to live
+  # independently (4.05, 4.07, 4.09, or 4.10, 0r 4.06, or 4.08)
+  
+  # NOTE: this value may be automatically-populated 
+  # NOTE: regardless of anything else mentioned above, if a client has a Physical Disability 
+}
+
+
+# dis_df <- a.disabilities
+# enr_df <- a.enrollment
+# exit_df <- a.exit
+# pit_date <- ymd(20230125)
 
 screened_positive_disability2 <- function(dis_df, 
                                           enr_df, 
                                           exit_df, 
                                           pit_date){
+  # desired outputs (multiple select from following list): 
+  # Mental Health Disorder, Alcohol Use Disorder, Drug Use Disorder, 
+  # Both Alcohol and Drug Use Disorders, Chronic Health Condition, HIV/AIDS, 
+  # Development Disability, and/or Physical Disability,
+
+  
   # work down to the columns we need
   dis_df <- dis_df[colnames(dis_df) %in% 
            grep(pattern = "disab|Disab|^Disab.*ID$|^Enr.*ID$|^Pers.*ID$|Date_disab$|Stage$|^Indef", 
@@ -863,9 +885,27 @@ screened_positive_disability2 <- function(dis_df,
   dis_df$DisabilityType_text <-  unlist(lapply(X = dis_df$DisabilityType, 
                                                FUN = disability_type.1.3.def))
   dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
-                                                   FUN = fun_1.8_def))
+                                                   FUN = fun_1.8_def)) %>%
+    ifelse(. %in% 
+           c("Client doesn't Know", 
+             "Client refused") | 
+           is.na(.), 
+         yes = "unknown or cannot tell", 
+         no = .)
   
+  dis_df %>%
+    group_by(DisabilitiesID) %>%
+    summarise(n = n()) 
   
+  dis_df %>%
+    group_by(DisabilityResponse_text, DisabilityResponse,
+             DisabilityType_text, 
+             IndefiniteAndImpairs_txt) %>%
+    summarise(n = n()) %>%
+    as.data.table() %>%
+    dcast(., 
+          DisabilityResponse_text + DisabilityResponse +
+            DisabilityType_text ~ IndefiniteAndImpairs_txt, fill = 0)
   
   # identify most recent informationDate for each client-enrollment----
   join_dates <- hmis_join(dis_df,  
