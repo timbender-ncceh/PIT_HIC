@@ -894,7 +894,13 @@ screened_positive_disability2 <- function(dis_df,
                                                    dis_df$DisabilityResponse, 
                                                    dis_df$DisabilityType))
   
-  # TO DO:  look up what "indefinite and impairing definition means and put it here----
+  # DEFINITION: "indefinite and impairing":  If Yes for “Physical Disability”,
+  # "Chronic Health Condition", "Mental Health Disorder", OR if Alcohol use
+  # disorder, Drug use disorder, or Both alcohol and drug use disorders for
+  # “Substance Use Disorder”, THEN... Expected to be of long–continued and
+  # indefinite duration and substantially impairs ability to live independently
+  # (https://files.hudexchange.info/resources/documents/FY-2022-HMIS-Data-Dictionary.pdf)
+  
   dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
                                                    FUN = fun_1.8_def)) %>%
     ifelse(. %in% 
@@ -904,14 +910,60 @@ screened_positive_disability2 <- function(dis_df,
          yes = "unknown or cannot tell", 
          no = .)
   
+  # indefinite and impairing verification
+  dis_df$IndefiniteAndImpairs_verify <- NA
+  
+  dis_df[(dis_df$DisabilityType == 5 & dis_df$DisabilityResponse == 1) | 
+           (dis_df$DisabilityType == 7 & dis_df$DisabilityResponse == 1) |
+           (dis_df$DisabilityType == 9 & dis_df$DisabilityResponse == 1) | 
+           (dis_df$DisabilityType == 10 & dis_df$DisabilityResponse %in% c(1,2,3)),]$IndefiniteAndImpairs_verify <- "IndefImpairs_YES"
+  
+  
+  dis_df
+  
+  dis_df$DisabilityType_text     %>% unique()
   dis_df$DisabilityResponse_text %>% unique()
   
+  dis_df$DisabilityResponse_text.categories_calc <- NA
+  dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
+                                                             c("Disabled", 
+                                                               "Drug use disorder", 
+                                                               "Alcohol use disorder", 
+                                                               "Both alcohol and drug use disorders"), 
+                                                           yes = "DisabResp_YES", 
+                                                           no = dis_df$DisabilityResponse_text.categories_calc)
+  
+  dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
+                                                             c("Not disabled"), 
+                                                           yes = "DisabResp_NOorUNKNOWN", 
+                                                           no = dis_df$DisabilityResponse_text.categories_calc)
+  
+  dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
+                                                             c("unknown or cannot tell if disabled"), 
+                                                           yes = "DisabResp_NOorUNKNOWN", 
+                                                           no = dis_df$DisabilityResponse_text.categories_calc)
+  
+  dis_df$IndefiniteAndImpairs_txt.categories_calc <- NA
+  dis_df$IndefiniteAndImpairs_txt.categories_calc <- ifelse(dis_df$IndefiniteAndImpairs_txt %in% 
+                                                              c("Yes"), 
+                                                            yes = "IndefImpairs_YES", 
+                                                            no = dis_df$IndefiniteAndImpairs_txt.categories_calc)
+  dis_df$IndefiniteAndImpairs_txt.categories_calc <- ifelse(dis_df$IndefiniteAndImpairs_txt %in% 
+                                                              c("No", "unknown or cannot tell"), 
+                                                            yes = "IndefImpairs_NOorUNKNOWN", 
+                                                            no = dis_df$IndefiniteAndImpairs_txt.categories_calc)
   
   dis_df %>%
-    group_by(DisabilityResponse_text, DisabilityResponse,
+    group_by(DisabilityType, 
              DisabilityType_text, 
-             IndefiniteAndImpairs_txt) %>%
-    summarise(n = n()) %>%
+             DisabilityResponse, 
+             DisabilityResponse_text, 
+             DisabilityResponse_text.categories_calc, 
+             IndefiniteAndImpairs, 
+             IndefiniteAndImpairs_verify,
+             IndefiniteAndImpairs_txt, 
+             IndefiniteAndImpairs_txt.categories_calc) %>%
+    summarise(n = n())  %>% View()
     as.data.table() %>%
     dcast(., 
           DisabilityResponse_text + DisabilityResponse +
