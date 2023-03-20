@@ -910,16 +910,16 @@ screened_positive_disability2 <- function(dis_df,
          yes = "unknown or cannot tell", 
          no = .)
   
-  # indefinite and impairing verification
-  dis_df$IndefiniteAndImpairs_verify <- NA
-  
-  dis_df[(dis_df$DisabilityType == 5 & dis_df$DisabilityResponse == 1) | 
-           (dis_df$DisabilityType == 7 & dis_df$DisabilityResponse == 1) |
-           (dis_df$DisabilityType == 9 & dis_df$DisabilityResponse == 1) | 
-           (dis_df$DisabilityType == 10 & dis_df$DisabilityResponse %in% c(1,2,3)),]$IndefiniteAndImpairs_verify <- "IndefImpairs_YES"
-  
-  
-  dis_df
+  # # indefinite and impairing verification
+  # dis_df$IndefiniteAndImpairs_verify <- NA
+  # 
+  # dis_df[(dis_df$DisabilityType == 5 & dis_df$DisabilityResponse == 1) | 
+  #          (dis_df$DisabilityType == 7 & dis_df$DisabilityResponse == 1) |
+  #          (dis_df$DisabilityType == 9 & dis_df$DisabilityResponse == 1) | 
+  #          (dis_df$DisabilityType == 10 & dis_df$DisabilityResponse %in% c(1,2,3)),]$IndefiniteAndImpairs_verify <- "IndefImpairs_YES"
+  # 
+  #
+  # dis_df
   
   dis_df$DisabilityType_text     %>% unique()
   dis_df$DisabilityResponse_text %>% unique()
@@ -960,7 +960,7 @@ screened_positive_disability2 <- function(dis_df,
              DisabilityResponse_text, 
              DisabilityResponse_text.categories_calc, 
              IndefiniteAndImpairs, 
-             IndefiniteAndImpairs_verify,
+             #IndefiniteAndImpairs_verify,
              IndefiniteAndImpairs_txt, 
              IndefiniteAndImpairs_txt.categories_calc) %>%
     summarise(n = n())  %>% View()
