@@ -898,17 +898,17 @@ parse_DisabilitiesID <- function(dID, return_disability.type = T){
   
   if(return_disability.type){
     if(out["suffix_character"] == "C"){
-      out["suffix_character"] <- "Chronic Health Condition"
+      out["suffix_character"] <- "CH.condition"
     }else if(out["suffix_character"] == "D"){
-      out["suffix_character"] <- "Developmental Disability"
+      out["suffix_character"] <- "D.disability"
     }else if(out["suffix_character"] == "H"){
-      out["suffix_character"] <- "HIV/AIDS"
+      out["suffix_character"] <- "HIV.AIDS"
     }else if(out["suffix_character"] == "M"){
-      out["suffix_character"] <- "Mental Health Disorder"
+      out["suffix_character"] <- "MH.disorder"
     }else if(out["suffix_character"] == "P"){
-      out["suffix_character"] <- "Physical Disability"
+      out["suffix_character"] <- "P.disability"
     }else if(out["suffix_character"] == "S"){
-      out["suffix_character"] <- "Substance Use Disorder"
+      out["suffix_character"] <- "SU.disorder"
     }else{
       out["suffix_character"] <- NA
     }
@@ -929,10 +929,10 @@ screened_positive_disability2 <- function(dis_df,
                                           pit_date){
   # desired outputs (multiple select from following list): 
   # (M)ental Health Disorder               (DisabilityType 9), 
-  # (S)ubstance Use Disorder                (Disability Type 10)
-  # Alcohol Use Disorder                 (DisabilityType 10; DisabilityResponse [??]), 
-  # Drug Use Disorder                    (DisabilityType 10; DisabilityResponse [??]), 
-  # Both Alcohol and Drug Use Disorders  (DisabilityType 10; DisabilityResponse [??]),
+  # (S)ubstance Use Disorder               (Disability Type 10)
+  # Alcohol Use Disorder                   (DisabilityType 10; DisabilityResponse [??]), 
+  # Drug Use Disorder                      (DisabilityType 10; DisabilityResponse [??]), 
+  # Both Alcohol and Drug Use Disorders    (DisabilityType 10; DisabilityResponse [??]),
   # (C)hronic Health Condition             (DisabilityType 7),
   # (H)IV/AIDS                             (DisabilityType 8),
   # (D)evelopment Disability               (DisabilityType 6), 
@@ -948,6 +948,19 @@ screened_positive_disability2 <- function(dis_df,
            grep(pattern = "disab|Disab|^Disab.*ID$|^Enr.*ID$|^Pers.*ID$|Date_disab$|Stage$|^Indef", 
                 x = colnames(dis_df), ignore.case = F, 
                 value = T)] 
+  
+  # get dID suffix_char
+  dis_df$dID_suffix.type <- lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID) %>% lapply(., nth, 3) %>% unlist()
+  dis_df$dID_2           <- paste(unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 1)), 
+                             unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 2)), 
+                             sep = "_", collapse = "_")
+  # for(i in 1:nrow(dis_df)){
+  #   #dis_df$dID_suffix.type[i] <- parse_DisabilitiesID(dID = dis_df$DisabilitiesID[i])["suffix_character"]
+  #   dis_df$dID_2[i]           <- paste(parse_DisabilitiesID(dID = dis_df$DisabilitiesID[i])["EnrollmentID"], 
+  #                                      parse_DisabilitiesID(dID = dis_df$DisabilitiesID[i])["suffix_number"], 
+  #                                      sep = "_", collapse = "_")
+  # }
+  dis_df
   
   # bring in text values for dr and dt
   dis_df$DisabilityType_text <-  unlist(lapply(X = dis_df$DisabilityType, 
