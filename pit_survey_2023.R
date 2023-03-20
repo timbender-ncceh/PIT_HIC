@@ -420,12 +420,13 @@ a.enrollment$calc_location_county <- a.enrollment$calc_location_county %>%
 # Disabilities Check----
 a.disabilities <- read_csv("Disabilities.csv")
 
-a.disabilities$DisabilityResponse_text <- unlist(mapply(FUN = disability_response.4.10.2.def, 
-                                                        disab.response.val = a.disabilities$DisabilityResponse,
-                                                        disabilityType = a.disabilities$DisabilityType))
+# a.disabilities$DisabilityResponse_text <- unlist(mapply(FUN = disability_response.4.10.2.def, 
+#                                                        disab.response.val = a.disabilities$DisabilityResponse,
+#                                                        disabilityType = a.disabilities$DisabilityType))
 
 a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
 
+# run screened_positive_disability function here (version 1 or 2, not sure which yet)
 screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
 
 
