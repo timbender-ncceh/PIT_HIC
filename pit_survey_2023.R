@@ -50,7 +50,10 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/Januar
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+#devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+# commented out the above temporarily just during comment branch. use below for now: 
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/4-concern-that-disabling-conditions-isnt-coming-through-properly/pit_survey_calculations.R?raw=TRUE")
+
 
 hmis_join <- function(x.file,
                       y.file,
@@ -422,6 +425,7 @@ a.disabilities$DisabilityResponse_text <- unlist(mapply(FUN = disability_respons
                                                         disabilityType = a.disabilities$DisabilityType))
 
 a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
+
 screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
 
 
