@@ -1,4 +1,22 @@
 
+fun_titlecase <- function(string = "a string of words"){
+  require(dplyr)
+  out <- unlist(strsplit(string, " ")) %>%
+    strsplit(., "")
+  
+  for(i in 1:length(out)){
+    out[[i]][1] <- toupper(out[[i]][1])
+  }
+  
+  out <- lapply(X = out, 
+                FUN = paste, 
+                sep = "", collapse = "") %>%
+    unlist() %>%
+    paste(., sep = " ", collapse = " ")
+  
+  return(out)
+}
+
 current_folder <- function() {
   path_name <- rstudioapi::getSourceEditorContext()$path
   if (path_name == "") {
@@ -982,14 +1000,8 @@ parse_DisabilitiesID <- function(dID, return_disability.type = T){
 # }
 
 # dis_df <- a.disabilities
-# enr_df <- a.enrollment
-# exit_df <- a.exit
-# pit_date <- ymd(20230125)
 
-screened_positive_disability2 <- function(dis_df, 
-                                          enr_df, 
-                                          exit_df, 
-                                          pit_date){
+screened_positive_disability2 <- function(dis_df){
   # desired outputs (multiple select from following list): 
   # (M)ental Health Disorder               (DisabilityType 9), 
   # (S)ubstance Use Disorder               (Disability Type 10)
@@ -1050,10 +1062,10 @@ screened_positive_disability2 <- function(dis_df,
            no = .)
   
   
-  dis_df$DisabilityType_text      %>% unique()
-  dis_df$DisabilityResponse_text  %>% unique()
-  dis_df$IndefiniteAndImpairs_txt %>% unique()
-  
+  # dis_df$DisabilityType_text      %>% unique()
+  # dis_df$DisabilityResponse_text  %>% unique()
+  # dis_df$IndefiniteAndImpairs_txt %>% unique()
+  # 
   dis_df$DisabilityResponse_text.categories_calc <- NA
   dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
                                                              c("Disabled", 
@@ -1082,7 +1094,21 @@ screened_positive_disability2 <- function(dis_df,
                                                             no = dis_df$IndefiniteAndImpairs_txt.categories_calc)
   
   
+  
+  
+
+  # paste("dr", 
+  #       gsub(" ", "", unlist(lapply(dis_df$DisabilityResponse_text, FUN = fun_titlecase))), 
+  #            sep = "_")
+    
+  
   disdf_indimp <- dis_df %>%
+    mutate(., 
+           IndefiniteAndImpairs_txt = paste("II", 
+                                           gsub(" ", "", 
+                                                unlist(lapply(IndefiniteAndImpairs_txt, 
+                                                              FUN = fun_titlecase))), 
+                                           sep = ".")) %>%
     group_by(PersonalID, EnrollmentID, dID_2, InformationDate_disab, dID_suffix.type, 
              DisabilityResponse_text, IndefiniteAndImpairs_txt
              #DisabilityResponse_text.categories_calc, IndefiniteAndImpairs_txt.categories_calc
@@ -1098,9 +1124,15 @@ screened_positive_disability2 <- function(dis_df,
                      value.var = "IndefiniteAndImpairs_txt",
                      #value.var = "IndefiniteAndImpairs_txt.categories_calc",
                      sep = "//") %>%
-    as.data.frame() #%>% as_tibble()
+    as.data.frame() %>% as_tibble()
   
   disdf_disabresp <- dis_df %>%
+    mutate(., 
+           DisabilityResponse_text = paste("DR", 
+                                           gsub(" ", "", 
+                                                unlist(lapply(DisabilityResponse_text, 
+                                                              FUN = fun_titlecase))), 
+                                           sep = ".")) %>%
     group_by(PersonalID, EnrollmentID, dID_2, InformationDate_disab, dID_suffix.type, 
              DisabilityResponse_text, IndefiniteAndImpairs_txt
              #DisabilityResponse_text.categories_calc, IndefiniteAndImpairs_txt.categories_calc
@@ -1144,12 +1176,24 @@ screened_positive_disability2 <- function(dis_df,
   
   # filter by newest informationdate
   
-  disdf_ddrii %>%
+  disdf_ddrii <- disdf_ddrii %>%
     ungroup() %>%
     group_by(PersonalID) %>%
     slice_max(., 
               order_by = InformationDate_disab, 
               n = 1)
+ # disdf_ddrii %>%
+ #   group_by(CH.condition, 
+ #            D.disability, 
+ #            HIV.AIDS, 
+ #            MH.disorder, 
+ #            P.disability, 
+ #            SU.disorder) %>%
+ #   summarise(n = n(), 
+ #             n_pid = n_distinct(PersonalID)) %>%
+ #   .[order(.$n_pid,decreasing = T),]
+ 
+  return(disdf_ddrii)
   
  #    #%>%
  #    # dcast(., 
