@@ -1026,36 +1026,42 @@ screened_positive_disability2 <- function(dis_df,
                                                             yes = "IndefImpairs_NOorUNKNOWN", 
                                                             no = dis_df$IndefiniteAndImpairs_txt.categories_calc)
   
-  dis_df %>%
-    group_by(IndefiniteAndImpairs_txt, 
-             IndefiniteAndImpairs_txt.categories_calc,
-             IndefiniteAndImpairs) %>%
-    summarise(n  =n())
   
   dis_df %>%
-    group_by(DisabilityType_text) %>%
-    summarise(n = n())
-  
-  dis_df %>%
-    group_by(DisabilitiesID) %>%
-    summarise(n = n())
-  
-  
-  dis_df %>%
-    group_by(DisabilityType, 
-             DisabilityType_text, 
-             DisabilityResponse, 
-             DisabilityResponse_text, 
+    group_by(DisabilityType_text, 
+             DisabilityResponse_text,
              DisabilityResponse_text.categories_calc, 
-             IndefiniteAndImpairs, 
-             #IndefiniteAndImpairs_verify,
-             IndefiniteAndImpairs_txt, 
              IndefiniteAndImpairs_txt.categories_calc) %>%
-    summarise(n = n())  %>% View()
+    summarise(n = n()) %>%
+    # .[grepl(pattern = "_YES$", 
+    #         x = .$DisabilityResponse_text.categories_calc) & 
+    #     grepl(pattern = "_YES$", 
+    #           x = .$IndefiniteAndImpairs_txt.categories_calc),]
     as.data.table() %>%
     dcast(., 
-          DisabilityResponse_text + DisabilityResponse +
-            DisabilityType_text ~ IndefiniteAndImpairs_txt, fill = 0)
+          DisabilityType_text ~#+
+            #DisabilityResponse_text ~
+            DisabilityResponse_text.categories_calc +
+            IndefiniteAndImpairs_txt.categories_calc, fill = 0, fun.aggregate = sum, 
+          sep = "_._")
+  
+  
+  
+  # dis_df %>%
+  #   group_by(DisabilityType, 
+  #            DisabilityType_text, 
+  #            DisabilityResponse, 
+  #            DisabilityResponse_text, 
+  #            DisabilityResponse_text.categories_calc, 
+  #            IndefiniteAndImpairs, 
+  #            #IndefiniteAndImpairs_verify,
+  #            IndefiniteAndImpairs_txt, 
+  #            IndefiniteAndImpairs_txt.categories_calc) %>%
+  #   summarise(n = n())  %>% View()
+  #   as.data.table() %>%
+  #   dcast(., 
+  #         DisabilityResponse_text + DisabilityResponse +
+  #           DisabilityType_text ~ IndefiniteAndImpairs_txt, fill = 0)
   
   # identify most recent informationDate for each client-enrollment----
   join_dates <- hmis_join(dis_df,  
