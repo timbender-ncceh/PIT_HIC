@@ -918,6 +918,69 @@ parse_DisabilitiesID <- function(dID, return_disability.type = T){
 }
 
 
+
+# 
+# w_alcoholuseD <- function(dis_df, 
+#                           enr_df){
+#   # work down to the columns we need
+#   dis_df <- dis_df[colnames(dis_df) %in% 
+#                      grep(pattern = "disab|Disab|^Disab.*ID$|^Enr.*ID$|^Pers.*ID$|Date_disab$|Stage$|^Indef", 
+#                           x = colnames(dis_df), ignore.case = F, 
+#                           value = T)] 
+#   
+#   # get dID suffix_char
+#   dis_df$dID_suffix.type <- lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID) %>% lapply(., nth, 3) %>% unlist()
+#   dis_df$dID_2           <- paste(unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 1)), 
+#                                   unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 2)), 
+#                                   sep = "_", collapse = "_") 
+#   
+#   # identify most recent informationDate for each client-enrollment----
+#   join_dates <- hmis_join(dis_df,  
+#                           enr_df[colnames(enr_df) %in% 
+#                                    c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
+#                                      "RelationshipToHoH", 
+#                                      #"DisablingCondition", "DisabledHoH", 
+#                                      #"MentalHealthDisorderFam", "PhysicalDisabilityFam",
+#                                      #"AlcoholDrugUseDisorderFam",
+#                                      "EntryDate")], 
+#                           jtype = "left") %>%
+#     hmis_join(., 
+#               exit_df[colnames(exit_df) %in% 
+#                         c("ExitID", "EnrollmentID", "PersonalID", "ExitDate" )], 
+#               jtype = "left") 
+#   
+#   # filter out all information dates that occur after the PIT survey date and
+#   # then find the latest InformationDate for each enrollment - that becomes
+#   # your most recent and thus most applicable date for disability inventory
+#   
+#   join_dates <- join_dates %>%
+#     .[.$InformationDate_disab <= pit_date,] %>%
+#     group_by(PersonalID, EnrollmentID) %>%
+#     slice_max(., 
+#               order_by = as.numeric(InformationDate_disab), 
+#               n = 1)
+#   
+#   # alcoholuse
+#   
+#   
+#   return(out)
+# }
+# 
+# w_druguseD <- function(dis_df){
+#   
+#   return(out)
+# }
+# 
+# w_mentalhealthD <- function(){
+#  
+#   return(out)
+# }
+# 
+# w_hivaids <- function(dis_df){
+#   
+#   return(out)
+# }
+
 # dis_df <- a.disabilities
 # enr_df <- a.enrollment
 # exit_df <- a.exit
@@ -945,15 +1008,16 @@ screened_positive_disability2 <- function(dis_df,
   
   # work down to the columns we need
   dis_df <- dis_df[colnames(dis_df) %in% 
-           grep(pattern = "disab|Disab|^Disab.*ID$|^Enr.*ID$|^Pers.*ID$|Date_disab$|Stage$|^Indef", 
-                x = colnames(dis_df), ignore.case = F, 
-                value = T)] 
+                     grep(pattern = "disab|Disab|^Disab.*ID$|^Enr.*ID$|^Pers.*ID$|Date_disab$|Stage$|^Indef", 
+                          x = colnames(dis_df), ignore.case = F, 
+                          value = T)] 
   
   # get dID suffix_char
   dis_df$dID_suffix.type <- lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID) %>% lapply(., nth, 3) %>% unlist()
   dis_df$dID_2           <- paste(unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 1)), 
-                             unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 2)), 
-                             sep = "_", collapse = "_")
+                                  unlist(lapply(lapply(X = dis_df$DisabilitiesID, FUN = parse_DisabilitiesID), nth, 2)), 
+                                  sep = "_")#, 
+  #collapse = "_")
   # for(i in 1:nrow(dis_df)){
   #   #dis_df$dID_suffix.type[i] <- parse_DisabilitiesID(dID = dis_df$DisabilitiesID[i])["suffix_character"]
   #   dis_df$dID_2[i]           <- paste(parse_DisabilitiesID(dID = dis_df$DisabilitiesID[i])["EnrollmentID"], 
@@ -966,8 +1030,8 @@ screened_positive_disability2 <- function(dis_df,
   dis_df$DisabilityType_text <-  unlist(lapply(X = dis_df$DisabilityType, 
                                                FUN = disability_type.1.3.def))
   dis_df$DisabilityResponse_text <- unlist(mapply(FUN = disability_response.4.10.2.def, 
-                                                   dis_df$DisabilityResponse, 
-                                                   dis_df$DisabilityType))
+                                                  dis_df$DisabilityResponse, 
+                                                  dis_df$DisabilityType))
   
   # DEFINITION: "indefinite and impairing":  If Yes for “Physical Disability”,
   # "Chronic Health Condition", "Mental Health Disorder", OR if Alcohol use
@@ -979,25 +1043,16 @@ screened_positive_disability2 <- function(dis_df,
   dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
                                                    FUN = fun_1.8_def)) %>%
     ifelse(. %in% 
-           c("Client doesn't Know", 
-             "Client refused") | 
-           is.na(.), 
-         yes = "unknown or cannot tell", 
-         no = .)
+             c("Client doesn't Know", 
+               "Client refused") | 
+             is.na(.), 
+           yes = "unknown or cannot tell", 
+           no = .)
   
- # # indefinite and impairing verification
-  # dis_df$IndefiniteAndImpairs_verify <- NA
-  # 
-  # dis_df[(dis_df$DisabilityType == 5 & dis_df$DisabilityResponse == 1) | 
-  #          (dis_df$DisabilityType == 7 & dis_df$DisabilityResponse == 1) |
-  #          (dis_df$DisabilityType == 9 & dis_df$DisabilityResponse == 1) | 
-  #          (dis_df$DisabilityType == 10 & dis_df$DisabilityResponse %in% c(1,2,3)),]$IndefiniteAndImpairs_verify <- "IndefImpairs_YES"
-  # 
-  #
-  # dis_df
   
-  dis_df$DisabilityType_text     %>% unique()
-  dis_df$DisabilityResponse_text %>% unique()
+  dis_df$DisabilityType_text      %>% unique()
+  dis_df$DisabilityResponse_text  %>% unique()
+  dis_df$IndefiniteAndImpairs_txt %>% unique()
   
   dis_df$DisabilityResponse_text.categories_calc <- NA
   dis_df$DisabilityResponse_text.categories_calc <- ifelse(dis_df$DisabilityResponse_text %in%
@@ -1027,108 +1082,187 @@ screened_positive_disability2 <- function(dis_df,
                                                             no = dis_df$IndefiniteAndImpairs_txt.categories_calc)
   
   
-  dis_df %>%
-    group_by(DisabilityType_text, 
-             DisabilityResponse_text,
-             DisabilityResponse_text.categories_calc, 
-             IndefiniteAndImpairs_txt.categories_calc) %>%
-    summarise(n = n()) %>%
-    # .[grepl(pattern = "_YES$", 
-    #         x = .$DisabilityResponse_text.categories_calc) & 
-    #     grepl(pattern = "_YES$", 
-    #           x = .$IndefiniteAndImpairs_txt.categories_calc),]
+  disdf_indimp <- dis_df %>%
+    group_by(PersonalID, EnrollmentID, dID_2, InformationDate_disab, dID_suffix.type, 
+             DisabilityResponse_text, IndefiniteAndImpairs_txt
+             #DisabilityResponse_text.categories_calc, IndefiniteAndImpairs_txt.categories_calc
+    ) %>%
+    summarise() %>%
     as.data.table() %>%
-    dcast(., 
-          DisabilityType_text ~#+
-            #DisabilityResponse_text ~
-            DisabilityResponse_text.categories_calc +
-            IndefiniteAndImpairs_txt.categories_calc, fill = 0, fun.aggregate = sum, 
-          sep = "_._")
+    dcast.data.table(., 
+                     PersonalID + 
+                       EnrollmentID + 
+                       dID_2 + 
+                       InformationDate_disab ~ 
+                       dID_suffix.type,
+                     value.var = "IndefiniteAndImpairs_txt",
+                     #value.var = "IndefiniteAndImpairs_txt.categories_calc",
+                     sep = "//") %>%
+    as.data.frame() #%>% as_tibble()
   
+  disdf_disabresp <- dis_df %>%
+    group_by(PersonalID, EnrollmentID, dID_2, InformationDate_disab, dID_suffix.type, 
+             DisabilityResponse_text, IndefiniteAndImpairs_txt
+             #DisabilityResponse_text.categories_calc, IndefiniteAndImpairs_txt.categories_calc
+    ) %>%
+    summarise() %>%
+    as.data.table() %>%
+    dcast.data.table(., 
+                     PersonalID + 
+                       EnrollmentID + 
+                       dID_2 + 
+                       InformationDate_disab ~ 
+                       dID_suffix.type,
+                     value.var = "DisabilityResponse_text",
+                     sep = "//") %>%
+    as.data.frame() #%>% as_tibble()
   
+  disdf_ddrii <- full_join(disdf_disabresp, 
+                           disdf_indimp, 
+                           by = c("PersonalID", "EnrollmentID", "dID_2", 
+                                  "InformationDate_disab"), 
+                           suffix = c("__dr", "__ii")) %>% as_tibble()
   
-  # dis_df %>%
-  #   group_by(DisabilityType, 
-  #            DisabilityType_text, 
-  #            DisabilityResponse, 
-  #            DisabilityResponse_text, 
-  #            DisabilityResponse_text.categories_calc, 
-  #            IndefiniteAndImpairs, 
-  #            #IndefiniteAndImpairs_verify,
-  #            IndefiniteAndImpairs_txt, 
-  #            IndefiniteAndImpairs_txt.categories_calc) %>%
-  #   summarise(n = n())  %>% View()
-  #   as.data.table() %>%
-  #   dcast(., 
-  #         DisabilityResponse_text + DisabilityResponse +
-  #           DisabilityType_text ~ IndefiniteAndImpairs_txt, fill = 0)
+  disdf_ddrii %>%
+    colnames() %>%
+    grep("__", ., value = T) %>%
+    gsub("__.*$", "", .) %>%
+    unique()
   
-  # identify most recent informationDate for each client-enrollment----
-  join_dates <- hmis_join(dis_df,  
-                          enr_df[colnames(enr_df) %in% 
-                                   c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
-                                     "RelationshipToHoH", 
-                                     #"DisablingCondition", "DisabledHoH", 
-                                     #"MentalHealthDisorderFam", "PhysicalDisabilityFam",
-                                     #"AlcoholDrugUseDisorderFam",
-                                     "EntryDate")], 
-                          jtype = "left") %>%
-    hmis_join(., 
-              exit_df[colnames(exit_df) %in% 
-                        c("ExitID", "EnrollmentID", "PersonalID", "ExitDate" )], 
-              jtype = "left") 
+  drop.cols <- disdf_ddrii %>%
+    colnames() %>%
+    grep("__", ., value = T)
   
-  # filter out all information dates that occur after the PIT survey date and
-  # then find the latest InformationDate for each enrollment - that becomes
-  # your most recent and thus most applicable date for disability inventory
+  disdf_ddrii <- mutate(disdf_ddrii, 
+         CH.condition = paste(CH.condition__dr, CH.condition__ii, sep = ", "), 
+         D.disability = paste(D.disability__dr, D.disability__ii, sep = ", "), 
+         HIV.AIDS     = paste(HIV.AIDS__dr,     HIV.AIDS__ii,     sep = ", "), 
+         MH.disorder  = paste(MH.disorder__dr,  MH.disorder__ii,  sep = ", "), 
+         P.disability = paste(P.disability__dr, P.disability__ii, sep = ", "), 
+         SU.disorder  = paste(SU.disorder__dr,  SU.disorder__ii,  sep = ", ")) %>%
+    .[!colnames(.) %in% drop.cols]
   
-  join_dates <- join_dates %>%
-    .[.$InformationDate_disab <= pit_date,] %>%
-    group_by(PersonalID, EnrollmentID) %>%
+  # filter by newest informationdate
+  
+  disdf_ddrii %>%
+    ungroup() %>%
+    group_by(PersonalID) %>%
     slice_max(., 
-              order_by = as.numeric(InformationDate_disab), 
+              order_by = InformationDate_disab, 
               n = 1)
   
-  
-  
-  # join_dates %>%
-  #   group_by(PersonalID, EnrollmentID) %>%
-  #   summarise(n = n(), 
-  #             n_infodates = n_distinct(InformationDate_disab), 
-  #             n_projID    = n_distinct(ProjectID)) %>%
-  #   .[order(.$n_infodates,decreasing = T),]
-  
-  
-  # cast table to show [something - define here]
-  #jd <- 
-  join_dates %>% 
-    as.data.table() %>%
-    dcast(., 
-          PersonalID + EnrollmentID + 
-            #InformationDate_disab ~ dt_name, 
-            InformationDate_disab ~
-           DisabilityType_text +  DisabilityResponse_text,
-          #value.var = "is_disab") 
-          value.var = "DisabilityType_text", 
-          sep = "_._") 
-  
- join_dates %>%
-   group_by(EnrollmentID, PersonalID, InformationDate_disab) %>%
-   summarise(n_dtt = n_distinct(DisabilityType_text)) %>%
-   .$n_dtt %>% table()
-  
-  duplicated(join_dates) %>% table()
-  join_dates %>%
-    .[!duplicated(.),] %>%
-    group_by(PersonalID, EnrollmentID, InformationDate_disab, 
-             DisabilityResponse_text, 
-             DisabilityType_text, 
-             IndefiniteAndImpairs_txt) %>%
-    summarise(n = n(), 
-              n_projid = n_distinct(ProjectID)) %>%
-    .[.$n > 1 | 
-        .$n_projid > 1,] %>%
-    .[order(.$n_projid, decreasing = T),]
+ #    #%>%
+ #    # dcast(., 
+ #    #       dID_2 + DisabilityResponse_text ~ dID_suffix.type) 
+ #  
+ #  # TO DO NOTE: SUMMARISE OR CAST OR WHATEVER TO THIS TABLE ^^^ SUCH THAT YOU HAVE THE FOLLOWING COLS: (done)
+ #  # PID, EID, DID2, InfoDate_disab, DIDTYPE, PASTE(RESPONSE-INDEFINITE.IMPAIRS) (done)
+ #  # TO DO: ALSO FIX NOTES IN GOOGLE DOC FORM 3/21/23----
+ #  
+ #  # dis_df %>%
+ #  #   group_by(dID_2, 
+ #  #            dID_suffix.type, 
+ #  #            DisabilityType_text, 
+ #  #            DisabilityResponse_text,
+ #  #            DisabilityResponse_text.categories_calc, 
+ #  #            IndefiniteAndImpairs_txt.categories_calc) %>%
+ #  #   summarise(n = n()) %>%
+ #  #   # .[grepl(pattern = "_YES$", 
+ #  #   #         x = .$DisabilityResponse_text.categories_calc) & 
+ #  #   #     grepl(pattern = "_YES$", 
+ #  #   #           x = .$IndefiniteAndImpairs_txt.categories_calc),]
+ #  #   as.data.table() %>%
+ #  #   dcast(., 
+ #  #         DisabilityType_text ~#+
+ #  #           #DisabilityResponse_text ~
+ #  #           DisabilityResponse_text.categories_calc +
+ #  #           IndefiniteAndImpairs_txt.categories_calc, fill = 0, fun.aggregate = sum, 
+ #  #         sep = "_._")
+ #  
+ #  
+ #  
+ #  # dis_df %>%
+ #  #   group_by(DisabilityType,
+ #  #            DisabilityType_text,
+ #  #            DisabilityResponse,
+ #  #            DisabilityResponse_text,
+ #  #            DisabilityResponse_text.categories_calc,
+ #  #            IndefiniteAndImpairs,
+ #  #            #IndefiniteAndImpairs_verify,
+ #  #            IndefiniteAndImpairs_txt,
+ #  #            IndefiniteAndImpairs_txt.categories_calc) %>%
+ #  #   summarise(n = n())  %>% 
+ #  #   as.data.table() %>%
+ #  #   dcast(.,
+ #  #         DisabilityResponse_text + DisabilityResponse +
+ #  #           DisabilityType_text ~ IndefiniteAndImpairs_txt, fill = 0)
+ #  
+ #  # identify most recent informationDate for each client-enrollment----
+ #  join_dates <- hmis_join(dis_df,  
+ #                          enr_df[colnames(enr_df) %in% 
+ #                                   c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
+ #                                     "RelationshipToHoH", 
+ #                                     #"DisablingCondition", "DisabledHoH", 
+ #                                     #"MentalHealthDisorderFam", "PhysicalDisabilityFam",
+ #                                     #"AlcoholDrugUseDisorderFam",
+ #                                     "EntryDate")], 
+ #                          jtype = "left") %>%
+ #    hmis_join(., 
+ #              exit_df[colnames(exit_df) %in% 
+ #                        c("ExitID", "EnrollmentID", "PersonalID", "ExitDate" )], 
+ #              jtype = "left") 
+ #  
+ #  # filter out all information dates that occur after the PIT survey date and
+ #  # then find the latest InformationDate for each enrollment - that becomes
+ #  # your most recent and thus most applicable date for disability inventory
+ #  
+ #  join_dates <- join_dates %>%
+ #    .[.$InformationDate_disab <= pit_date,] %>%
+ #    group_by(PersonalID, EnrollmentID) %>%
+ #    slice_max(., 
+ #              order_by = as.numeric(InformationDate_disab), 
+ #              n = 1)
+ #  
+ #  
+ #  
+ #  # join_dates %>%
+ #  #   group_by(PersonalID, EnrollmentID) %>%
+ #  #   summarise(n = n(), 
+ #  #             n_infodates = n_distinct(InformationDate_disab), 
+ #  #             n_projID    = n_distinct(ProjectID)) %>%
+ #  #   .[order(.$n_infodates,decreasing = T),]
+ #  
+ #  
+ #  # cast table to show [something - define here]
+ #  #jd <- 
+ #  join_dates %>% 
+ #    as.data.table() %>%
+ #    dcast(., 
+ #          PersonalID + EnrollmentID + 
+ #            #InformationDate_disab ~ dt_name, 
+ #            InformationDate_disab ~
+ #           DisabilityType_text +  DisabilityResponse_text,
+ #          #value.var = "is_disab") 
+ #          value.var = "DisabilityType_text", 
+ #          sep = "_._") 
+ #  
+ # join_dates %>%
+ #   group_by(EnrollmentID, PersonalID, InformationDate_disab) %>%
+ #   summarise(n_dtt = n_distinct(DisabilityType_text)) %>%
+ #   .$n_dtt %>% table()
+ #  
+ #  duplicated(join_dates) %>% table()
+ #  join_dates %>%
+ #    .[!duplicated(.),] %>%
+ #    group_by(PersonalID, EnrollmentID, InformationDate_disab, 
+ #             DisabilityResponse_text, 
+ #             DisabilityType_text, 
+ #             IndefiniteAndImpairs_txt) %>%
+ #    summarise(n = n(), 
+ #              n_projid = n_distinct(ProjectID)) %>%
+ #    .[.$n > 1 | 
+ #        .$n_projid > 1,] %>%
+ #    .[order(.$n_projid, decreasing = T),]
   
 }
 
