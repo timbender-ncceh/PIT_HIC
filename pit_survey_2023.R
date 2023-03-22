@@ -7,6 +7,7 @@ library(lubridate)
 library(data.table)
 library(devtools)
 library(openxlsx)
+library(ggplot2)
 
 rm(list=ls())
 cat('\f')
@@ -423,8 +424,8 @@ a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
 
 # run screened_positive_disability function here (version 1 or 2, not sure which yet)----
 
-screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
-
+#screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
+screened.pos.disab_df <- screened_positive_disability2(dis_df = a.disabilities)
 
 
 # Healthanddv check----
@@ -557,9 +558,9 @@ c.enrollment              <- b.enrollment
 #   .$n_pid %>% sum
 
 
-c.exit                    <- b.exit
+c.exit                   <- b.exit
 c.currentlivingsituation <- b.currentlivingsituation
-c.client                  <- b.client
+c.client                 <- b.client
 c.screened.pos.disab_df  <- screened.pos.disab_df
 c.healthanddv            <- b.healthanddv
 
@@ -581,7 +582,7 @@ output <- left_join(c.enrollment, c.client) %>%
   #left_join(., c.exit) %>%
   left_join(., comp_county) %>%
   left_join(., b.project) %>%
-  left_join(., screened.pos.disab_df) %>%
+  left_join(., c.screened.pos.disab_df) %>%
   left_join(., c.healthanddv) %>%
   #left_join(., d.currentlivingsituation) %>%
   left_join(., b.inventory[,c("ProjectID", 
@@ -619,12 +620,14 @@ output2 <- output[,c("PersonalID",
                      "gender_calc", "gender_category_calc", 
                      "race_calc", "race2_calc", "race_cat_calc", 
                      "ethnicity_def", 
-                     "HIV.AIDS", 
-                     "chronic_hlth_C", 
-                     "developmental_D", 
-                     "mental_health_D", 
-                     "physical_D", 
-                     "substance_use_D", 
+                     "InformationDate_disab", 
+                     "CH.condition", "D.disability", "HIV.AIDS", "MH.disorder", "P.disability", "SU.disorder",
+                     # "HIV.AIDS", 
+                     # "chronic_hlth_C", 
+                     # "developmental_D", 
+                     # "mental_health_D", 
+                     # "physical_D", 
+                     # "substance_use_D", 
                      "provider_calc", 
                      "Region", 
                      #"County", 
@@ -684,13 +687,14 @@ gender_category_calc	12	8	TRUE
 race_calc	13	9			
 race2_calc	14	10	TRUE		
 race_cat_calc	15	11	TRUE		
-ethnicity_def	16	12			
+ethnicity_def	16	12
+InformationDate_disab	16.5	12.5
 HIV.AIDS	17	13			
-chronic_hlth_C	18	14			
-developmental_D	19	15			
-mental_health_D	20	16			
-physical_D	21	17			
-substance_use_D	22	18			
+CH.condition	18	14			
+D.disability	19	15			
+MH.disorder	20	16			
+P.disability	21	17			
+SU.disorder	22	18			
 provider_calc	23	19			
 NCCounty	24	29			
 CH	25	20		true - document what i've found so far	
@@ -909,7 +913,7 @@ output3 <- output3[!colnames(output3) %in% c("proj_county")]
 # change names----
 output3$DQ_flag_type <- output3$DQ_flag_type  %>% as.character()
 
-unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
+#unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
 
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.reltohoh_na", 
                                "missing RelationshipToHoh", output3$DQ_flag_type)
@@ -939,15 +943,15 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race",
 
 colnames(output3)
 
-# spot check nicole to andrea
-spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
-spot.check2 <- output2 %>%
-  .[#.$EnrollmentID %in% spot.check3$EnrollmentID & 
-      .$PersonalID %in% spot.check3$client_id,] %>% 
-  group_by(#EnrollmentID, 
-           PersonalID, calc_location_county, 
-           calc_region) %>%
-  summarise(n = n())
+# # spot check nicole to andrea
+# spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
+# spot.check2 <- output2 %>%
+#   .[#.$EnrollmentID %in% spot.check3$EnrollmentID & 
+#       .$PersonalID %in% spot.check3$client_id,] %>% 
+#   group_by(#EnrollmentID, 
+#            PersonalID, calc_location_county, 
+#            calc_region) %>%
+#   summarise(n = n())
 
 # nicole changes----
 # remove enrolllmentID
@@ -961,7 +965,7 @@ output3 <- output3[output3$DQ_flag_type != "verify DV-fleeing and DV-victim",]
 getwd()
 library(glue)
 
-grep("calc", colnames(output3), value = T, ignore.case = T)
+#grep("calc", colnames(output3), value = T, ignore.case = T)
 
 # Nicole final filter-----
 nicole_filter1 <- output3$hh_cls == 16 & 
