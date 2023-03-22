@@ -1117,7 +1117,7 @@ screened_positive_disability2 <- function(dis_df){
   return(disdf_ddrii)
 }
 
-x <- screened_positive_disability2(dis_df = a.disabilities)
+# x <- screened_positive_disability2(dis_df = a.disabilities)
 
 screened_positive_disability <- function(dis_df = c.disabilities, 
                                          enr_df = c.enrollment, 
