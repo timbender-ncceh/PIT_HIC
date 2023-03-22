@@ -594,7 +594,7 @@ output <- left_join(c.enrollment, c.client) %>%
 
 out.cn <- colnames(output)
 
-grep("cls", out.cn, ignore.case = T, value = T)
+#grep("cls", out.cn, ignore.case = T, value = T)
 
 output$gender_category_calc <- NA
 output$race2_calc <- NA
@@ -603,7 +603,7 @@ output$CH <- NA
 output$youth_type_hh <- NA
 output$veteran_type_hh <- NA
 
-grep("county|calc", colnames(output), value = T, ignore.case = T)
+#grep("county|calc", colnames(output), value = T, ignore.case = T)
 
 output2 <- output[,c("PersonalID", 
                      "reltionshiptohoh_def", 
@@ -743,7 +743,7 @@ for(i in 1:nrow(andrea_join)){
   andrea_join$Original_Order2[i] <- which(colnames(output2A) == andrea_join[i,]$COLUMN_NAME)
 }
 andrea_join <- andrea_join[order(andrea_join$Original_Order2),]
-andrea_join$order.o2a
+#andrea_join$order.o2a
 
 output2A <- output2A[,andrea_join$Original_Order2[order(andrea_join$New_Order_Requested)]]
 
@@ -755,8 +755,8 @@ colnames(output2A)[colnames(output2A) %in%
 
 # colnames(output2A)
 
-andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested", 
-               "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
+# andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested", 
+#                "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
 
 
 # added new logic related to [dealing with hh_cls and  hh_cls_infodate duplication]---- 
@@ -788,7 +788,7 @@ for(i in unique(output2$PersonalID)){
 }
 
 
-# write output to .xlsx----
+# write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
            file = out.name.andrea)
 
@@ -819,7 +819,7 @@ write.xlsx(x = output2A[!duplicated(output2A),],
 
 output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in%
                                             c("Client refused", "No") & 
-  output2$currentlyFleeingDV_def %in% c("Yes", "Client doesn't Know"))
+                                            output2$currentlyFleeingDV_def %in% c("Yes", "Client doesn't Know"))
 
 # DOB vs DOB Data Quality
 output2$issue.DOB_vs_DOBDataQuality <- F
@@ -844,12 +844,12 @@ output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_Pers
 
 output3 <- output2 %>%
   .[!duplicated(.),] %>%
-  # filter out dates not during pit week [added 2023-01-25]
-  .[data.table::between(x = .$hh_cls_infodate, 
-                        #lower = pit.week_start, (commented out 2023-01-31)
-                        lower = pit.night,       #(added 2023-01-31)
-                        upper =  pit.week_end) & 
-      !is.na(.$hh_cls_infodate),] %>% 
+  # filter out dates not during pit week [added 2023-01-25] -- this is fine (3.22.23 - nicole asked for this filter)
+  .[data.table::between(x = .$hh_cls_infodate, #  -- this is fine (3.22.23 - nicole asked for this filter)
+                        #lower = pit.week_start, (commented out 2023-01-31)  -- this is fine (3.22.23 - nicole asked for this filter)
+                        lower = pit.night,       #(added 2023-01-31) -- this is fine (3.22.23 - nicole asked for this filter)
+                        upper =  pit.week_end) & #  -- this is fine (3.22.23 - nicole asked for this filter)
+      !is.na(.$hh_cls_infodate),] %>%  #  -- this is fine (3.22.23 - nicole asked for this filter)
   # / 
   
   group_by(client_id = PersonalID, 
