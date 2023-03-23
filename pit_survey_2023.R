@@ -787,6 +787,30 @@ for(i in unique(output2$PersonalID)){
   rm(temp)
 }
 
+# Youth_ and Veteran_type Households----
+
+cli_enr.join <- a.enrollment[,c("PersonalID", "EnrollmentID", "HouseholdID", 
+                                    "reltionshiptohoh_def")] %>%
+  left_join(., 
+            a.client[,c("PersonalID", "age_calc", "vetStatus_def")])
+
+youth_vet_hhs.df <- data.frame(HouseholdID = unique(cli_enr.join$HouseholdID), 
+                               youth_vet_hh_type = NA) %>%
+  .[!is.na(.$HouseholdID),]
+
+for(i in 1:nrow(youth_vet_hhs.df)){
+ try( youth_vet_hhs.df$youth_vet_hh_type[i] <- get_youth.hh.info(hh_pid.ages.v = cli_enr.join$age_calc[cli_enr.join$HouseholdID == 
+                                                                                                     youth_vet_hhs.df$HouseholdID[i]], 
+                                                             relations2hoh.v = cli_enr.join$reltionshiptohoh_def[cli_enr.join$HouseholdID == 
+                                                                                                       youth_vet_hhs.df$HouseholdID[i]], 
+                                                             vetstatus.v     = cli_enr.join$vetStatus_def[cli_enr.join$HouseholdID == 
+                                                                                                      youth_vet_hhs.df$HouseholdID[i]]))
+}
+
+youth_vet_hhs.df <- youth_vet_hhs.df %>% as_tibble()
+
+output2A <- left_join(youth_vet_hhs.df, a.enrollment[,c("HouseholdID", "PersonalID", "EnrollmentID", "HoH_PersonalID")]) %>%
+  right_join(., output2A)
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
