@@ -940,6 +940,103 @@ screened_positive_disability2 <- function(dis_df){
   return(disdf_ddrii)
 }
 
+screened_positive_disability <- function(dis_df = c.disabilities, 
+                                         enr_df = c.enrollment, 
+                                         exit_df = c.exit, 
+                                         pit_date = ymd(20230125)){
+  
+  
+  # final score:----
+  dis_df$is_disab <- "unknown or cannot tell"
+  
+  dis_df[dis_df$DisabilityResponse > 1 | 
+           dis_df$DisabilityResponse == 99 | # added 3/17/23 but probably redundant
+           is.na(dis_df$DisabilityResponse),]$is_disab <- "unknown or cannot tell"
+  dis_df[dis_df$DisabilityResponse == 0 & 
+           !is.na(dis_df$DisabilityResponse),]$is_disab <- "not disabled"
+  dis_df[dis_df$DisabilityResponse == 1 & 
+           !is.na(dis_df$DisabilityResponse) & 
+           dis_df$IndefiniteAndImpairs == 1 & 
+           !is.na(dis_df$IndefiniteAndImpairs),]$is_disab <- "disabled"
+  
+  dis_df[dis_df$DisabilityResponse == 1 & 
+           !is.na(dis_df$DisabilityResponse) & 
+           dis_df$IndefiniteAndImpairs == 0 & 
+           !is.na(dis_df$IndefiniteAndImpairs),]$is_disab <- "not disabled"
+  dis_df[dis_df$DisabilityResponse == 1 & 
+           (dis_df$IndefiniteAndImpairs %in% c(8,9,99) | 
+              is.na(dis_df$IndefiniteAndImpairs)),]$is_disab <- "unknown or cannot tell"
+  
+  #dis_df[is.na(dis_df$is_disab),]$is_disab <- "unknown or cannot tell"
+  
+  
+  #To Do----
+  
+  # add the non-disabled clients back into the output table
+  
+  # there is a problem in the logic of the output table - there should not be
+  # multiple of any one disability type per each enrollment_ID
+  
+  "https://files.hudexchange.info/resources/documents/HMIS-Standard-Reporting-Terminology-Glossary.pdf"
+  "Working with Ncceh Data report.docx"
+  
+  dis_df %>%
+    group_by(is_disab) %>%
+    summarise(count_disabilities = n()) 
+  
+  # identify most recent informationDate for each client-enrollment----
+  
+  join_dates <- hmis_join(dis_df,  
+                          enr_df[colnames(enr_df) %in% c("EnrollmentID", "HouseholdID", "PersonalID", "ProjectID", 
+                                                         #"DisablingCondition", "RelationshipToHoH", 
+                                                         "EntryDate")], 
+                          jtype = "left") %>%
+    hmis_join(., 
+              exit_df, jtype = "left") 
+  
+  
+  # filter out all information dates that occur after the PIT survey date and
+  # then find the latest InformationDate for each enrollment - that becomes
+  # your most recent and thus most applicable date for disability inventory
+  
+  join_dates <- join_dates %>%
+    .[.$InformationDate_disab <= pit_date,] %>%
+    group_by(PersonalID, EnrollmentID) %>%
+    slice_max(., 
+              order_by = InformationDate_disab, 
+              n = 1)
+  
+  
+  jd <- join_dates %>%
+    left_join(., 
+              data.frame(DisabilityType = 5:10, 
+                         dt_name = c("physical_D", 
+                                     "developmental_D", 
+                                     "chronic_hlth_C", 
+                                     "HIV.AIDS", 
+                                     "mental_health_D", 
+                                     "substance_use_D"))) %>%
+    as.data.table() %>%
+    dcast(., 
+          PersonalID + EnrollmentID + #is_disab +
+            InformationDate_disab ~ dt_name, 
+          #fun.aggregate = length
+          value.var = "is_disab") 
+  
+  # There are NA values in this table and it's not clear why----- VVVV
+  
+  jd[jd$developmental_D == T & jd$chronic_hlth_C == T,]
+  
+  jd %>%
+    group_by(developmental_D, HIV.AIDS, chronic_hlth_C, 
+             mental_health_D, physical_D, substance_use_D) %>%
+    summarise(n = n()) %>%
+    .[order(.$n,decreasing = T),]
+  
+  return(jd)
+  
+}
+
 calc_age <- function(dob, decimal.month = F, age_on_date){
   require(lubridate)
   require(dplyr)
