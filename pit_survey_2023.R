@@ -7,6 +7,7 @@ library(lubridate)
 library(data.table)
 library(devtools)
 library(openxlsx)
+library(ggplot2)
 
 rm(list=ls())
 cat('\f')
@@ -14,7 +15,7 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230309)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230316)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
@@ -50,7 +51,10 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/Januar
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+#devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+# commented out the above temporarily just during comment branch. use below for now: 
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/4-concern-that-disabling-conditions-isnt-coming-through-properly/pit_survey_calculations.R?raw=TRUE")
+
 
 hmis_join <- function(x.file,
                       y.file,
@@ -417,7 +421,12 @@ a.enrollment$calc_location_county <- a.enrollment$calc_location_county %>%
 # Disabilities Check----
 a.disabilities <- read_csv("Disabilities.csv")
 a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
-screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
+
+# run screened_positive_disability function here (version 1 or 2, not sure which yet)----
+
+#screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
+screened.pos.disab_df <- screened_positive_disability2(dis_df = a.disabilities)
+
 
 # Healthanddv check----
 a.healthanddv <- read_csv("HealthAndDV.csv")
@@ -549,9 +558,9 @@ c.enrollment              <- b.enrollment
 #   .$n_pid %>% sum
 
 
-c.exit                    <- b.exit
+c.exit                   <- b.exit
 c.currentlivingsituation <- b.currentlivingsituation
-c.client                  <- b.client
+c.client                 <- b.client
 c.screened.pos.disab_df  <- screened.pos.disab_df
 c.healthanddv            <- b.healthanddv
 
@@ -573,7 +582,7 @@ output <- left_join(c.enrollment, c.client) %>%
   #left_join(., c.exit) %>%
   left_join(., comp_county) %>%
   left_join(., b.project) %>%
-  left_join(., screened.pos.disab_df) %>%
+  left_join(., c.screened.pos.disab_df) %>%
   left_join(., c.healthanddv) %>%
   #left_join(., d.currentlivingsituation) %>%
   left_join(., b.inventory[,c("ProjectID", 
@@ -586,7 +595,7 @@ output <- left_join(c.enrollment, c.client) %>%
 
 out.cn <- colnames(output)
 
-grep("cls", out.cn, ignore.case = T, value = T)
+#grep("cls", out.cn, ignore.case = T, value = T)
 
 output$gender_category_calc <- NA
 output$race2_calc <- NA
@@ -595,7 +604,7 @@ output$CH <- NA
 output$youth_type_hh <- NA
 output$veteran_type_hh <- NA
 
-grep("county|calc", colnames(output), value = T, ignore.case = T)
+#grep("county|calc", colnames(output), value = T, ignore.case = T)
 
 output2 <- output[,c("PersonalID", 
                      "reltionshiptohoh_def", 
@@ -611,12 +620,14 @@ output2 <- output[,c("PersonalID",
                      "gender_calc", "gender_category_calc", 
                      "race_calc", "race2_calc", "race_cat_calc", 
                      "ethnicity_def", 
-                     "HIV.AIDS", 
-                     "chronic_hlth_C", 
-                     "developmental_D", 
-                     "mental_health_D", 
-                     "physical_D", 
-                     "substance_use_D", 
+                     "InformationDate_disab", 
+                     "CH.condition", "D.disability", "HIV.AIDS", "MH.disorder", "P.disability", "SU.disorder",
+                     # "HIV.AIDS", 
+                     # "chronic_hlth_C", 
+                     # "developmental_D", 
+                     # "mental_health_D", 
+                     # "physical_D", 
+                     # "substance_use_D", 
                      "provider_calc", 
                      "Region", 
                      #"County", 
@@ -676,13 +687,14 @@ gender_category_calc	12	8	TRUE
 race_calc	13	9			
 race2_calc	14	10	TRUE		
 race_cat_calc	15	11	TRUE		
-ethnicity_def	16	12			
+ethnicity_def	16	12
+InformationDate_disab	16.5	12.5
 HIV.AIDS	17	13			
-chronic_hlth_C	18	14			
-developmental_D	19	15			
-mental_health_D	20	16			
-physical_D	21	17			
-substance_use_D	22	18			
+CH.condition	18	14			
+D.disability	19	15			
+MH.disorder	20	16			
+P.disability	21	17			
+SU.disorder	22	18			
 provider_calc	23	19			
 NCCounty	24	29			
 CH	25	20		true - document what i've found so far	
@@ -735,7 +747,7 @@ for(i in 1:nrow(andrea_join)){
   andrea_join$Original_Order2[i] <- which(colnames(output2A) == andrea_join[i,]$COLUMN_NAME)
 }
 andrea_join <- andrea_join[order(andrea_join$Original_Order2),]
-andrea_join$order.o2a
+#andrea_join$order.o2a
 
 output2A <- output2A[,andrea_join$Original_Order2[order(andrea_join$New_Order_Requested)]]
 
@@ -747,8 +759,8 @@ colnames(output2A)[colnames(output2A) %in%
 
 # colnames(output2A)
 
-andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested", 
-               "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
+# andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested", 
+#                "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
 
 
 # added new logic related to [dealing with hh_cls and  hh_cls_infodate duplication]---- 
@@ -780,7 +792,7 @@ for(i in unique(output2$PersonalID)){
 }
 
 
-# write output to .xlsx----
+# write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
            file = out.name.andrea)
 
@@ -811,7 +823,7 @@ write.xlsx(x = output2A[!duplicated(output2A),],
 
 output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in%
                                             c("Client refused", "No") & 
-  output2$currentlyFleeingDV_def %in% c("Yes", "Client doesn't Know"))
+                                            output2$currentlyFleeingDV_def %in% c("Yes", "Client doesn't Know"))
 
 # DOB vs DOB Data Quality
 output2$issue.DOB_vs_DOBDataQuality <- F
@@ -836,12 +848,12 @@ output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_Pers
 
 output3 <- output2 %>%
   .[!duplicated(.),] %>%
-  # filter out dates not during pit week [added 2023-01-25]
-  .[data.table::between(x = .$hh_cls_infodate, 
-                        #lower = pit.week_start, (commented out 2023-01-31)
-                        lower = pit.night,       #(added 2023-01-31)
-                        upper =  pit.week_end) & 
-      !is.na(.$hh_cls_infodate),] %>% 
+  # filter out dates not during pit week [added 2023-01-25] -- this is fine (3.22.23 - nicole asked for this filter)
+  .[data.table::between(x = .$hh_cls_infodate, #  -- this is fine (3.22.23 - nicole asked for this filter)
+                        #lower = pit.week_start, (commented out 2023-01-31)  -- this is fine (3.22.23 - nicole asked for this filter)
+                        lower = pit.night,       #(added 2023-01-31) -- this is fine (3.22.23 - nicole asked for this filter)
+                        upper =  pit.week_end) & #  -- this is fine (3.22.23 - nicole asked for this filter)
+      !is.na(.$hh_cls_infodate),] %>%  #  -- this is fine (3.22.23 - nicole asked for this filter)
   # / 
   
   group_by(client_id = PersonalID, 
@@ -901,7 +913,7 @@ output3 <- output3[!colnames(output3) %in% c("proj_county")]
 # change names----
 output3$DQ_flag_type <- output3$DQ_flag_type  %>% as.character()
 
-unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
+#unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
 
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.reltohoh_na", 
                                "missing RelationshipToHoh", output3$DQ_flag_type)
@@ -931,15 +943,15 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race",
 
 colnames(output3)
 
-# spot check nicole to andrea
-spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
-spot.check2 <- output2 %>%
-  .[#.$EnrollmentID %in% spot.check3$EnrollmentID & 
-      .$PersonalID %in% spot.check3$client_id,] %>% 
-  group_by(#EnrollmentID, 
-           PersonalID, calc_location_county, 
-           calc_region) %>%
-  summarise(n = n())
+# # spot check nicole to andrea
+# spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
+# spot.check2 <- output2 %>%
+#   .[#.$EnrollmentID %in% spot.check3$EnrollmentID & 
+#       .$PersonalID %in% spot.check3$client_id,] %>% 
+#   group_by(#EnrollmentID, 
+#            PersonalID, calc_location_county, 
+#            calc_region) %>%
+#   summarise(n = n())
 
 # nicole changes----
 # remove enrolllmentID
@@ -953,7 +965,7 @@ output3 <- output3[output3$DQ_flag_type != "verify DV-fleeing and DV-victim",]
 getwd()
 library(glue)
 
-grep("calc", colnames(output3), value = T, ignore.case = T)
+#grep("calc", colnames(output3), value = T, ignore.case = T)
 
 # Nicole final filter-----
 nicole_filter1 <- output3$hh_cls == 16 & 
