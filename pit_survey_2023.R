@@ -729,12 +729,12 @@ o2a_cols <- data.frame(name.o2a = colnames(output2A),
   as_tibble()
 
 andrea_join <- full_join(andrea_cols_changes, 
-          o2a_cols, 
-          by = c("COLUMN_NAME" = "name.o2a"))
+                         o2a_cols, 
+                         by = c("COLUMN_NAME" = "name.o2a"))
 
 # remove fields
 andrea_join <- andrea_join[is.na(andrea_join$REMOVE_COLUMN) | 
-              andrea_join$REMOVE_COLUMN == F,]
+                             andrea_join$REMOVE_COLUMN == F,]
 
 # reorder fields
 andrea_join <- andrea_join[order(andrea_join$order.o2a),]
@@ -813,6 +813,9 @@ youth_vet_hhs.df <- youth_vet_hhs.df %>% as_tibble()
 
 output2A <- left_join(youth_vet_hhs.df, a.enrollment[,c("HouseholdID", "PersonalID", "EnrollmentID", "HoH_PersonalID")]) %>%
   right_join(., output2A)
+
+# To-Do: Reorder Columns (added 3/23/2023; note here when complete)
+# To-Do: Remove Unused Columns (added 3/23/2023; note here when complete)
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
