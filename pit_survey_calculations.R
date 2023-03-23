@@ -1,5 +1,3 @@
-
-
 disability_response.4.10.2.def <- function(disab.response.val, 
                                            disabilityType){
   # logic
