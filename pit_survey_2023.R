@@ -51,10 +51,7 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/Januar
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
-#devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
-# commented out the above temporarily just during comment branch. use below for now: 
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/4-concern-that-disabling-conditions-isnt-coming-through-properly/pit_survey_calculations.R?raw=TRUE")
-
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
 
 hmis_join <- function(x.file,
                       y.file,
@@ -85,8 +82,6 @@ hmis_join <- function(x.file,
 is_hashed <- function(x){
   return(nchar(x) == 64 & class(x) == "character")
 }
-
-
 
 # Working Directory Setup----
 setwd(csv.file.dir)
@@ -124,7 +119,7 @@ rm(a.rando.key)
 a.client$DOBDataQuality_def <- unlist(lapply(a.client$DOBDataQuality, 
                                              fun_dob_dataqual))
 
-a.client$age_calc     <- calc_age(dob = a.client$DOB)
+a.client$age_calc     <- calc_age(dob = a.client$DOB, age_on_date = pit.night)
 
 # FLAG - age----
 a.client$flag.age_too_old <- a.client$age_calc >= 80
@@ -159,6 +154,7 @@ for(i in 1:nrow(a.client)){
                                     white           = a.client$White[i])
   
 }
+
 
 # FLAG - race----
 a.client$flag.race <-  a.client$race_calc == "[unknown]" | is.na(a.client$race_calc)
