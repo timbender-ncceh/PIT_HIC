@@ -1,49 +1,70 @@
-get_youth.hh.info <- function(hh_pid.ages.v = 49,
-                              relations2hoh.v = "Self (head of household)", 
-                              vetstatus.v = "No"){
+get_youth.hh.info <- function(hh_pid.ages.v = NA,#49,
+                              relations2hoh.v = NA,#"Self (head of household)", 
+                              vetstatus.v = NA){#"No"){
   out <- NULL
-  # Parenting youth - households with at least 1 adult and 1 child----
-  if(all(hh_pid.ages.v < 25) & 
-     any(hh_pid.ages.v < 18) & 
-     any(data.table::between(hh_pid.ages.v, 18, 24)) & 
-     length(hh_pid.ages.v) > 1 & 
-     any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
-    out <- c(out, "YOUTH - Parenting youth - households with at least 1 adult and 1 child")
+  
+  # if all 3 arguments are NA
+  if(all(is.na(hh_pid.ages.v)) & 
+     all(is.na(relations2hoh.v)) & 
+     all(is.na(vetstatus.v))){
+    out <- c(out, 
+             "UNKNOWN")
+  }else if(all(is.na(hh_pid.ages.v)) & 
+           all(is.na(relations2hoh.v)) & 
+           any(vetstatus.v == "Yes",na.rm = T)){
+    out <- c(out, 
+             "UNKNOWN.youth, VETERAN")
+  }else if(all(is.na(hh_pid.ages.v)) & 
+           all(is.na(relations2hoh.v)) & 
+           any(vetstatus.v == "No",na.rm = T)){
+    out <- c(out, 
+             "UNKNOWN")
+  }else{
+    # Parenting youth - households with at least 1 adult and 1 child----
+    if(all(hh_pid.ages.v < 25, na.rm = T) & 
+       any(hh_pid.ages.v < 18, na.rm = T) & 
+       any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T) & 
+       length(hh_pid.ages.v) > 1 & 
+       any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+      out <- c(out, "YOUTH - Parenting youth - households with at least 1 adult and 1 child")
+    }
+    # Parenting youth - households with only children----
+    if(all(hh_pid.ages.v < 18) & 
+       length(hh_pid.ages.v) > 1 & 
+       any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+      out <- c(out, "YOUTH - Parenting youth - households with only children")
+    }
+    # Unaccompanied youth - households without children----
+    if(all(data.table::between(hh_pid.ages.v, 18, 24)) & 
+       !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+      out <- c(out, "YOUTH - Unaccompanied youth - households without children")
+    }
+    # Unaccompanied youth - households with a least 1 adult and 1 child----
+    if(all(hh_pid.ages.v < 25, na.rm = T) & 
+       any(hh_pid.ages.v < 18, na.rm = T) & 
+       any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T) & 
+       length(hh_pid.ages.v) > 1  & 
+       !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+      out <- c(out, "YOUTH - Unaccompanied youth - households with a least 1 adult and 1 child")
+    }
+    # Unaccompanied youth - households with only children----
+    if(all(hh_pid.ages.v < 18, na.rm = T) & 
+       !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+      out <- c(out, "YOUTH - Unaccompanied youth - households with only children")
+    }
+    # if out is null
+    if(is.null(out)){
+      out <- "NOT YOUTH"
+    }
+    # veteran
+    if(any(vetstatus.v == "Yes",na.rm = T)){
+      out <- paste("VETERAN - ", 
+                   out, 
+                   sep = "", collapse = "")
+    }
   }
-  # Parenting youth - households with only children----
-  if(all(hh_pid.ages.v < 18) & 
-     length(hh_pid.ages.v) > 1 & 
-     any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
-    out <- c(out, "YOUTH - Parenting youth - households with only children")
-  }
-  # Unaccompanied youth - households without children----
-  if(all(data.table::between(hh_pid.ages.v, 18, 24)) & 
-     !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
-    out <- c(out, "YOUTH - Unaccompanied youth - households without children")
-  }
-  # Unaccompanied youth - households with a least 1 adult and 1 child----
-  if(all(hh_pid.ages.v < 25) & 
-     any(hh_pid.ages.v < 18) & 
-     any(data.table::between(hh_pid.ages.v, 18, 24)) & 
-     length(hh_pid.ages.v) > 1  & 
-     !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
-    out <- c(out, "YOUTH - Unaccompanied youth - households with a least 1 adult and 1 child")
-  }
-  # Unaccompanied youth - households with only children----
-  if(all(hh_pid.ages.v < 18) & 
-     !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
-    out <- c(out, "YOUTH - Unaccompanied youth - households with only children")
-  }
-  # if out is null
-  if(is.null(out)){
-    out <- "NOT YOUTH"
-  }
-  # veteran
-  if(any(vetstatus.v == "Yes",na.rm = T)){
-    out <- paste("VETERAN - ", 
-                 out, 
-                 sep = "", collapse = "")
-  }
+  
+  
   return(out)
 }
 
