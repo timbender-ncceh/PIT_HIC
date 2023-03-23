@@ -15,7 +15,7 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230316)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230323)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
