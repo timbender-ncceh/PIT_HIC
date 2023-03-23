@@ -98,8 +98,6 @@ get_youth.hh.info <- function(hh_pid.ages.v,
   return(out)
 }
 
-get_youth.hh.info()
-
 lead0 <- function(x){
   # adds a leading zero to numbers - useful for setting time from string
   if(!is.character(x)){
