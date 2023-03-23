@@ -1,3 +1,4 @@
+
 lead0 <- function(x){
   # adds a leading zero to numbers - useful for setting time from string
   if(!is.character(x)){
@@ -7,10 +8,65 @@ lead0 <- function(x){
     out <- paste("0", x, sep = "")
   }else{
     out <- x
-  }
+    }
   return(out)
 }
 
+disability_response.4.10.2.def <- function(disab.response.val, 
+                                           disabilityType){
+  # logic
+  # if DisabilityType is '10' (Substance Abuse Disorder)
+  if(disabilityType == 10){
+    if(disab.response.val == 0){
+      out <- "Not disabled"
+    }
+    if(disab.response.val == 1){
+      out <- "Alcohol use disorder"
+    }
+    if(disab.response.val == 2){
+      out <- "Drug use disorder"
+    }
+    if(disab.response.val == 3){
+      out <- "Both alcohol and drug use disorders"
+    }
+    if(disab.response.val == 8){
+      # 8 = Client doesn't know
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 9){
+      # 9 = Client refused
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 99 |
+       # 99 = Data not collected
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+  }else{
+    # else DisabilityType is NOT '10' (Substance Abuse Disorder)
+    if(disab.response.val == 0){
+      out <- "Not disabled"
+    }
+    if(disab.response.val == 1){
+      out <- "Disabled"
+    }
+    if(disab.response.val == 8 |
+       # 8 = Client doesn't know
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 9 |
+       # 9 = Client refused
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+    if(disab.response.val == 99 |
+       # 99 = Data not collected
+       is.na(disab.response.val)){
+      out <- "unknown or cannot tell if disabled"
+    }
+
+  
 fun_titlecase <- function(string = "a string of words"){
   require(dplyr)
   out <- unlist(strsplit(string, " ")) %>%
@@ -158,6 +214,7 @@ disability_response.4.10.2.def <- function(disab.response.val,
   return(out)
 }
 
+
 make_abbr <- function(string = "go ahead and make my day without me"){
   require(dplyr)
   # returns an abbreviation for a multi-word string in by taking the first
@@ -198,6 +255,8 @@ make_abbr <- function(string = "go ahead and make my day without me"){
   out <- out %>% paste(., sep = "", collapse = "")
   return(out)
 }
+
+make_abbr()
 
 pit_xls_info <- function(filenames){
   require(lubridate)
@@ -1037,7 +1096,9 @@ screened_positive_disability <- function(dis_df = c.disabilities,
   
 }
 
+
 calc_age <- function(dob, decimal.month = F, age_on_date){
+
   require(lubridate)
   require(dplyr)
   # check class of dob - expected to be class 'Date'.  If Character, change to 'Date'
