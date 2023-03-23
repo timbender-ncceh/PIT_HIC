@@ -44,6 +44,7 @@ calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
   }
   return(out)
 }
+
 fun_rel2hoh <- function(x){
   if(is.na(x)){
     out <- NA#"Data not collected"
@@ -220,7 +221,7 @@ glue("AGES: {paste(ages,sep=\", \",collapse=\", \")}\nRELS: {paste(rels,sep=\", 
 
 get_youth.hh.info(hh_pid.ages.v    = ages, 
                    relations2hoh.v = rels, 
-                   vetstatus.v     = vets)
+                   vetstatus.v     = vetz)
 
 
 summary.out <- data.frame(hhid = unique(enrcli$HouseholdID), 
