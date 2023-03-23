@@ -1,6 +1,6 @@
-get_youth.hh.info <- function(hh_pid.ages.v = NA,#49,
-                              relations2hoh.v = NA,#"Self (head of household)", 
-                              vetstatus.v = NA){#"No"){
+get_youth.hh.info <- function(hh_pid.ages.v = c(NA,NA),#49,
+                              relations2hoh.v = c("Head of household's Child","Self (head of household)"),#"Self (head of household)", 
+                              vetstatus.v = c("No", "No")){
   out <- NULL
   
   # if all 3 arguments are NA
@@ -23,7 +23,9 @@ get_youth.hh.info <- function(hh_pid.ages.v = NA,#49,
     # Parenting youth - households with at least 1 adult and 1 child----
     if(all(hh_pid.ages.v < 25, na.rm = T) & 
        any(hh_pid.ages.v < 18, na.rm = T) & 
-       any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T) & 
+       ifelse(any(is.logical(hh_pid.ages.v)), 
+              yes = F, 
+              no = any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T)) & 
        length(hh_pid.ages.v) > 1 & 
        any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
       out <- c(out, "YOUTH - Parenting youth - households with at least 1 adult and 1 child")
@@ -35,14 +37,18 @@ get_youth.hh.info <- function(hh_pid.ages.v = NA,#49,
       out <- c(out, "YOUTH - Parenting youth - households with only children")
     }
     # Unaccompanied youth - households without children----
-    if(all(data.table::between(hh_pid.ages.v, 18, 24)) & 
+    if(ifelse(any(is.logical(hh_pid.ages.v)), 
+              yes = F, 
+              no = any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T)) & 
        !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
       out <- c(out, "YOUTH - Unaccompanied youth - households without children")
     }
     # Unaccompanied youth - households with a least 1 adult and 1 child----
     if(all(hh_pid.ages.v < 25, na.rm = T) & 
        any(hh_pid.ages.v < 18, na.rm = T) & 
-       any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T) & 
+       ifelse(any(is.logical(hh_pid.ages.v)), 
+              yes = F, 
+              no = any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T)) & 
        length(hh_pid.ages.v) > 1  & 
        !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
       out <- c(out, "YOUTH - Unaccompanied youth - households with a least 1 adult and 1 child")
@@ -63,10 +69,10 @@ get_youth.hh.info <- function(hh_pid.ages.v = NA,#49,
                    sep = "", collapse = "")
     }
   }
-  
-  
   return(out)
 }
+
+get_youth.hh.info()
 
 lead0 <- function(x){
   # adds a leading zero to numbers - useful for setting time from string
