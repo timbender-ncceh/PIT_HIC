@@ -17,6 +17,7 @@ rm(list=ls())
 cat('\f')
 gc()
 
+setwd("C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data")
 # note:  veterans are not alaways hoh so don't encode logic to account for hoh
 # necessarily
 calc_age <- function(dob, decimal.month = F, age_on_date = ymd(20230125)){
@@ -150,12 +151,9 @@ a.client$age       <- unlist(lapply(X = a.client$DOB,
 enrcli             <- full_join(a.client, a.enrollment) %>%
   .[! colnames(.) %in% c("DOB", "VeteranStatus")]
 
-
-
-get_youth.hh.info <- function(hh_pid.ages.v = c(17,19), 
-                               #age.hoh, 
-                               relations2hoh.v, 
-                               vetstatus.v){
+get_youth.hh.info <- function(hh_pid.ages.v = 49,
+                               relations2hoh.v = "Self (head of household)", 
+                               vetstatus.v = "No"){
   out <- NULL
   # Parenting youth - households with at least 1 adult and 1 child----
   if(all(hh_pid.ages.v < 25) & 
@@ -189,20 +187,16 @@ get_youth.hh.info <- function(hh_pid.ages.v = c(17,19),
     !any(relations2hoh.v == "Head of household’s Child")){
     out <- c(out, "YOUTH - Unaccompanied youth - households with only children")
   }
-  
   # if out is null
   if(is.null(out)){
     out <- "NOT YOUTH"
   }
-  
   # veteran
   if(any(vetstatus.v == "Yes",na.rm = T)){
     out <- paste("VETERAN - ", 
                  out, 
                  sep = "", collapse = "")
   }
-  
-  
   return(out)
 }
 
