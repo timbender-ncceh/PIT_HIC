@@ -1,3 +1,29 @@
+get_github.url <- function(repo.file = NULL,
+                           dir_only = F,
+                           repo.branch = "main",
+                           gh.repo = "PIT_HIC",
+                           gh.user = "timbender-ncceh"){
+  require(dplyr)
+  require(glue)
+  out <- "foo"
+  # ERROR CHECKS
+  # if asking for filename url (not directory url)...
+  if(!dir_only){
+    #repo.file cannot be null / empty
+    if(is.null(repo.file)){
+      stop("argument 'repo.file' must be provided when dir_only == FALSE")
+    }else{
+      # return directory url
+      out <- glue("https://raw.githubusercontent.com/{gh.user}/{gh.repo}/{repo.branch}/{repo.file}")
+    }
+  }else{
+    # if asking for directory url
+    # return directory url
+    out <- glue("https://raw.githubusercontent.com/{gh.user}/{gh.repo}/{repo.branch}")
+  }
+  return(out)
+}
+
 get_youth.hh.info <- function(hh_pid.ages.v = c(NA,NA),#49,
                               relations2hoh.v = c("Head of household's Child","Self (head of household)"),#"Self (head of household)", 
                               vetstatus.v = c("No", "No")){
