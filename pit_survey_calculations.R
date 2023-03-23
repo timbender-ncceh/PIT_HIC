@@ -7,18 +7,18 @@ get_youth.hh.info <- function(hh_pid.ages.v = 49,
      any(hh_pid.ages.v < 18) & 
      any(data.table::between(hh_pid.ages.v, 18, 24)) & 
      length(hh_pid.ages.v) > 1 & 
-     any(relations2hoh.v == "Head of household’s Child")){
+     any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
     out <- c(out, "YOUTH - Parenting youth - households with at least 1 adult and 1 child")
   }
   # Parenting youth - households with only children----
   if(all(hh_pid.ages.v < 18) & 
      length(hh_pid.ages.v) > 1 & 
-     any(relations2hoh.v == "Head of household’s Child")){
+     any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
     out <- c(out, "YOUTH - Parenting youth - households with only children")
   }
   # Unaccompanied youth - households without children----
   if(all(data.table::between(hh_pid.ages.v, 18, 24)) & 
-     !any(relations2hoh.v == "Head of household’s Child")){
+     !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
     out <- c(out, "YOUTH - Unaccompanied youth - households without children")
   }
   # Unaccompanied youth - households with a least 1 adult and 1 child----
@@ -26,12 +26,12 @@ get_youth.hh.info <- function(hh_pid.ages.v = 49,
      any(hh_pid.ages.v < 18) & 
      any(data.table::between(hh_pid.ages.v, 18, 24)) & 
      length(hh_pid.ages.v) > 1  & 
-     !any(relations2hoh.v == "Head of household’s Child")){
+     !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
     out <- c(out, "YOUTH - Unaccompanied youth - households with a least 1 adult and 1 child")
   }
   # Unaccompanied youth - households with only children----
   if(all(hh_pid.ages.v < 18) & 
-     !any(relations2hoh.v == "Head of household’s Child")){
+     !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
     out <- c(out, "YOUTH - Unaccompanied youth - households with only children")
   }
   # if out is null
