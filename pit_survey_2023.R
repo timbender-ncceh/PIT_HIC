@@ -799,7 +799,7 @@ youth_vet_hhs.df <- data.frame(HouseholdID = unique(cli_enr.join$HouseholdID),
   .[!is.na(.$HouseholdID),]
 
 for(i in 1:nrow(youth_vet_hhs.df)){
- try( youth_vet_hhs.df$youth_vet_hh_type[i] <- get_youth.hh.info(hh_pid.ages.v = cli_enr.join$age_calc[cli_enr.join$HouseholdID == 
+try( youth_vet_hhs.df$youth_vet_hh_type[i] <- get_youth.hh.info(hh_pid.ages.v = cli_enr.join$age_calc[cli_enr.join$HouseholdID == 
                                                                                                      youth_vet_hhs.df$HouseholdID[i]], 
                                                              relations2hoh.v = cli_enr.join$reltionshiptohoh_def[cli_enr.join$HouseholdID == 
                                                                                                        youth_vet_hhs.df$HouseholdID[i]], 
