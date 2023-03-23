@@ -51,7 +51,9 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/Januar
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+#devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+# updated to reflect dev branch ^^^
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/pit_survey_calculations.R?raw=TRUE")
 
 hmis_join <- function(x.file,
                       y.file,
