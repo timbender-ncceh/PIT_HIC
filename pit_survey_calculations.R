@@ -8,7 +8,7 @@ hh_age.unknown <- function(ages){
   return(out)
 }
 
-hh_wal1a1c <- function(ages){
+hh_wal1a1c <- function(ages, age.upperlim = 18){
   #Persons in households with at least one adult and one child (HH-type 1). This
   #category includes households with one adult and at least one child under age
   #18.
@@ -16,33 +16,33 @@ hh_wal1a1c <- function(ages){
     out <- F
   }else{
     # must have 1+ adult 
-    out <- sum(ages >= 18) >= 1 & 
+    out <- sum(ages >= age.upperlim) >= 1 & 
       # must have 1+ child
-      sum(ages < 18) >= 1
+      sum(ages < age.upperlim) >= 1
   }
   return(out)
 }
 
-hh_wo.c <- function(ages){
+hh_wo.c <- function(ages, age.upperlim = 18){
   #This category includes single adults, adult couples with no children, and
   #groups of adults (including adult parents with their adult children).
   if(any(is.na(ages))){
     out <- F
   }else{
-    out <- sum(ages >= 18) >= 1 & 
-      sum(ages < 18) == 0
+    out <- sum(ages >= age.upperlim) >= 1 & 
+      sum(ages < age.upperlim) == 0
   }
   return(out)
 }
 
-hh_w.o.C <- function(ages){
+hh_w.o.C <- function(ages, age.upperlim = 18){
   #This category includes persons under age 18, including children in one-child
   #households, adolescent parents (under age 18) and their children, adolescent
   #siblings, or other household configurations composed only of children.
   if(any(is.na(ages))){
     out <- F
   }else{
-    if(all(ages < 18)){
+    if(all(ages < age.upperlim)){
       out <- T
     }else{
       out <- F
@@ -51,7 +51,7 @@ hh_w.o.C <- function(ages){
   return(out)
 }
 
-py_u18 <- function(ages){
+py_u18 <- function(ages, age_ul = 18){
   #are youth who identify as the parent or legal guardian of one or more
   #children who are present with or sleeping in the same place as that youth
   #parent, where there is no person over age 24 in the household. Parenting
@@ -65,14 +65,14 @@ py_u18 <- function(ages){
     out <- F
   }else{
     # oldest hh member is <18
-    out <- max(ages) < 18 & 
+    out <- max(ages) < age_ul & 
     # hhw.o.c (if py < 18)
-      hh_w.o.C(ages)
+      hh_w.o.C(ages, age.upperlim = age_ul)
   }
   return(out)
 }
 
-py_18.24 <- function(ages){
+py_18.24 <- function(ages, age_ul = 24){
   require(data.table)
   #are youth who identify as the parent or legal guardian of one or more
   #children who are present with or sleeping in the same place as that youth
@@ -87,14 +87,14 @@ py_18.24 <- function(ages){
     out <- F
   }else{
     # oldest hh member is 18-24
-    out <- between(ages, 18, 24) & 
+    out <- between(ages, 18, age_ul) & 
     # hhwal1a1c (if py 18-24)
-      hh_wal1a1c(ages)
+      hh_wal1a1c(ages, age.upperlim = age_ul)
   }
   return(out)
 }
 
-uy <- function(ages){
+uy <- function(ages, age.upperlim = 18){
   #are persons under age 25 who are not presenting or sleeping in the same place
   #as their parent or legal guardian, any household member over age 24, or their
   #own children. Unaccompanied youth may be a subset of any household type: they
@@ -103,10 +103,13 @@ uy <- function(ages){
   #if the household includes at least one household member under 18, at least
   #one member between 18 and 24, and no members over age 24. They are a subset
   #of households with only children if all household members are under 18.
+  
+  
   if(any(is.na(ages))){
     out <- F
   }else{
-    
+    # this cannot be parenting youth 
+    # this cannot be households 25+
   }
   return(out)
 }
@@ -124,12 +127,12 @@ hh_vet <- function(vet.statuses){
   return(out)
 }
 
-hh_youth <- function(ages){
+hh_youth <- function(ages, age.upperlim = 24){
   # all household members are 24 or under
   if(any(is.na(ages))){
     out <- F
   }else{
-    if(all(ages <= 24)){
+    if(all(ages <= age.upperlim)){
       out <- T
     }else
       out <- F
