@@ -1,3 +1,81 @@
+hh_wal1a1c <- function(ages){
+  #Persons in households with at least one adult and one child (HH-type 1). This
+  #category includes households with one adult and at least one child under age
+  #18.
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    
+  }
+  return(out)
+}
+
+hh_wo.c <- function(ages){
+  #This category includes single adults, adult couples with no children, and
+  #groups of adults (including adult parents with their adult children).
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    
+  }
+  return(out)
+}
+
+hh_w.o.C <- function(ages){
+  #This category includes persons under age 18, including children in one-child
+  #households, adolescent parents (under age 18) and their children, adolescent
+  #siblings, or other household configurations composed only of children.
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    
+  }
+  return(out)
+  
+}
+
+py <- function(ages){
+  #are youth who identify as the parent or legal guardian of one or more
+  #children who are present with or sleeping in the same place as that youth
+  #parent, where there is no person over age 24 in the household. Parenting
+  #youth are either a subset of households with at least one adult and one child
+  #if the parenting youth is between 18 and 24, or households with only children
+  #if the parenting youth is under 18. CoCs should report the numbers of
+  #children in parenting youth households separately for households with
+  #parenting youth under 18 and households with parenting youth who are 18 to
+  #24.
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    
+  }
+  return(out)
+}
+
+uy <- function(ages){
+  #are persons under age 25 who are not presenting or sleeping in the same place
+  #as their parent or legal guardian, any household member over age 24, or their
+  #own children. Unaccompanied youth may be a subset of any household type: they
+  #are a subset of households without children if all household members are 18
+  #to 24. They are a subset of households with at least one adult and one child
+  #if the household includes at least one household member under 18, at least
+  #one member between 18 and 24, and no members over age 24. They are a subset
+  #of households with only children if all household members are under 18.
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    
+  }
+  return(out)
+}
+
+hh_vet <- function(vet.statuses){
+  #Households with one or more veterans who might be presenting with other
+  #persons.
+}
+
+
+
 get_github.url <- function(repo.file = NULL,
                            dir_only = F,
                            repo.branch = "main",
