@@ -24,9 +24,9 @@ get_github.url <- function(repo.file = NULL,
   return(out)
 }
 
-get_youth.hh.info <- function(hh_pid.ages.v = c(NA,NA),#49,
-                              relations2hoh.v = c("Head of household's Child","Self (head of household)"),#"Self (head of household)", 
-                              vetstatus.v = c("No", "No")){
+get_youth.hh.info <- function(hh_pid.ages.v,
+                              relations2hoh.v, 
+                              vetstatus.v){
   out <- NULL
   
   # if all 3 arguments are NA
@@ -97,8 +97,6 @@ get_youth.hh.info <- function(hh_pid.ages.v = c(NA,NA),#49,
   }
   return(out)
 }
-
-get_youth.hh.info()
 
 lead0 <- function(x){
   # adds a leading zero to numbers - useful for setting time from string
@@ -742,7 +740,7 @@ fun_rel2hoh <- function(x){
   }else if(x == 4){
     out <- "Head of household’s other relation member"
   }else if(x == 5){
-    out <- "Other: non-relation member "
+    out <- "Other: non-relation member"
   }else if(x == 99){
     out <- NA
   }else if(x == 1){
