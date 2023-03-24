@@ -1,3 +1,13 @@
+hh_age.unknown <- function(ages){
+  # if any household member has an age value of NA
+  if(any(is.na(ages))){
+    out <- T
+  }else{
+    out <- F
+  }
+  return(out)
+}
+
 hh_wal1a1c <- function(ages){
   #Persons in households with at least one adult and one child (HH-type 1). This
   #category includes households with one adult and at least one child under age
