@@ -54,7 +54,7 @@ hh_w.o.C <- function(ages, age.upperlim = 18){
   return(out)
 }
 
-py_u18 <- function(ages, age_ul = 18){
+py_u18 <- function(ages, rel2hohs){
   #are youth who identify as the parent or legal guardian of one or more
   #children who are present with or sleeping in the same place as that youth
   #parent, where there is no person over age 24 in the household. Parenting
@@ -64,13 +64,23 @@ py_u18 <- function(ages, age_ul = 18){
   #children in parenting youth households separately for households with
   #parenting youth under 18 and households with parenting youth who are 18 to
   #24.
+  
+  age_ul=18
+  
   if(any(is.na(ages))){
     out <- F
   }else{
-    # oldest hh member is <18
-    out <- max(ages) < age_ul & 
-    # hhw.o.c (if py < 18)
-      hh_w.o.C(ages, age.upperlim = age_ul)
+    # oldest hh member is 18-24
+    out <- #between(max(ages), 18, age_ul) & 
+      # max age <= 24
+      max(ages) < 18 & 
+      # min age < 18
+      min(ages) < 18 &
+      
+      # rel2hoh as child
+      any(grepl(pattern = "^Head of Household.*Child$",
+                x = rel2hohs), 
+          na.rm = T)
   }
   return(out)
 }
