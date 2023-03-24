@@ -24,7 +24,6 @@ hh_wal1a1c <- function(ages,
   return(out)
 }
 
-hh_wal1a1c(c(8,21,18),24)
 
 hh_wo.c <- function(ages, age.upperlim = 18){
   #This category includes single adults, adult couples with no children, and
@@ -115,7 +114,7 @@ py_18.24 <- function(ages, rel2hohs,
   return(out)
 }
 
-uy <- function(ages, age.upperlim = 18){
+uy <- function(ages, rel2hohs){
   #are persons under age 25 who are not presenting or sleeping in the same place
   #as their parent or legal guardian, any household member over age 24, or their
   #own children. Unaccompanied youth may be a subset of any household type: they
@@ -124,15 +123,22 @@ uy <- function(ages, age.upperlim = 18){
   #if the household includes at least one household member under 18, at least
   #one member between 18 and 24, and no members over age 24. They are a subset
   #of households with only children if all household members are under 18.
-  
-  
+  age.upperlim = 24
   if(any(is.na(ages)) | 
      # this cannot be households 25+
-     any(ages >= 25)){
+     any(ages > 24) | 
+     # this cannot be age_NA
+     any(is.na(ages)) | 
+     # this cannot be... pu
+     py_18.24(ages, rel2hohs)|
+     py_u18(ages,rel2hoh)){
     out <- F
   }else{
-    # this cannot be parenting youth 
-    
+    if(all(ages <= 24)){
+      out <- T
+    }else{
+      out <- F
+    }
   }
   return(out)
 }
