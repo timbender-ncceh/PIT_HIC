@@ -72,8 +72,28 @@ uy <- function(ages){
 hh_vet <- function(vet.statuses){
   #Households with one or more veterans who might be presenting with other
   #persons.
+  if(any(vet.statuses == "Yes", na.rm = T) | 
+     any(vet.statuses == T, na.rm = T) | 
+     any(vet.statuses == 1, na.rm = T)){
+    out <- "Yes"
+  }else{
+    out <- "No"
+  }
+  return(out)
 }
 
+hh_youth <- function(ages){
+  # all household members are 24 or under
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    if(all(ages <= 24)){
+      out <- T
+    }else
+      out <- F
+  }
+  return(out)
+}
 
 
 get_github.url <- function(repo.file = NULL,
