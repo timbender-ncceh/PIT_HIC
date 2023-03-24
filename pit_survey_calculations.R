@@ -7,8 +7,8 @@ hh_wal1a1c <- function(ages){
   }else{
     # must have 1+ adult 
     out <- sum(ages >= 18) >= 1 & 
-    # must have 1+ child
-    sum(ages < 18) >= 1
+      # must have 1+ child
+      sum(ages < 18) >= 1
   }
   return(out)
 }
@@ -19,7 +19,8 @@ hh_wo.c <- function(ages){
   if(any(is.na(ages))){
     out <- F
   }else{
-    
+    out <- sum(ages >= 18) >= 1 & 
+      sum(ages < 18) == 0
   }
   return(out)
 }
