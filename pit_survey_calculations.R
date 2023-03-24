@@ -42,13 +42,16 @@ hh_w.o.C <- function(ages){
   if(any(is.na(ages))){
     out <- F
   }else{
-    
+    if(all(ages < 18)){
+      out <- T
+    }else{
+      out <- F
+    }
   }
   return(out)
-  
 }
 
-py <- function(ages){
+py_u18 <- function(ages){
   #are youth who identify as the parent or legal guardian of one or more
   #children who are present with or sleeping in the same place as that youth
   #parent, where there is no person over age 24 in the household. Parenting
@@ -61,7 +64,32 @@ py <- function(ages){
   if(any(is.na(ages))){
     out <- F
   }else{
-    
+    # oldest hh member is <18
+    out <- max(ages) < 18 & 
+    # hhw.o.c (if py < 18)
+      hh_w.o.C(ages)
+  }
+  return(out)
+}
+
+py_18.24 <- function(ages){
+  require(data.table)
+  #are youth who identify as the parent or legal guardian of one or more
+  #children who are present with or sleeping in the same place as that youth
+  #parent, where there is no person over age 24 in the household. Parenting
+  #youth are either a subset of households with at least one adult and one child
+  #if the parenting youth is between 18 and 24, or households with only children
+  #if the parenting youth is under 18. CoCs should report the numbers of
+  #children in parenting youth households separately for households with
+  #parenting youth under 18 and households with parenting youth who are 18 to
+  #24.
+  if(any(is.na(ages))){
+    out <- F
+  }else{
+    # oldest hh member is 18-24
+    out <- between(ages, 18, 24) & 
+    # hhwal1a1c (if py 18-24)
+      hh_wal1a1c(ages)
   }
   return(out)
 }
