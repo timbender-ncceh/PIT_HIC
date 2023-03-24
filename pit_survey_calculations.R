@@ -740,7 +740,7 @@ fun_rel2hoh <- function(x){
   }else if(x == 4){
     out <- "Head of household’s other relation member"
   }else if(x == 5){
-    out <- "Other: non-relation member "
+    out <- "Other: non-relation member"
   }else if(x == 99){
     out <- NA
   }else if(x == 1){
