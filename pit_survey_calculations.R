@@ -71,10 +71,7 @@ py_u18 <- function(ages, rel2hohs){
   }else{
     # oldest hh member is 18-24
     out <- #between(max(ages), 18, age_ul) & 
-      # max age <= 24
-      max(ages) < 18 & 
-      # min age < 18
-      min(ages) < 18 &
+      all(ages < 18) &  
       
       # rel2hoh as child
       any(grepl(pattern = "^Head of Household.*Child$",
@@ -130,8 +127,8 @@ uy <- function(ages, rel2hohs){
      # this cannot be age_NA
      any(is.na(ages)) | 
      # this cannot be... pu
-     py_18.24(ages, rel2hohs)|
-     py_u18(ages,rel2hoh)){
+     py_18.24(ages=ages, rel2hohs=rel2hohs)|
+     py_u18(ages=ages,rel2hohs=rel2hohs)){
     out <- F
   }else{
     if(all(ages <= 24)){
