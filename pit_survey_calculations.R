@@ -26,6 +26,7 @@ hh_wal1a1c <- function(ages,
 
 
 hh_wo.c <- function(ages, age.upperlim = 18){
+  # WITHOUT CHILDREN
   #This category includes single adults, adult couples with no children, and
   #groups of adults (including adult parents with their adult children).
   if(any(is.na(ages))){
@@ -38,6 +39,7 @@ hh_wo.c <- function(ages, age.upperlim = 18){
 }
 
 hh_w.o.C <- function(ages, age.upperlim = 18){
+  # WITH ONLY CHILDREN
   #This category includes persons under age 18, including children in one-child
   #households, adolescent parents (under age 18) and their children, adolescent
   #siblings, or other household configurations composed only of children.
