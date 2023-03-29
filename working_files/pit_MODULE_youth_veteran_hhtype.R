@@ -14,43 +14,45 @@ temp.enrollment$RelationshipToHoH_def <- unlist(lapply(X = temp.enrollment$Relat
 
 
 # REAL DATA----
-real.df <- left_join(temp.enrollment[,c("HouseholdID", "PersonalID", "EnrollmentID", 
+yvhh.df <- left_join(temp.enrollment[,c("HouseholdID", "PersonalID", "EnrollmentID", 
                                      "RelationshipToHoH_def")], 
                      temp.client[,c("PersonalID", "age", 
-                                 "VeteranStatus_def")]) 
+                                 "VeteranStatus_def")]) %>%
+  mutate(., 
+         hh1_age.unknown = NA,
+         hh1_vet         = NA,
+         hh1_w.o.C       = NA,
+         hh1_wal1a1c     = NA,
+         hh1_wo.c        = NA,
+         hh1_youth       = NA,
+         py1_18.24       = NA,
+         py1_u18         = NA,
+         uy1             = NA)
 
 rm(temp.client,temp.enrollment)
 
-real.df$hh1_age.unknown <- NA
-real.df$hh1_vet         <- NA
-real.df$hh1_w.o.C       <- NA
-real.df$hh1_wal1a1c     <- NA
-real.df$hh1_wo.c        <- NA
-real.df$hh1_youth       <- NA
-real.df$py1_18.24       <- NA
-real.df$py1_u18         <- NA
-real.df$uy1             <- NA
 
-for(i in unique(real.df$HouseholdID)){
+
+for(i in unique(yvhh.df$HouseholdID)){
  #print(i)
   if(!is.na(i)){
-    real.df$hh1_age.unknown[real.df$HouseholdID == i] <- hh_age.unknown(ages = real.df$age[real.df$HouseholdID == i])
-    real.df$hh1_vet[real.df$HouseholdID == i]         <- hh_vet(vet.statuses = real.df$VeteranStatus_def[real.df$HouseholdID == i])
-    real.df$hh1_w.o.C[real.df$HouseholdID == i]       <- hh_w.o.C(ages = real.df$age[real.df$HouseholdID == i])
-    real.df$hh1_wal1a1c[real.df$HouseholdID == i]     <- hh_wal1a1c(ages = real.df$age[real.df$HouseholdID == i])
-    real.df$hh1_wo.c[real.df$HouseholdID == i]        <- hh_wo.c(ages = real.df$age[real.df$HouseholdID == i])
-    real.df$hh1_youth[real.df$HouseholdID == i]       <- hh_youth(ages = real.df$age[real.df$HouseholdID == i])
-    real.df$py1_18.24[real.df$HouseholdID == i]       <- py_18.24(ages = real.df$age[real.df$HouseholdID == i], 
-                                                                  rel2hohs = real.df$RelationshipToHoH_def[real.df$HouseholdID == i])
-    real.df$py1_u18[real.df$HouseholdID == i]         <- py_u18(ages = real.df$age[real.df$HouseholdID == i], 
-                                                                rel2hohs = real.df$RelationshipToHoH_def[real.df$HouseholdID == i])
-    real.df$uy1[real.df$HouseholdID == i]             <- uy(ages = real.df$age[real.df$HouseholdID == i], 
-                                                            rel2hohs = real.df$RelationshipToHoH_def[real.df$HouseholdID == i])
+    yvhh.df$hh1_age.unknown[yvhh.df$HouseholdID == i] <- hh_age.unknown(ages = yvhh.df$age[yvhh.df$HouseholdID == i])
+    yvhh.df$hh1_vet[yvhh.df$HouseholdID == i]         <- hh_vet(vet.statuses = yvhh.df$VeteranStatus_def[yvhh.df$HouseholdID == i])
+    yvhh.df$hh1_w.o.C[yvhh.df$HouseholdID == i]       <- hh_w.o.C(ages = yvhh.df$age[yvhh.df$HouseholdID == i])
+    yvhh.df$hh1_wal1a1c[yvhh.df$HouseholdID == i]     <- hh_wal1a1c(ages = yvhh.df$age[yvhh.df$HouseholdID == i])
+    yvhh.df$hh1_wo.c[yvhh.df$HouseholdID == i]        <- hh_wo.c(ages = yvhh.df$age[yvhh.df$HouseholdID == i])
+    yvhh.df$hh1_youth[yvhh.df$HouseholdID == i]       <- hh_youth(ages = yvhh.df$age[yvhh.df$HouseholdID == i])
+    yvhh.df$py1_18.24[yvhh.df$HouseholdID == i]       <- py_18.24(ages = yvhh.df$age[yvhh.df$HouseholdID == i], 
+                                                                  rel2hohs = yvhh.df$RelationshipToHoH_def[yvhh.df$HouseholdID == i])
+    yvhh.df$py1_u18[yvhh.df$HouseholdID == i]         <- py_u18(ages = yvhh.df$age[yvhh.df$HouseholdID == i], 
+                                                                rel2hohs = yvhh.df$RelationshipToHoH_def[yvhh.df$HouseholdID == i])
+    yvhh.df$uy1[yvhh.df$HouseholdID == i]             <- uy(ages = yvhh.df$age[yvhh.df$HouseholdID == i], 
+                                                            rel2hohs = yvhh.df$RelationshipToHoH_def[yvhh.df$HouseholdID == i])
   }
 }
 rm(i)
 
-real.df <- real.df %>%
+yvhh.df <- yvhh.df %>%
   mutate(.,
          hh1_youth       = ifelse(hh1_youth, "YOUTH", ""),
          hh1_age.unknown = ifelse(hh1_age.unknown, "AGE_UNKNOWN", ""),
@@ -79,5 +81,5 @@ real.df <- real.df %>%
 
 
 # minimum colums
-real.df <- real.df[,c("PersonalID", "EnrollmentID", "HouseholdID", 
+yvhh.df <- yvhh.df[,c("PersonalID", "EnrollmentID", "HouseholdID", 
                       "out_hh_type")]
