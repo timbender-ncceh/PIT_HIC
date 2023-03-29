@@ -32,11 +32,8 @@ rm(list=ls()[!ls() %in% c("get_youth.hh.info",
                           "py_u18", 
                           "py_18.24", 
                           "uy", 
-                          "hh_vet")])
-
-
-
-
+                          "hh_vet", 
+                          "hh_youth")])
 
 # data----
 pit.night    <- ymd(20230125)
