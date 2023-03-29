@@ -1,82 +1,79 @@
-Coc/Region,County,District 1,District 3,District 4,District 5,District 7,District 8,District 9,District 10,District 11,District 13,with_hmis@ncceh_data
-BoS Region 1,Cherokee,,,,,,,,,x,,TRUE
-BoS Region 1,Clay,,,,,,,,,x,,TRUE
-BoS Region 1,Graham,,,,,,,,,x,,TRUE
-BoS Region 1,Haywood,,,,,,,,,x,,TRUE
-BoS Region 1,Jackson,,,,,,,,,x,,TRUE
-BoS Region 1,Macon,,,,,,,,,x,,TRUE
-BoS Region 1,Madison,,,,,,,,,x,,TRUE
-BoS Region 1,Swain,,,,,,,,,x,,TRUE
-BoS Region 2,Henderson,,,,,,,,,x,,TRUE
-BoS Region 2,Polk,,,,,,,,,x,,TRUE
-BoS Region 2,Rutherford,,,,,,,,x,,,TRUE
-BoS Region 2,Transylvania,,,,,,,,,x,,TRUE
-BoS Region 3,Alexander,,,,,,,,x,,,TRUE
-BoS Region 3,Burke,,,,,,,,x,,,TRUE
-BoS Region 3,Caldwell,,,,x,,,,,,,TRUE
-BoS Region 3,Catawba,,,,,,,,x,,,TRUE
-BoS Region 3,McDowell,,,,,,,,,x,,TRUE
-BoS Region 4,Davie,,,,x,,,,,,,TRUE
-BoS Region 4,Iredell,,,,,,,,x,,,TRUE
-BoS Region 4,Stokes,,,,x,,,,,,,TRUE
-BoS Region 4,Surry,,,,x,,,,,,,TRUE
-BoS Region 4,Yadkin,,,,x,,,,,,,TRUE
-BoS Region 5,Cabarrus,,,,,,,,,,,TRUE
-BoS Region 5,Davidson,,,,,,x,,,,,TRUE
-BoS Region 5,Rowan,,,,,,x,,,,,TRUE
-BoS Region 5,Stanly,,,,,,x,,,,,TRUE
-BoS Region 5,Union,,,,,,x,,,,,TRUE
-BoS Region 6,Alamance,,,x,,,,,,,,TRUE
-BoS Region 6,Casewell,,,,,,,,,,,TRUE
-BoS Region 6,Chatham,,,,,,,x,,,,TRUE
-BoS Region 6,Person,,,x,,,,,,,,TRUE
-BoS Region 6,Rockingham,,,,,,,,,,,TRUE
-BoS Region 7,Anson,,,,,,x,,,,,TRUE
-BoS Region 7,Harnett,,,,,,,,,,x,TRUE
-BoS Region 7,Hoke,,,,,,,x,,,,TRUE
-BoS Region 7,Johnston,,,,,,,,,,x,TRUE
-BoS Region 7,Lee,,,,,,,x,,,,TRUE
-BoS Region 7,Montgomery,,,,,,x,,,,,TRUE
-BoS Region 7,Moore,,,,,,,x,,,,TRUE
-BoS Region 7,Randolph,,,,,,,x,,,,TRUE
-BoS Region 7,Richmond,,,,,,x,,,,,TRUE
-BoS Region 8,Bladen,,,,,x,,,,,,TRUE
-BoS Region 8,Columbus,,,,,x,,,,,,TRUE
-BoS Region 8,Robeson,,,,,x,,,,,,TRUE
-BoS Region 8,Scotland,,,,,,,x,,,,TRUE
-BoS Region 9,Edgecombe,x,,,,,,,,,,TRUE
-BoS Region 9,Franklin,x,,,,,,,,,,TRUE
-BoS Region 9,Granville,,,x,,,,,,,,TRUE
-BoS Region 9,Halifax,x,,,,,,,,,,TRUE
-BoS Region 9,Nash,x,,,,,,,,,,TRUE
-BoS Region 9,Northhampton,x,,,,,,,,,,TRUE
-BoS Region 9,Vance,x,,,,,,,,,,TRUE
-BoS Region 9,Warren,x,,,,,,,,,,TRUE
-BoS Region 10,Duplin,,x,,,,,,,,,TRUE
-BoS Region 10,Greene,x,,,,,,,,,,TRUE
-BoS Region 10,Lenoir,,x,,,,,,,,,TRUE
-BoS Region 10,Sampson,,x,,,,,,,,,TRUE
-BoS Region 10,Wayne,,,,,,,,,,x,TRUE
-BoS Region 10,Wilson,x,,,,,,,,,,TRUE
-BoS Region 11,Camden,,x,,,,,,,,,TRUE
-BoS Region 11,Chowan,x,,,,,,,,,,TRUE
-BoS Region 11,Currituck,,x,,,,,,,,,TRUE
-BoS Region 11,Dare,,x,,,,,,,,,TRUE
-BoS Region 11,Gates,x,,,,,,,,,,TRUE
-BoS Region 11,Hertford,x,,,,,,,,,,TRUE
-BoS Region 11,Hyde,,x,,,,,,,,,TRUE
-BoS Region 11,Pasquotank,x,,,,,,,,,,TRUE
-BoS Region 11,Perquimans,x,,,,,,,,,,TRUE
-BoS Region 11,Tyrrell,x,,,,,,,,,,TRUE
-BoS Region 12,Beaufort,,x,,,,,,,,,TRUE
-BoS Region 12,Bertie,x,,,,,,,,,,TRUE
-BoS Region 12,Martin ,x,,,,,,,,,,TRUE
-BoS Region 12,Pitt,x,,,,,,,,,,TRUE
-BoS Region 12,Washington,x,,,,,,,,,,TRUE
-BoS Region 13,Carteret,,x,,,,,,,,,TRUE
-BoS Region 13,Craven,,x,,,,,,,,,TRUE
-BoS Region 13,Jones,,x,,,,,,,,,TRUE
-BoS Region 13,Onslow,,x,,,,,,,,,TRUE
-BoS Region 13,Pamlico,,x,,,,,,,,,TRUE
-Orange CoC,Durham,,,x,,,,,,,,TRUE
-Durham CoC,Orange,,,x,,,,,,,,TRUE
+Coc/Region,County,with_hmis@ncceh_data,District
+BoS Region 9,Edgecombe,TRUE,District 1
+BoS Region 9,Franklin,TRUE,District 1
+BoS Region 9,Halifax,TRUE,District 1
+BoS Region 9,Nash,TRUE,District 1
+BoS Region 9,Northhampton,TRUE,District 1
+BoS Region 9,Vance,TRUE,District 1
+BoS Region 9,Warren,TRUE,District 1
+BoS Region 10,Greene,TRUE,District 1
+BoS Region 10,Wilson,TRUE,District 1
+BoS Region 11,Chowan,TRUE,District 1
+BoS Region 11,Gates,TRUE,District 1
+BoS Region 11,Hertford,TRUE,District 1
+BoS Region 11,Pasquotank,TRUE,District 1
+BoS Region 11,Perquimans,TRUE,District 1
+BoS Region 11,Tyrrell,TRUE,District 1
+BoS Region 12,Bertie,TRUE,District 1
+BoS Region 12,Martin,TRUE,District 1
+BoS Region 12,Pitt,TRUE,District 1
+BoS Region 12,Washington,TRUE,District 1
+BoS Region 10,Duplin,TRUE,District 3
+BoS Region 10,Lenoir,TRUE,District 3
+BoS Region 10,Sampson,TRUE,District 3
+BoS Region 11,Camden,TRUE,District 3
+BoS Region 11,Currituck,TRUE,District 3
+BoS Region 11,Dare,TRUE,District 3
+BoS Region 11,Hyde,TRUE,District 3
+BoS Region 12,Beaufort,TRUE,District 3
+BoS Region 13,Carteret,TRUE,District 3
+BoS Region 13,Craven,TRUE,District 3
+BoS Region 13,Jones,TRUE,District 3
+BoS Region 13,Onslow,TRUE,District 3
+BoS Region 13,Pamlico,TRUE,District 3
+BoS Region 6,Alamance,TRUE,District 4
+BoS Region 6,Person,TRUE,District 4
+BoS Region 9,Granville,TRUE,District 4
+Orange CoC,Durham,TRUE,District 4
+Durham CoC,Orange,TRUE,District 4
+BoS Region 3,Caldwell,TRUE,District 5
+BoS Region 4,Davie,TRUE,District 5
+BoS Region 4,Stokes,TRUE,District 5
+BoS Region 4,Surry,TRUE,District 5
+BoS Region 4,Yadkin,TRUE,District 5
+BoS Region 8,Bladen,TRUE,District 7
+BoS Region 8,Columbus,TRUE,District 7
+BoS Region 8,Robeson,TRUE,District 7
+BoS Region 5,Davidson,TRUE,District 8
+BoS Region 5,Rowan,TRUE,District 8
+BoS Region 5,Stanly,TRUE,District 8
+BoS Region 5,Union,TRUE,District 8
+BoS Region 7,Anson,TRUE,District 8
+BoS Region 7,Montgomery,TRUE,District 8
+BoS Region 7,Richmond,TRUE,District 8
+BoS Region 6,Chatham,TRUE,District 9
+BoS Region 7,Hoke,TRUE,District 9
+BoS Region 7,Lee,TRUE,District 9
+BoS Region 7,Moore,TRUE,District 9
+BoS Region 7,Randolph,TRUE,District 9
+BoS Region 8,Scotland,TRUE,District 9
+BoS Region 2,Rutherford,TRUE,District 10
+BoS Region 3,Alexander,TRUE,District 10
+BoS Region 3,Burke,TRUE,District 10
+BoS Region 3,Catawba,TRUE,District 10
+BoS Region 4,Iredell,TRUE,District 10
+BoS Region 1,Cherokee,TRUE,District 11
+BoS Region 1,Clay,TRUE,District 11
+BoS Region 1,Graham,TRUE,District 11
+BoS Region 1,Haywood,TRUE,District 11
+BoS Region 1,Jackson,TRUE,District 11
+BoS Region 1,Macon,TRUE,District 11
+BoS Region 1,Madison,TRUE,District 11
+BoS Region 1,Swain,TRUE,District 11
+BoS Region 2,Henderson,TRUE,District 11
+BoS Region 2,Polk,TRUE,District 11
+BoS Region 2,Transylvania,TRUE,District 11
+BoS Region 3,McDowell,TRUE,District 11
+BoS Region 7,Harnett,TRUE,District 13
+BoS Region 7,Johnston,TRUE,District 13
+BoS Region 10,Wayne,TRUE,District 13
