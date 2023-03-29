@@ -87,6 +87,8 @@ for(i in unique(real.df$HouseholdID)){
   }
 }
 
+colnames(real.df)
+unique(real.df$RelationshipToHoH_def)
 
 real.df.out <- real.df %>%
   group_by(HouseholdID,
@@ -101,9 +103,15 @@ real.df.out <- real.df %>%
            uy1) %>%
   summarise(hh_size = n_distinct(PersonalID), 
             #n_hhid = n_distinct(HouseholdID), 
+            n_vets  = sum(VeteranStatus_def == "Yes", na.rm = T),
+            n_HoH   = sum(RelationshipToHoH_def == "Self (head of household)", na.rm = T),
+            n_ChildOfHoH = sum(RelationshipToHoH_def == "Head of household’s Child", na.rm = T),
             min_age = min(age), 
-            max_age = max(age), 
-            max_know.age = max(age,na.rm = T)) %>%
+            max_age = max(age),
+            max_known.age = max(age,na.rm = T),
+            nAge_0to17  = sum(age < 18, na.rm = T), 
+            nAge_18to24 = sum(age >= 18 & age <= 24, na.rm = T), 
+            nAge_25up   = sum(age >= 25, na.rm = T)) %>%
   ungroup() %>% 
   mutate(., 
          hh1_youth       = ifelse(hh1_youth, "YOUTH", ""),
@@ -128,8 +136,18 @@ real.df.out <- real.df %>%
                              sep = "-")) %>%
   mutate(., 
          out_hh_type = gsub(pattern = "^-{1,}|-{1,}$", "", out_hh_type), 
-         out_hh_type = gsub(pattern = "-{1,}", "--", out_hh_type))
+         out_hh_type = gsub(pattern = "-{1,}", ", ", out_hh_type))
 
 
 
 real.df.out$out_hh_type %>% unique()
+
+not.cols <- colnames(real.df.out) %>%
+  grep(pattern = "^py1|^hh1|^uy1", x = ., value = T)
+
+keep.cols <- colnames(real.df.out)[!colnames(real.df.out) %in%
+                        not.cols]
+
+final.out <- real.df.out[colnames(real.df.out) %in% keep.cols]
+
+library(ggplot2)
