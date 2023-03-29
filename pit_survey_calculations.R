@@ -8,7 +8,8 @@ hh_age.unknown <- function(ages){
   return(out)
 }
 
-hh_wal1a1c <- function(ages, age.upperlim = 18){
+hh_wal1a1c <- function(ages, 
+                       age.upperlim=18){
   #Persons in households with at least one adult and one child (HH-type 1). This
   #category includes households with one adult and at least one child under age
   #18.
@@ -23,7 +24,9 @@ hh_wal1a1c <- function(ages, age.upperlim = 18){
   return(out)
 }
 
+
 hh_wo.c <- function(ages, age.upperlim = 18){
+  # WITHOUT CHILDREN
   #This category includes single adults, adult couples with no children, and
   #groups of adults (including adult parents with their adult children).
   if(any(is.na(ages))){
@@ -36,6 +39,7 @@ hh_wo.c <- function(ages, age.upperlim = 18){
 }
 
 hh_w.o.C <- function(ages, age.upperlim = 18){
+  # WITH ONLY CHILDREN
   #This category includes persons under age 18, including children in one-child
   #households, adolescent parents (under age 18) and their children, adolescent
   #siblings, or other household configurations composed only of children.
@@ -51,7 +55,7 @@ hh_w.o.C <- function(ages, age.upperlim = 18){
   return(out)
 }
 
-py_u18 <- function(ages, age_ul = 18){
+py_u18 <- function(ages, rel2hohs){
   #are youth who identify as the parent or legal guardian of one or more
   #children who are present with or sleeping in the same place as that youth
   #parent, where there is no person over age 24 in the household. Parenting
@@ -61,18 +65,26 @@ py_u18 <- function(ages, age_ul = 18){
   #children in parenting youth households separately for households with
   #parenting youth under 18 and households with parenting youth who are 18 to
   #24.
+  
+  age_ul=18
+  
   if(any(is.na(ages))){
     out <- F
   }else{
-    # oldest hh member is <18
-    out <- max(ages) < age_ul & 
-    # hhw.o.c (if py < 18)
-      hh_w.o.C(ages, age.upperlim = age_ul)
+    # oldest hh member is 18-24
+    out <- #between(max(ages), 18, age_ul) & 
+      all(ages < 18) &  
+      
+      # rel2hoh as child
+      any(grepl(pattern = "^Head of Household.*Child$",
+                x = rel2hohs), 
+          na.rm = T)
   }
   return(out)
 }
 
-py_18.24 <- function(ages, age_ul = 24){
+py_18.24 <- function(ages, rel2hohs, 
+                     age_ul=24){
   require(data.table)
   #are youth who identify as the parent or legal guardian of one or more
   #children who are present with or sleeping in the same place as that youth
@@ -87,14 +99,21 @@ py_18.24 <- function(ages, age_ul = 24){
     out <- F
   }else{
     # oldest hh member is 18-24
-    out <- between(ages, 18, age_ul) & 
-    # hhwal1a1c (if py 18-24)
-      hh_wal1a1c(ages, age.upperlim = age_ul)
+    out <- between(max(ages), 18, age_ul) & 
+      # max age <= 24
+      max(ages) <= 24 & 
+      # min age < 18
+      min(ages) < 18 &
+      
+    # rel2hoh as child
+      any(grepl(pattern = "^Head of Household.*Child$",
+          x = rel2hohs), 
+          na.rm = T)
   }
   return(out)
 }
 
-uy <- function(ages, age.upperlim = 18){
+uy <- function(ages, rel2hohs){
   #are persons under age 25 who are not presenting or sleeping in the same place
   #as their parent or legal guardian, any household member over age 24, or their
   #own children. Unaccompanied youth may be a subset of any household type: they
@@ -103,13 +122,22 @@ uy <- function(ages, age.upperlim = 18){
   #if the household includes at least one household member under 18, at least
   #one member between 18 and 24, and no members over age 24. They are a subset
   #of households with only children if all household members are under 18.
-  
-  
-  if(any(is.na(ages))){
+  age.upperlim = 24
+  if(any(is.na(ages)) | 
+     # this cannot be households 25+
+     any(ages > 24) | 
+     # this cannot be age_NA
+     any(is.na(ages)) | 
+     # this cannot be... pu
+     py_18.24(ages=ages, rel2hohs=rel2hohs)|
+     py_u18(ages=ages,rel2hohs=rel2hohs)){
     out <- F
   }else{
-    # this cannot be parenting youth 
-    # this cannot be households 25+
+    if(all(ages <= 24)){
+      out <- T
+    }else{
+      out <- F
+    }
   }
   return(out)
 }
