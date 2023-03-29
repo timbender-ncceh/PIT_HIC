@@ -1,103 +1,82 @@
-county_coc,region,district,county,state
-Edgecombe,Region 9,District 1,Edgecombe,North Carolina
-Franklin,Region 9,District 1,Franklin,North Carolina
-Halifax,Region 9,District 1,Halifax,North Carolina
-Nash,Region 9,District 1,Nash,North Carolina
-Northampton,Region 9,District 1,Northampton,North Carolina
-Vance,Region 9,District 1,Vance,North Carolina
-Warren,Region 9,District 1,Warren,North Carolina
-Greene,Region 10,District 1,Greene,North Carolina
-Wilson,Region 10,District 1,Wilson,North Carolina
-Chowan,Region 11,District 1,Chowan,North Carolina
-Gates,Region 11,District 1,Gates,North Carolina
-Hertford,Region 11,District 1,Hertford,North Carolina
-Pasquotank,Region 11,District 1,Pasquotank,North Carolina
-Perquimans,Region 11,District 1,Perquimans,North Carolina
-Tyrrell,Region 11,District 1,Tyrrell,North Carolina
-Bertie,Region 12,District 1,Bertie,North Carolina
-Martin,Region 12,District 1,Martin,North Carolina
-Pitt,Region 12,District 1,Pitt,North Carolina
-Washington,Region 12,District 1,Washington,North Carolina
-Duplin,Region 10,District 3,Duplin,North Carolina
-Lenoir,Region 10,District 3,Lenoir,North Carolina
-Sampson,Region 10,District 3,Sampson,North Carolina
-Camden,Region 11,District 3,Camden,North Carolina
-Currituck,Region 11,District 3,Currituck,North Carolina
-Dare,Region 11,District 3,Dare,North Carolina
-Hyde,Region 11,District 3,Hyde,North Carolina
-Beaufort,Region 12,District 3,Beaufort,North Carolina
-Carteret,Region 13,District 3,Carteret,North Carolina
-Craven,Region 13,District 3,Craven,North Carolina
-Jones,Region 13,District 3,Jones,North Carolina
-Onslow,Region 13,District 3,Onslow,North Carolina
-Pamlico,Region 13,District 3,Pamlico,North Carolina
-Alamance,Region 6,District 4,Alamance,North Carolina
-Person,Region 6,District 4,Person,North Carolina
-Granville,Region 9,District 4,Granville,North Carolina
-Orange CoC,Region 13,District 4,Orange,North Carolina
-Durham CoC,Region 13,District 4,Durham,North Carolina
-Caldwell,Region 3,District 5,Caldwell,North Carolina
-Davie,Region 4,District 5,Davie,North Carolina
-Stokes,Region 4,District 5,Stokes,North Carolina
-Surry,Region 4,District 5,Surry,North Carolina
-Yadkin,Region 4,District 5,Yadkin,North Carolina
-Mitchell,Region 13,District 5,Mitchell,North Carolina
-Avery,Region 13,District 5,Avery,North Carolina
-Watauga,Region 13,District 5,Watauga,North Carolina
-Wilkes,Region 13,District 5,Wilkes,North Carolina
-Ashe,Region 13,District 5,Ashe,North Carolina
-Alleghany,Region 13,District 5,Alleghany,North Carolina
-Forsyth,Region 13,District 5,Forsyth,North Carolina
-Guilford,Region 13,District 5,Guilford,North Carolina
-Bladen,Region 8,District 7,Bladen,North Carolina
-Columbus,Region 8,District 7,Columbus,North Carolina
-Robeson,Region 8,District 7,Robeson,North Carolina
-Fayetteville/Cumberland,Region 13,District 7,Cumberland,North Carolina
-Brunswick,Region 13,District 7,Brunswick,North Carolina
-New Hanover,Region 13,District 7,New Hanover,North Carolina
-Pender,Region 13,District 7,Pender,North Carolina
-Davidson,Region 5,District 8,Davidson,North Carolina
-Rowan,Region 5,District 8,Rowan,North Carolina
-Stanly,Region 5,District 8,Stanly,North Carolina
-Union,Region 5,District 8,Union,North Carolina
-Anson,Region 7,District 8,Anson,North Carolina
-Montgomery,Region 7,District 8,Montgomery,North Carolina
-Richmond,Region 7,District 8,Richmond,North Carolina
-Chatham,Region 6,District 9,Chatham,North Carolina
-Hoke,Region 7,District 9,Hoke,North Carolina
-Lee,Region 7,District 9,Lee,North Carolina
-Moore,Region 7,District 9,Moore,North Carolina
-Randolph,Region 7,District 9,Randolph,North Carolina
-Scotland,Region 8,District 9,Scotland,North Carolina
-Rutherford,Region 2,District 10,Rutherford,North Carolina
-Alexander,Region 3,District 10,Alexander,North Carolina
-Burke,Region 3,District 10,Burke,North Carolina
-Catawba,Region 3,District 10,Catawba,North Carolina
-Iredell,Region 4,District 10,Iredell,North Carolina
-Cleveland,Region 13,District 10,Cleveland,North Carolina
-Lincoln,Region 13,District 10,Lincoln,North Carolina
-Cherokee,Region 1,District 11,Cherokee,North Carolina
-Clay,Region 1,District 11,Clay,North Carolina
-Graham,Region 1,District 11,Graham,North Carolina
-Haywood,Region 1,District 11,Haywood,North Carolina
-Jackson,Region 1,District 11,Jackson,North Carolina
-Macon,Region 1,District 11,Macon,North Carolina
-Madison,Region 1,District 11,Madison,North Carolina
-Swain,Region 1,District 11,Swain,North Carolina
-Henderson,Region 2,District 11,Henderson,North Carolina
-Polk,Region 2,District 11,Polk,North Carolina
-Transylvania,Region 2,District 11,Transylvania,North Carolina
-McDowell,Region 3,District 11,McDowell,North Carolina
-Asheville/Buncombe CoC,Region 13,District 11,Buncombe,North Carolina
-Yancey,Region 13,District 11,Yancey,North Carolina
-Harnett,Region 7,District 13,Harnett,North Carolina
-Johnston,Region 7,District 13,Johnston,North Carolina
-Wayne,Region 10,District 13,Wayne,North Carolina
-Wake,Region 13,District 2,Wake,North Carolina
-Caswell,Region 6,District 6,Caswell,North Carolina
-Rockingham,Region 6,District 6,Rockingham,North Carolina
-Guilford,Region 13,District 6,Guilford,North Carolina
-Cabarrus,Region 5,District 12,Cabarrus,North Carolina
-Charlotte/Mecklenburg,Region 13,District 12,Mecklenburg,North Carolina
-Gaston,Region 13,District 14,Gaston,North Carolina
-Charlotte/Mecklenburg,Region 13,District 14,Mecklenburg,North Carolina
+Coc/Region,County,District 1,District 3,District 4,District 5,District 7,District 8,District 9,District 10,District 11,District 13,with_hmis@ncceh_data
+BoS Region 1,Cherokee,,,,,,,,,x,,TRUE
+BoS Region 1,Clay,,,,,,,,,x,,TRUE
+BoS Region 1,Graham,,,,,,,,,x,,TRUE
+BoS Region 1,Haywood,,,,,,,,,x,,TRUE
+BoS Region 1,Jackson,,,,,,,,,x,,TRUE
+BoS Region 1,Macon,,,,,,,,,x,,TRUE
+BoS Region 1,Madison,,,,,,,,,x,,TRUE
+BoS Region 1,Swain,,,,,,,,,x,,TRUE
+BoS Region 2,Henderson,,,,,,,,,x,,TRUE
+BoS Region 2,Polk,,,,,,,,,x,,TRUE
+BoS Region 2,Rutherford,,,,,,,,x,,,TRUE
+BoS Region 2,Transylvania,,,,,,,,,x,,TRUE
+BoS Region 3,Alexander,,,,,,,,x,,,TRUE
+BoS Region 3,Burke,,,,,,,,x,,,TRUE
+BoS Region 3,Caldwell,,,,x,,,,,,,TRUE
+BoS Region 3,Catawba,,,,,,,,x,,,TRUE
+BoS Region 3,McDowell,,,,,,,,,x,,TRUE
+BoS Region 4,Davie,,,,x,,,,,,,TRUE
+BoS Region 4,Iredell,,,,,,,,x,,,TRUE
+BoS Region 4,Stokes,,,,x,,,,,,,TRUE
+BoS Region 4,Surry,,,,x,,,,,,,TRUE
+BoS Region 4,Yadkin,,,,x,,,,,,,TRUE
+BoS Region 5,Cabarrus,,,,,,,,,,,TRUE
+BoS Region 5,Davidson,,,,,,x,,,,,TRUE
+BoS Region 5,Rowan,,,,,,x,,,,,TRUE
+BoS Region 5,Stanly,,,,,,x,,,,,TRUE
+BoS Region 5,Union,,,,,,x,,,,,TRUE
+BoS Region 6,Alamance,,,x,,,,,,,,TRUE
+BoS Region 6,Casewell,,,,,,,,,,,TRUE
+BoS Region 6,Chatham,,,,,,,x,,,,TRUE
+BoS Region 6,Person,,,x,,,,,,,,TRUE
+BoS Region 6,Rockingham,,,,,,,,,,,TRUE
+BoS Region 7,Anson,,,,,,x,,,,,TRUE
+BoS Region 7,Harnett,,,,,,,,,,x,TRUE
+BoS Region 7,Hoke,,,,,,,x,,,,TRUE
+BoS Region 7,Johnston,,,,,,,,,,x,TRUE
+BoS Region 7,Lee,,,,,,,x,,,,TRUE
+BoS Region 7,Montgomery,,,,,,x,,,,,TRUE
+BoS Region 7,Moore,,,,,,,x,,,,TRUE
+BoS Region 7,Randolph,,,,,,,x,,,,TRUE
+BoS Region 7,Richmond,,,,,,x,,,,,TRUE
+BoS Region 8,Bladen,,,,,x,,,,,,TRUE
+BoS Region 8,Columbus,,,,,x,,,,,,TRUE
+BoS Region 8,Robeson,,,,,x,,,,,,TRUE
+BoS Region 8,Scotland,,,,,,,x,,,,TRUE
+BoS Region 9,Edgecombe,x,,,,,,,,,,TRUE
+BoS Region 9,Franklin,x,,,,,,,,,,TRUE
+BoS Region 9,Granville,,,x,,,,,,,,TRUE
+BoS Region 9,Halifax,x,,,,,,,,,,TRUE
+BoS Region 9,Nash,x,,,,,,,,,,TRUE
+BoS Region 9,Northhampton,x,,,,,,,,,,TRUE
+BoS Region 9,Vance,x,,,,,,,,,,TRUE
+BoS Region 9,Warren,x,,,,,,,,,,TRUE
+BoS Region 10,Duplin,,x,,,,,,,,,TRUE
+BoS Region 10,Greene,x,,,,,,,,,,TRUE
+BoS Region 10,Lenoir,,x,,,,,,,,,TRUE
+BoS Region 10,Sampson,,x,,,,,,,,,TRUE
+BoS Region 10,Wayne,,,,,,,,,,x,TRUE
+BoS Region 10,Wilson,x,,,,,,,,,,TRUE
+BoS Region 11,Camden,,x,,,,,,,,,TRUE
+BoS Region 11,Chowan,x,,,,,,,,,,TRUE
+BoS Region 11,Currituck,,x,,,,,,,,,TRUE
+BoS Region 11,Dare,,x,,,,,,,,,TRUE
+BoS Region 11,Gates,x,,,,,,,,,,TRUE
+BoS Region 11,Hertford,x,,,,,,,,,,TRUE
+BoS Region 11,Hyde,,x,,,,,,,,,TRUE
+BoS Region 11,Pasquotank,x,,,,,,,,,,TRUE
+BoS Region 11,Perquimans,x,,,,,,,,,,TRUE
+BoS Region 11,Tyrrell,x,,,,,,,,,,TRUE
+BoS Region 12,Beaufort,,x,,,,,,,,,TRUE
+BoS Region 12,Bertie,x,,,,,,,,,,TRUE
+BoS Region 12,Martin ,x,,,,,,,,,,TRUE
+BoS Region 12,Pitt,x,,,,,,,,,,TRUE
+BoS Region 12,Washington,x,,,,,,,,,,TRUE
+BoS Region 13,Carteret,,x,,,,,,,,,TRUE
+BoS Region 13,Craven,,x,,,,,,,,,TRUE
+BoS Region 13,Jones,,x,,,,,,,,,TRUE
+BoS Region 13,Onslow,,x,,,,,,,,,TRUE
+BoS Region 13,Pamlico,,x,,,,,,,,,TRUE
+Orange CoC,Durham,,,x,,,,,,,,TRUE
+Durham CoC,Orange,,,x,,,,,,,,TRUE
