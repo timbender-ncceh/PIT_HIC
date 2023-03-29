@@ -151,3 +151,50 @@ keep.cols <- colnames(real.df.out)[!colnames(real.df.out) %in%
 final.out <- real.df.out[colnames(real.df.out) %in% keep.cols]
 
 library(ggplot2)
+
+ggplot() + 
+  geom_hline(data = data.frame(y1 = c(17.5, 24.5)), 
+             aes(yintercept = y1), color = "black", 
+             linetype = 2232)+ 
+  geom_boxplot(data = final.out, 
+             aes(x = out_hh_type, group = out_hh_type,
+                 y = min_age))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  labs(title = "Minimum Age (Distribution) by HH Type")+
+  scale_y_continuous(breaks = seq(0,1000,by=10))
+
+ggplot() + 
+  geom_hline(data = data.frame(y1 = c(17.5, 24.5)), 
+             aes(yintercept = y1), color = "black", 
+             linetype = 2232)+ 
+  geom_boxplot(data = final.out, 
+               aes(x = out_hh_type, group = out_hh_type,
+                   y = max_age))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  labs(title = "Maximum Age (Distribution) by HH Type")+
+  scale_y_continuous(breaks = seq(0,1000,by=10))
+
+
+ggplot() + 
+  # geom_hline(data = data.frame(y1 = c(17.5, 24.5)), 
+  #            aes(yintercept = y1), color = "black", 
+  #            linetype = 2232)+ 
+  geom_jitter(data = final.out, 
+               aes(x = out_hh_type, group = out_hh_type,
+                   y = n_vets))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  labs(title = "Number of Veterans in HH by HH_Type")+
+  scale_y_continuous(breaks = seq(0,1000,by=1), 
+                     minor_breaks = seq(0,1000,by=1))
+
+
+
+out.join <- left_join(real.df, 
+                      final.out) 
+
+
+write_csv(x = final.out, 
+          file = "householdID_level_MODULE_youthvethh.csv")
+
+write_csv(x = out.join, 
+          file = "personalID_level_MODULE_youthvethh.csv")
