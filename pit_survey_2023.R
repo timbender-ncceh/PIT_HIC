@@ -42,7 +42,6 @@ pit.week_end   <- pit.night %m+% days(7) #ymd(20220222) #20230221
 
 # /NOTE----
 
-
 # resources----
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
@@ -50,7 +49,7 @@ out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_survey_calculations.R?raw=TRUE")
 
 hmis_join <- function(x.file,
                       y.file,
@@ -123,7 +122,6 @@ a.client$age_calc     <- calc_age(dob = a.client$DOB, age_on_date = pit.night)
 a.client$flag.age_too_old <- a.client$age_calc >= 80
 a.client$flag.DOB_na <- is.na(a.client$DOB) | is.na(a.client$DOBDataQuality)
 
-
 a.client$hud_age_calc <- NA
 for(i in 1:nrow(a.client)){
   a.client$hud_age_calc[i] <- hud_age_category(age_yrs = a.client$age_calc[i])
@@ -186,7 +184,7 @@ a.enrollment <- left_join(a.enrollment,
 rm(flag.child.hoh)
 
 # NC County of Service & Region
-zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
+zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/crosswalks/zip_county_crosswalk.txt")
 
 a.projectcoc <- read_csv(file = "ProjectCoC.csv") %>%
   left_join(., zip_co.cw[,c("ZIP", "County", "City")]) %>%
@@ -221,8 +219,7 @@ out.cls$InformationDate_cls <- out.cls$InformationDate
 out.cls <- out.cls[!colnames(out.cls) %in% 
                      c("CurrentLivingSituation", "InformationDate")]
 
-a.enrollment <- left_join(a.enrollment, 
-                          out.cls)
+a.enrollment <- left_join(a.enrollment, out.cls)
 
 # Project Checks----
 a.project                 <- read_csv("Project.csv")
@@ -351,7 +348,6 @@ a.healthanddv$flag_dv                    <- is.na(a.healthanddv$domesticViolence
 # Inventory check----
 a.inventory                   <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
-
 
 # Output files, pre-join----
 # flag_colnames(a.client)
@@ -512,8 +508,6 @@ output2 <- output[,c("PersonalID",
                      "InformationDate_cls",#"InformationDate",
                      flag_colnames(output))]
 
-
-
 output2 <- output2[!colnames(output2) %in% c("Region")]
 
 output2$flag_nmfhh_and_1day_before.after_pitnight <- 
@@ -577,90 +571,90 @@ output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(cldet.df)
 
 # To-Do: Reorder Columns (added 3/23/2023; note here when complete)----
-# # ANDREA COLUMN CHANGES----
-# andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
-# PersonalID	1	1
-# reltionshiptohoh_def	2	2
-# vetStatus_def	3	3
-# calc_location_county	4	31
-# calc_location_county_flag	5	32
-# calc_region	6	33
-# proj_county	7	34
-# age_calc	8	4
-# DOBDataQuality_def	9	5
-# hud_age_calc	10	6
-# gender_calc	11	7
-# gender_category_calc	12	8	TRUE
-# race_calc	13	9
-# race2_calc	14	10	TRUE
-# race_cat_calc	15	11	TRUE
-# ethnicity_def	16	12
-# InformationDate_disab	16.5	12.5
-# HIV.AIDS	17	13
-# CH.condition	18	14
-# D.disability	19	15
-# MH.disorder	20	16
-# P.disability	21	17
-# SU.disorder	22	18
-# provider_calc	23	19
-# NCCounty	24	29
-# CH	25	20		true - document what i've found so far
-# domesticViolenceVictim_def	26	21
-# currentlyFleeingDV_def	27	22
-# householdType_def	28	23
-# youth_type_hh	29	24		true - document what i've found so far
-# veteran_type_hh	30	25		true - document what i've found so far
-# HoH_PersonalID	31	35
-# hh_cls	32	36
-# hh_cls_infodate	33	37
-# EnrollmentID	34	26
-# ProjectName	35	27
-# EntryDate	36	28
-# flag.nccounty_na	37	30
-# flag.reltohoh_na	38	40
-# flag.child_hoh	39	41
-# flag.age_too_old	40	42
-# flag.DOB_na	41	43
-# flag.gender	42	44
-# flag.race	43	45
-# flag.ethnicity	44	46
-# flag.vetstatus	45	47
-# flag_dv	46	48
-# InformationDate_cls	newER_column	39			pid_cls_infodate
-# currentLivingSituation_def	newER_column	38			pid_cls
-# flag_nmfhh_and_1day_before.after_pitnight	49	49			")
-# 
-# o2a_cols <- data.frame(name.o2a = colnames(output2A),
-#                        order.o2a = 1:ncol(output2A)) %>%
-#   as_tibble()
-# andrea_join <- full_join(andrea_cols_changes,
-#                          o2a_cols,
-#                          by = c("COLUMN_NAME" = "name.o2a"))
-# 
-# # remove fields
-# andrea_join <- andrea_join[is.na(andrea_join$REMOVE_COLUMN) |
-#                              andrea_join$REMOVE_COLUMN == F,]
-# 
-# # reorder fields
-# andrea_join <- andrea_join[order(andrea_join$order.o2a),]
-# 
-# andrea_join$Original_Order2 <- NA
-# for(i in 1:nrow(andrea_join)){
-#   # get colnumber of corresponding column in output2a
-#   andrea_join$Original_Order2[i] <- which(colnames(output2A) == andrea_join[i,]$COLUMN_NAME)
-# }
-# andrea_join <- andrea_join[order(andrea_join$Original_Order2),]
-# #andrea_join$order.o2a
-# 
-# output2A <- output2A[,andrea_join$Original_Order2[order(andrea_join$New_Order_Requested)]]
-# 
-# # rename
-# colnames(output2A)[colnames(output2A) %in%
-#                      andrea_join$COLUMN_NAME[!is.na(andrea_join$RENAME_to_this_from_column_A)]] <-
-#   andrea_join$RENAME_to_this_from_column_A[!is.na(andrea_join$RENAME_to_this_from_column_A)]
-# 
-# # andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
-# #              "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
+# ANDREA COLUMN CHANGES----
+andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
+PersonalID	1	1
+reltionshiptohoh_def	2	2
+vetStatus_def	3	3
+calc_location_county	4	31
+calc_location_county_flag	5	32
+calc_region	6	33
+proj_county	7	34
+age_calc	8	4
+DOBDataQuality_def	9	5
+hud_age_calc	10	6
+gender_calc	11	7
+gender_category_calc	12	8	TRUE
+race_calc	13	9
+race2_calc	14	10	TRUE
+race_cat_calc	15	11	TRUE
+ethnicity_def	16	12
+InformationDate_disab	16.5	12.5
+HIV.AIDS	17	13
+CH.condition	18	14
+D.disability	19	15
+MH.disorder	20	16
+P.disability	21	17
+SU.disorder	22	18
+provider_calc	23	19
+NCCounty	24	29
+CH	25	20		true - document what i've found so far
+domesticViolenceVictim_def	26	21
+currentlyFleeingDV_def	27	22
+householdType_def	28	23
+youth_type_hh	29	24		true - document what i've found so far
+veteran_type_hh	30	25		true - document what i've found so far
+HoH_PersonalID	31	35
+hh_cls	32	36
+hh_cls_infodate	33	37
+EnrollmentID	34	26
+ProjectName	35	27
+EntryDate	36	28
+flag.nccounty_na	37	30
+flag.reltohoh_na	38	40
+flag.child_hoh	39	41
+flag.age_too_old	40	42
+flag.DOB_na	41	43
+flag.gender	42	44
+flag.race	43	45
+flag.ethnicity	44	46
+flag.vetstatus	45	47
+flag_dv	46	48
+InformationDate_cls	newER_column	39			pid_cls_infodate
+currentLivingSituation_def	newER_column	38			pid_cls
+flag_nmfhh_and_1day_before.after_pitnight	49	49			")
+
+o2a_cols <- data.frame(name.o2a = colnames(output2A),
+                       order.o2a = 1:ncol(output2A)) %>%
+  as_tibble()
+andrea_join <- full_join(andrea_cols_changes,
+                         o2a_cols,
+                         by = c("COLUMN_NAME" = "name.o2a"))
+
+# remove fields
+andrea_join <- andrea_join[is.na(andrea_join$REMOVE_COLUMN) |
+                             andrea_join$REMOVE_COLUMN == F,]
+
+# reorder fields
+andrea_join <- andrea_join[order(andrea_join$order.o2a),]
+
+andrea_join$Original_Order2 <- NA
+for(i in 1:nrow(andrea_join)){
+  # get colnumber of corresponding column in output2a
+  andrea_join$Original_Order2[i] <- which(colnames(output2A) == andrea_join[i,]$COLUMN_NAME)
+}
+andrea_join <- andrea_join[order(andrea_join$Original_Order2),]
+#andrea_join$order.o2a
+
+output2A <- output2A[,andrea_join$Original_Order2[order(andrea_join$New_Order_Requested)]]
+
+# rename
+colnames(output2A)[colnames(output2A) %in%
+                     andrea_join$COLUMN_NAME[!is.na(andrea_join$RENAME_to_this_from_column_A)]] <-
+  andrea_join$RENAME_to_this_from_column_A[!is.na(andrea_join$RENAME_to_this_from_column_A)]
+
+# andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
+#              "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
