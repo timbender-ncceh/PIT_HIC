@@ -1,6 +1,5 @@
 library(openxlsx)
 
-
 # get filename----
 ch.input.name <- list.files(pattern = "^A003 -")
 
@@ -8,14 +7,64 @@ ch.input.name <- list.files(pattern = "^A003 -")
 ch.sheet.names <- loadWorkbook(file = ch.input.name) %>% names()
 
 # load data---
-ch.summary.df <- readWorkbook(ch.input.name, sheet = "Summary") %>%
+ch.clientdetail.df <- readWorkbook(ch.input.name, sheet = "Client Detail", 
+                                   colNames = F, 
+                                   rowNames = F, 
+                                   detectDates = F, 
+                                   skipEmptyCols = T, 
+                                   skipEmptyRows = F, 
+                                   rows = NULL, 
+                                   cols = 1:13, 
+                                   fillMergedCells = T) %>%
   as_tibble()
-ch.clientdetail.df <- readWorkbook(ch.input.name, sheet = "Client Detail") %>%
-  as_tibble()
-ch.disabilityDQerrors.df <- readWorkbook(ch.input.name,sheet = "Disability DQ Errors") %>%
-  as_tibble()
-
-# remove unneeded vars
-rm(ch.sheet.names, ch.input.name)
 
 # tidy----
+# which rows to skip on load (empty, column headers, etc.)
+loadrows <- ch.clientdetail.df$X1 %>% 
+  as.numeric()
+loadrows <- which(!is.na(loadrows))+1
+rm(ch.clientdetail.df)
+
+# load client detail again----
+# this time, capturing only the rows we need
+cldet.df <- readWorkbook(ch.input.name, sheet = "Client Detail", 
+                         colNames = F, 
+                         rowNames = F, 
+                         detectDates = F, 
+                         skipEmptyCols = T, 
+                         #skipEmptyRows = F, 
+                         rows = loadrows, 
+                         cols = 1:13, 
+                         fillMergedCells = T) %>%
+  as_tibble()
+
+# manually pull column names from xlsx file----
+client.colnames.txt <- "HMIS ID	Household ID	Household Type	Relationship to Head of Household	Entry Date	Disabling Condition?	Prior Living Situation	Length of Stay in Previous Place	Approximate Date Homelessness Started	Regardless of where they stayed last night - Number of times the client has been on the streets, in ES, or SH in the past three years including today(5167)	Total number of months homeless on the street, in ES or SH in the past three years(5168)	Chronic Status" %>%
+  strsplit(., split = "\t") %>%
+  unlist()
+
+# change column names----
+# change 'HMIS ID' to 'PersonalID'
+client.colnames.txt[client.colnames.txt == "HMIS ID"] <- "PersonalID"
+# change 'Household ID' to 'HouseholdID'
+client.colnames.txt[client.colnames.txt == "Household ID"] <- "HouseholdID"
+# change 'Chronic Status' to 'ChronicStatus'
+client.colnames.txt[client.colnames.txt == "Chronic Status"] <- "ChronicStatus"
+# change 'Entry Date' to 'EntryDate' 
+client.colnames.txt[client.colnames.txt == "Entry Date"] <- "EntryDate"
+
+# update column names with manual changes (form above)----
+colnames(cldet.df) <- client.colnames.txt
+
+# remove unneeded cols----
+cldet.df <- cldet.df[,c("PersonalID", "HouseholdID", "EntryDate", "ChronicStatus")]
+
+# convert EntryDate from dbl to date----
+cldet.df$EntryDate <- unlist(lapply(X = cldet.df$EntryDate, 
+       FUN = get_unix.date.date)) %>% as_date
+
+# cleanup ----
+rm(ch.input.name, 
+   ch.sheet.names, 
+   client.colnames.txt, 
+   loadrows)
