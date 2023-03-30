@@ -820,12 +820,18 @@ gc()
 devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
 
 # join to future output
-output2A <- left_join(output2A, 
-          yvhh.df)
-
+output2A <- left_join(output2A, yvhh.df)
+rm(yvhh.df)
 
 # CHRONICALLY HOMELESS----
-source("https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
+
+# join to future output
+output2A <- left_join(output2A, 
+                      cldet.df, 
+                      by = c("PersonalID", "EntryDate"))
+
+rm(cldet.df)
 
 # To-Do: Reorder Columns (added 3/23/2023; note here when complete)
 # To-Do: Remove Unused Columns (added 3/23/2023; note here when complete)
