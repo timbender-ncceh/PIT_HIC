@@ -47,7 +47,6 @@ pit.week_end   <- pit.night %m+% days(7) #ymd(20220222) #20230221
 out.template <- "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
 # Setup----
-csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/test_data"
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
@@ -174,16 +173,16 @@ a.enrollment$flag.nccounty_na <- is.na(a.enrollment$NCCounty)
 
 # FLAG - relationshiphoh----
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
-a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$reltionshiptohoh_def)
+a.enrollment$flag.reltohoh_na     <- is.na(a.enrollment$reltionshiptohoh_def)
 
 # FLAG - child HOH----
 flag.child.hoh <- left_join(a.enrollment[,c("PersonalID", "EnrollmentID", "reltionshiptohoh_def")], 
-          a.client[,c("PersonalID", "age_calc")]) %>%
+                            a.client[,c("PersonalID", "age_calc")]) %>%
   mutate(., flag.child_hoh = age_calc <= 15 & reltionshiptohoh_def == 
            "Self (head of household)") 
 
 a.enrollment <- left_join(a.enrollment, 
-          flag.child.hoh[,c("PersonalID", "EnrollmentID", "flag.child_hoh")])
+                          flag.child.hoh[,c("PersonalID", "EnrollmentID", "flag.child_hoh")])
 rm(flag.child.hoh)
 
 # NC County of Service & Region
@@ -208,52 +207,13 @@ rm(zip_co.cw)
 
 # Exit Checks----
 a.exit <- read_csv("Exit.csv")
-
-# # date filter
-# 
-# all.eids <- full_join(a.enrollment[,c("EnrollmentID", "EntryDate")],
-#                       a.exit[,c("EnrollmentID", "ExitDate")])
-# 
-# eids.that.span.pit.night <- all.eids$EntryDate <= pit.night & 
-#   all.eids$ExitDate > pit.night
-# eids.that.span.pit.night[is.na(eids.that.span.pit.night)] <- F
-# all.eids$stay_spans_pit_night <- eids.that.span.pit.night
-# 
-# 
-# all.eids$lengthOfStay_calc <- all.eids$ExitDate - 
-#   all.eids$EntryDate
-# 
-# all.eids$days_bw_entry_and_pit_night <- pit.night - all.eids$EntryDate
-# 
-# 
-# pit.eids <- all.eids[all.eids$stay_spans_pit_night,]
-# rm(all.eids)
-# 
-# pit.eids <- pit.eids[!colnames(pit.eids) %in% c("EntryDate", "ExitDate")]
-# 
-# # / date filter
-
 a.exit$destination_def <- unlist(lapply(a.exit$Destination, fun_livingsituation_def))
-table(a.exit$destination_def, useNA = "always")
 
 # CurrentLivingSituation Checks----
-
 a.currentlivingsituation <- read_csv("CurrentLivingSituation.csv")
 
 out.cls <- calc_CLS_final(a.enr = a.enrollment, 
                           a.cls = a.currentlivingsituation)
-
-# # the number below should be roughly equal to the smartsheet total figure: 
-# out.cls %>%
-#   group_by(HouseholdID, hh_cls, 
-#            hh_cls_infodate) %>%
-#   summarise(n_pid = n_distinct(PersonalID)) %>%
-#   .[.$hh_cls == 16 & 
-#       !is.na(.$hh_cls),] %>%
-#   .[!is.na(.$hh_cls_infodate) & 
-#       .$hh_cls_infodate == pit.night,] %>%
-#   .$n_pid %>% sum
-  
 
 out.cls$currentLivingSituation_def <- unlist(lapply(out.cls$CurrentLivingSituation,
                                                     fun_livingsituation_def))
@@ -263,34 +223,21 @@ out.cls <- out.cls[!colnames(out.cls) %in%
 
 a.enrollment <- left_join(a.enrollment, 
                           out.cls)
-# # the number below should be roughly the same as the total number in the smartsheet tracker:
-# a.enrollment %>%
-#   group_by(HouseholdID, hh_cls, 
-#            hh_cls_infodate) %>%
-#   summarise(n_pid = n_distinct(PersonalID)) %>%
-#   .[.$hh_cls == 16 & 
-#       !is.na(.$hh_cls),] %>%
-#   .[!is.na(.$hh_cls_infodate) & 
-#       .$hh_cls_infodate == pit.night,] %>%
-#   .$n_pid %>% sum
 
 # Project Checks----
-a.project <- read_csv("Project.csv")
-a.project$provider_calc <- a.project$ProjectName
+a.project                 <- read_csv("Project.csv")
+a.project$provider_calc   <- a.project$ProjectName
 a.project$projectType_def <- unlist(lapply(a.project$ProjectType, fun_projtype))
 
 # assign project_county
 a.projectcoc$proj_county <- get.proj_county(proj_zip = a.projectcoc$ZIP, 
                                             proj_city = a.projectcoc$City)
 
-# get_hh_calc_location_co_by_hoh----
-# and implement get.calc_location_county()----
-
+# get_hh_calc_location_co_by_hoh and implement get.calc_location_county()----
 a.enrollment$calc_location_county <- NA
 a.enrollment$calc_region <- NA
 
 for(i in 1:nrow(a.enrollment)){
-  
   if(length(unique(a.project$HousingType[a.project$ProjectID == a.enrollment$ProjectID[i]])) > 1){
     stop(glue::glue("row {i} has multiple project.csv records associated with it"))
   }
@@ -356,7 +303,6 @@ for(i in 1:nrow(a.enrollment)){
 
 a.enrollment$calc_location_county_flag <- NA
 for(i in unique(a.enrollment$HouseholdID)){
-  
   n_hh_pids <- length(unique(a.enrollment[a.enrollment$HouseholdID == i,]$PersonalID))
   n_hh_hoh  <- sum(a.enrollment[a.enrollment$HouseholdID == i,]$RelationshipToHoH == 1)
   hoh_loc_co <- a.enrollment[a.enrollment$HouseholdID == i & 
@@ -379,7 +325,6 @@ for(i in unique(a.enrollment$HouseholdID)){
     a.enrollment$calc_location_county_flag[a.enrollment$HouseholdID == i] <- "no flags"
   }
   rm(flag1,flag2a,flag2b,flag3,n_hh_pids,n_hh_hoh,hoh_loc_co)
-  
 }
 
 # remove clc suffix
@@ -388,34 +333,32 @@ a.enrollment$calc_location_county <- a.enrollment$calc_location_county %>%
   trimws()
 
 # Disabilities Check----
-a.disabilities <- read_csv("Disabilities.csv")
+a.disabilities                       <- read_csv("Disabilities.csv")
 a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
 
-# run screened_positive_disability function here (version 1 or 2, not sure which yet)----
-#screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
+# run screened_positive_disability function here (version 2; i believe version 1 is obsolete)----
 screened.pos.disab_df <- screened_positive_disability2(dis_df = a.disabilities)
 
 # Healthanddv check----
-a.healthanddv <- read_csv("HealthAndDV.csv")
-a.healthanddv$domesticViolenceVictim_def <- unlist(lapply(a.healthanddv$DomesticViolenceVictim,
-                                                          fun_1.8_def))
-a.healthanddv$currentlyFleeingDV_def <- unlist(lapply(a.healthanddv$CurrentlyFleeing, fun_1.8_def))
+a.healthanddv                            <- read_csv("HealthAndDV.csv")
+a.healthanddv$domesticViolenceVictim_def <- unlist(lapply(a.healthanddv$DomesticViolenceVictim,fun_1.8_def))
+a.healthanddv$currentlyFleeingDV_def     <- unlist(lapply(a.healthanddv$CurrentlyFleeing, fun_1.8_def))
 
 # FLAG - DV----
-a.healthanddv$flag_dv <- is.na(a.healthanddv$domesticViolenceVictim_def) | 
+a.healthanddv$flag_dv                    <- is.na(a.healthanddv$domesticViolenceVictim_def) | 
   is.na(a.healthanddv$currentlyFleeingDV_def)
 
 # Inventory check----
-a.inventory <- read_csv("Inventory.csv")
+a.inventory                   <- read_csv("Inventory.csv")
 a.inventory$householdType_def <- unlist(lapply(a.inventory$HouseholdType, fun_hhtype))
 
 
 # Output files, pre-join----
 # flag_colnames(a.client)
-b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
-                        "hud_age_calc", "gender_calc", "race_calc", 
-                        "ethnicity_def", "vetStatus_def", 
-                        flag_colnames(a.client))]
+b.client     <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
+                            "hud_age_calc", "gender_calc", "race_calc", 
+                            "ethnicity_def", "vetStatus_def", 
+                            flag_colnames(a.client))]
 
 b.enrollment <- a.enrollment[colnames(a.enrollment) %in% 
                                c(grep("_def$|_calc$", colnames(a.enrollment), 
@@ -440,35 +383,38 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in%
 # this is fine VV.  it doesn't get joined to anything else
 b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% 
                                                         c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
-                                                ignore.case = F, value = T), 
-                                           "EnrollmentID", "PersonalID", "ProjectID", 
-                                           "HouseholdID", "HoH_PersonalID", 
-                                           "InformationDate", "currentLivingSituation_def", 
-                                           "currentLivingSituation.Date_calc", 
-                                           flag_colnames(a.currentlivingsituation))]
+                                                               ignore.case = F, value = T), 
+                                                          "EnrollmentID", "PersonalID", "ProjectID", 
+                                                          "HouseholdID", "HoH_PersonalID", 
+                                                          "InformationDate", "currentLivingSituation_def", 
+                                                          "currentLivingSituation.Date_calc", 
+                                                          flag_colnames(a.currentlivingsituation))]
 
-b.exit <- a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
-                                                ignore.case = F, value = T), 
-                                           "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
-                               "ExitID", "ExitDate", 
-                               flag_colnames(a.exit))]
+b.exit <- a.exit[colnames(a.exit) %in% 
+                   c(grep("_def$|_calc$", colnames(a.exit), 
+                          ignore.case = F, value = T), 
+                     "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
+                     "ExitID", "ExitDate", 
+                     flag_colnames(a.exit))]
 
-b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
-                                                ignore.case = F, value = T), 
-                                           "ProjectID", "OrganizationID", 
-                                           "projectType_def", 
-                                           "ProjectName", 
-                                           "provider_calc",
-                                           flag_colnames(a.project))]
+b.project <- a.project[colnames(a.project) %in% 
+                         c(grep("_def$|_calc$", colnames(a.project), 
+                                ignore.case = F, value = T), 
+                           "ProjectID", "OrganizationID", 
+                           "projectType_def", 
+                           "ProjectName", 
+                           "provider_calc",
+                           flag_colnames(a.project))]
 
-b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
-                                                ignore.case = F, value = T), 
-                                           "ProjectCoCID", "ProjectID", 
-                                           #"City", "ZIP", "CoCCode", 
-                                           "County", "Region", 
-                                           "NCCounty", "HoH_PersonalID", "ProjectName", 
-                                           "proj_county",
-                                           flag_colnames(a.projectcoc))]
+b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% 
+                               c(grep("_def$|_calc$", colnames(a.projectcoc), 
+                                      ignore.case = F, value = T), 
+                                 "ProjectCoCID", "ProjectID", 
+                                 #"City", "ZIP", "CoCCode", 
+                                 "County", "Region", 
+                                 "NCCounty", "HoH_PersonalID", "ProjectName", 
+                                 "proj_county",
+                                 flag_colnames(a.projectcoc))]
 
 b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in% 
                                  c(grep("_def$|_calc$", colnames(a.healthanddv), 
@@ -487,17 +433,14 @@ b.inventory <- a.inventory[colnames(a.inventory) %in%
                                flag_colnames(a.inventory))]
 
 
-c.enrollment <- b.enrollment
-
+c.enrollment             <- b.enrollment
 c.exit                   <- b.exit
 c.currentlivingsituation <- b.currentlivingsituation
 c.client                 <- b.client
 c.screened.pos.disab_df  <- screened.pos.disab_df
 c.healthanddv            <- b.healthanddv
 
-# colnames(c.currentlivingsituation) %>% grep("^hh|^hoh|date", ., value = T, ignore.case = T)
 # get last Information Date prior to or on pit night
-
 comp_county <- inner_join(c.enrollment[,c("EnrollmentID", "ProjectID", "NCCounty",
                                           flag_colnames(c.enrollment))],
                           b.projectcoc[,c("ProjectID", "County", flag_colnames(b.projectcoc))]) 
@@ -517,9 +460,6 @@ output <- left_join(c.enrollment, c.client) %>%
 # reorder to meet andrea's specs note:  this link below is not the resource for
 # field order (3/30/23)
 "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
-
-# out.cn <- colnames(output)
-# grep("cls", out.cn, ignore.case = T, value = T)
 
 output$gender_category_calc <- NA
 output$race2_calc <- NA
@@ -576,9 +516,10 @@ output2 <- output[,c("PersonalID",
 
 output2 <- output2[!colnames(output2) %in% c("Region")]
 
-output2$flag_nmfhh_and_1day_before.after_pitnight <- fun_flag_nmfhh_and_1day_before.after_pitnight(hh_cls1 = output2$hh_cls, 
-                                                                                                   hh_cls_infodate1 = output2$hh_cls_infodate, 
-                                                                                                   pit.night1 = pit.night)
+output2$flag_nmfhh_and_1day_before.after_pitnight <- 
+  fun_flag_nmfhh_and_1day_before.after_pitnight(hh_cls1 = output2$hh_cls, 
+                                                hh_cls_infodate1 = output2$hh_cls_infodate, 
+                                                pit.night1 = pit.night)
 
 # remove duplicates
 output2 <- output2[!duplicated(output2),]
@@ -590,9 +531,52 @@ if(year(pit.night) == 2023){
   out.name.andrea <- glue("andrea_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }
 
-# this makes a turning point for side changes to andrea's output
+# this marks a turning point for side changes to andrea's output
 output2A <- output2
 
+# added new logic related to [dealing with hh_cls and  hh_cls_infodate duplication]---- 
+# do this once for output2A
+for(i in unique(output2A$PersonalID)){
+  temp <- output2A[output2A$PersonalID %in% i,]
+  if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
+         (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
+    output2A$flag_nmfhh_and_1day_before.after_pitnight[output2A$PersonalID %in% i] <- F
+  }
+  rm(temp)
+}
+
+# do it again for output2 so that it gets carried down to DQ_Flag...
+for(i in unique(output2$PersonalID)){
+  temp <- output2[output2$PersonalID %in% i,]
+  if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
+         (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
+    output2$flag_nmfhh_and_1day_before.after_pitnight[output2$PersonalID %in% i] <- F
+  }
+  rm(temp)
+}
+
+# Youth_ and Veteran_type Households----
+# run youth_vet_hh_type code module
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
+# join to future output
+output2A <- left_join(output2A, yvhh.df)
+rm(yvhh.df)
+
+# CHRONICALLY HOMELESS----
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
+# temporarily add new joinby col
+output2A <- mutate(output2A, 
+                   EntryDate_char = as.character(EntryDate))
+# join to future output
+output2A <- left_join(output2A, 
+                      cldet.df, 
+                      by = c("PersonalID", "EntryDate_char"))
+# cleanup
+# remove temp entrydate_char col
+output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
+rm(cldet.df)
+
+# To-Do: Reorder Columns (added 3/23/2023; note here when complete)----
 # # ANDREA COLUMN CHANGES----
 # andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
 # PersonalID	1	1
@@ -677,62 +661,6 @@ output2A <- output2
 # 
 # # andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
 # #              "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
-
-
-# added new logic related to [dealing with hh_cls and  hh_cls_infodate duplication]---- 
-
-# do this once for output2A
-for(i in unique(output2A$PersonalID)){
-  
-  temp <- output2A[output2A$PersonalID %in% i,]
-  
-  if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
-         (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
-    output2A$flag_nmfhh_and_1day_before.after_pitnight[output2A$PersonalID %in% i] <- F
-  }
-  
-  rm(temp)
-}
-
-# do it again for output2 so that it gets carried down to DQ_Flag...
-for(i in unique(output2$PersonalID)){
-  
-  temp <- output2[output2$PersonalID %in% i,]
-  
-  if(any((temp$hh_cls == "16" & !is.na(temp$hh_cls)) & 
-         (temp$hh_cls_infodate == pit.night & !is.na(temp$hh_cls_infodate)))){
-    output2$flag_nmfhh_and_1day_before.after_pitnight[output2$PersonalID %in% i] <- F
-  }
-  
-  rm(temp)
-}
-
-# Youth_ and Veteran_type Households----
-
-# run youth_vet_hh_type code module
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
-
-# join to future output
-output2A <- left_join(output2A, yvhh.df)
-rm(yvhh.df)
-
-# CHRONICALLY HOMELESS----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
-
-# temporarily add new joinby col
-output2A <- mutate(output2A, 
-       EntryDate_char = as.character(EntryDate))
-
-# join to future output
-output2A <- left_join(output2A, 
-                      cldet.df, 
-                      by = c("PersonalID", "EntryDate_char"))
-# cleanup
-# remove temp entrydate_char col
-output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
-rm(cldet.df)
-
-# To-Do: Reorder Columns (added 3/23/2023; note here when complete)
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
