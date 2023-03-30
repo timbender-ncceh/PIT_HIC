@@ -653,7 +653,7 @@ get.calc_location_county <- function(housingtype, proj.address.county, nccounty)
 get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036), 
                             proj_city = c("Durham", "Raleigh", "Fountain", "Lebanon")){
   require(readr)
-  zip_cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
+  zip_cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/crosswalks/zip_county_crosswalk.txt")
   out <- NULL
   for(i in 1:length(proj_zip)){
     if(proj_zip[i] %in% zip_cw$ZIP & 
