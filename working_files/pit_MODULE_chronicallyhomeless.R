@@ -1,4 +1,37 @@
+# CHRONIC HOMELESSNESS MODULE
+
 library(openxlsx)
+
+# DOWNLOAD INSTRUCTIONS from HMIS----
+
+# 1. log into HMIS
+# 2. Mode: Shadow
+# 3. Search Shadow Mode User: bralexander (5483)
+
+# 4. REPORTS >>> BUSINESSOBJECTS >>> FOLDERS >>> PUBLIC FOLDERS >>>
+# hmisncceh_live_folder >>> HMIS@NCCEH Gallery >>>
+# A003_Chronic_Homelessness_Check
+
+# 5. Provier(s): (Optional)
+
+# 6. Reporting Group(s): 
+#   [1]  "Region 10 Coordinated Entry SSO Reporting Group(1688)"
+#   [2]  "Region 11 Coordinated Entry SSO Reporting Group(1689)"
+#   [3]  "Region 12 Coordinated Entry SSO Reporting Group(1690)"
+#   [4]  "Region 13 Coordinated Entry SSO Reporting Group(1997)"
+#   [5]  "Region  1 Coordinated Entry SSO Reporting Group(2046)" 
+#   [6]  "Region  2 Coordinated Entry SSO Reporting Group(1686)" 
+#   [7]  "Region  3 Coordinated Entry SSO Reporting Group(1999)" 
+#   [8]  "Region  4 Coordinated Entry SSO Reporting Group(2037)" 
+#   [9]  "Region  5 Coordinated Entry SSO Reporting Group(1687)" 
+#   [10] "Region  6 Coordinated Entry SSO Reporting Group(2048)" 
+#   [11] "Region  7 Coordinated Entry SSO Reporting Group(2049)" 
+#   [12] "Region  9 Coordinated Entry Reporting Group(2051)"     
+#   [13] "Region  8 Coordinated Entry Reporting Group(2040)"   
+
+# 7. EDA Provider:         -Default Provider-
+# 8. Start Date:           1/25/2023 12:00:00 AM
+# 9. End Date Plus 1 Day:  1/26/2023 12:00:00 AM
 
 # get filename----
 ch.input.name <- list.files(pattern = "^A003 -")
