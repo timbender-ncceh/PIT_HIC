@@ -104,3 +104,11 @@ rm(ch.input.name,
    ch.sheet.names, 
    client.colnames.txt, 
    loadrows)
+
+
+cldet.df %>%
+  group_by(ChronicStatus) %>%
+  summarise(total_pid = n_distinct(PersonalID)) %>%
+  ungroup() %>%
+  mutate(., 
+         pct.of.total = scales::percent(total_pid/sum(total_pid),accuracy = 0.1))
