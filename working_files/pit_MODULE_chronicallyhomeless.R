@@ -1,6 +1,7 @@
 # CHRONIC HOMELESSNESS MODULE
 
 library(openxlsx)
+library(datetimeutils)
 
 # DOWNLOAD INSTRUCTIONS from HMIS----
 
@@ -35,9 +36,6 @@ library(openxlsx)
 
 # get filename----
 ch.input.name <- list.files(pattern = "^A003 -")
-
-# get sheets----
-ch.sheet.names <- loadWorkbook(file = ch.input.name) %>% names()
 
 # load data---
 ch.clientdetail.df <- readWorkbook(ch.input.name, sheet = "Client Detail", 
@@ -94,21 +92,15 @@ cldet.df <- cldet.df[,c("PersonalID",
                         #"HouseholdID", 
                         "EntryDate",
                         "ChronicStatus")]
-
 # convert EntryDate from dbl to date----
-cldet.df$EntryDate <- unlist(lapply(X = cldet.df$EntryDate, 
-       FUN = get_unix.date.date)) %>% as_date
+cldet.df$EntryDate <- datetimeutils::convert_date(x = cldet.df$EntryDate, 
+                                                  type = "excel", 
+                                                  fraction = F, tz = "America/New_York") 
+
+# add a new join_by row for date that's class(character)
+cldet.df$EntryDate_char <- as.character(cldet.df$EntryDate)
 
 # cleanup ----
 rm(ch.input.name, 
-   ch.sheet.names, 
    client.colnames.txt, 
    loadrows)
-
-
-cldet.df %>%
-  group_by(ChronicStatus) %>%
-  summarise(total_pid = n_distinct(PersonalID)) %>%
-  ungroup() %>%
-  mutate(., 
-         pct.of.total = scales::percent(total_pid/sum(total_pid),accuracy = 0.1))
