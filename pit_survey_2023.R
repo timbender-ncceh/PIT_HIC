@@ -113,7 +113,6 @@ if(sum(is_hashed(a.client$LastName),na.rm = T)== 0){
             file = "Client.csv")
 }
 
-
 rm(a.rando.key)
 # /pii hash check
 
@@ -179,16 +178,15 @@ a.enrollment$flag.nccounty_na <- is.na(a.enrollment$NCCounty)
 a.enrollment$reltionshiptohoh_def <- unlist(lapply(a.enrollment$RelationshipToHoH, fun_rel2hoh))
 a.enrollment$flag.reltohoh_na <- is.na(a.enrollment$reltionshiptohoh_def)
 
-
 # FLAG - child HOH----
 flag.child.hoh <- left_join(a.enrollment[,c("PersonalID", "EnrollmentID", "reltionshiptohoh_def")], 
           a.client[,c("PersonalID", "age_calc")]) %>%
   mutate(., flag.child_hoh = age_calc <= 15 & reltionshiptohoh_def == 
            "Self (head of household)") 
+
 a.enrollment <- left_join(a.enrollment, 
           flag.child.hoh[,c("PersonalID", "EnrollmentID", "flag.child_hoh")])
 rm(flag.child.hoh)
-
 
 # NC County of Service & Region
 zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/zip_county_crosswalk.txt")
@@ -354,21 +352,9 @@ for(i in 1:nrow(a.enrollment)){
     }else if( sum(grepl("Region", unique(c(temp,temp2)))) == 1 ) {  # ... if, out of all of the unique values of temp and temp2, there is only 1 that contains "Region", use that one
       a.enrollment$calc_region[i] <- grep("Region", unique(c(temp,temp2)), value = T)
     }
-    
     rm(temp,temp2)
   }
 }
-
-# # the number below should be roughly the same as the total number in the smartsheet tracker:
-# a.enrollment %>%
-#   group_by(HouseholdID, hh_cls, 
-#            hh_cls_infodate) %>%
-#   summarise(n_pid = n_distinct(PersonalID)) %>%
-#   .[.$hh_cls == 16 & 
-#       !is.na(.$hh_cls),] %>%
-#   .[!is.na(.$hh_cls_infodate) & 
-#       .$hh_cls_infodate == pit.night,] %>%
-#   .$n_pid %>% sum
 
 a.enrollment$calc_location_county_flag <- NA
 for(i in unique(a.enrollment$HouseholdID)){
@@ -403,28 +389,13 @@ a.enrollment$calc_location_county <- a.enrollment$calc_location_county %>%
   gsub("County", "", .) %>%
   trimws()
 
-# # the number below should be roughly the same as the total number in the smartsheet tracker:
-# a.enrollment %>%
-#   group_by(HouseholdID, hh_cls, 
-#            hh_cls_infodate) %>%
-#   summarise(n_pid = n_distinct(PersonalID)) %>%
-#   .[.$hh_cls == 16 & 
-#       !is.na(.$hh_cls),] %>%
-#   .[!is.na(.$hh_cls_infodate) & 
-#       .$hh_cls_infodate == pit.night,] %>%
-#   .$n_pid %>% sum
-
-
-# dropping in some code developed from "nccounty_logic.R"
 # Disabilities Check----
 a.disabilities <- read_csv("Disabilities.csv")
 a.disabilities$InformationDate_disab <- a.disabilities$InformationDate
 
 # run screened_positive_disability function here (version 1 or 2, not sure which yet)----
-
 #screened.pos.disab_df <- screened_positive_disability(dis_df = a.disabilities, enr_df = a.enrollment, exit_df = a.exit)
 screened.pos.disab_df <- screened_positive_disability2(dis_df = a.disabilities)
-
 
 # Healthanddv check----
 a.healthanddv <- read_csv("HealthAndDV.csv")
@@ -448,11 +419,6 @@ b.client <- a.client[,c("PersonalID", "age_calc", "DOBDataQuality_def",
                         "ethnicity_def", "vetStatus_def", 
                         flag_colnames(a.client))]
 
-# colnames(a.enrollment) %>%
-#   .[order(.)] %>%
-#   grep(pattern = "^calc_|^hh_cls|^HoH_", 
-#        ., value = T, ignore.case = F)
-
 b.enrollment <- a.enrollment[colnames(a.enrollment) %in% 
                                c(grep("_def$|_calc$", colnames(a.enrollment), 
                                       ignore.case = F, value = T), 
@@ -473,20 +439,6 @@ b.enrollment <- a.enrollment[colnames(a.enrollment) %in%
                                  "currentLivingSituation_def", #"CurrentLivingSituation",
                                  flag_colnames(a.enrollment))]
 
-# # the number below should be roughly the same as the total number in the smartsheet tracker:
-# b.enrollment %>%
-#   group_by(HouseholdID, hh_cls, 
-#            hh_cls_infodate) %>%
-#   summarise(n_pid = n_distinct(PersonalID)) %>%
-#   .[.$hh_cls == 16 & 
-#       !is.na(.$hh_cls),] %>%
-#   .[!is.na(.$hh_cls_infodate) & 
-#       .$hh_cls_infodate == pit.night,] %>%
-#   .$n_pid %>% sum
-
-# colnames(a.currentlivingsituation)
-# grep("_def|CurrentLivingSituation", colnames(a.enrollment), value = T, ignore.case = T)
-
 # this is fine VV.  it doesn't get joined to anything else
 b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsituation) %in% 
                                                         c(grep("_def$|_calc$", colnames(a.currentlivingsituation), 
@@ -497,14 +449,12 @@ b.currentlivingsituation <-  a.currentlivingsituation[colnames(a.currentlivingsi
                                            "currentLivingSituation.Date_calc", 
                                            flag_colnames(a.currentlivingsituation))]
 
-colnames(a.exit)
 b.exit <- a.exit[colnames(a.exit) %in% c(grep("_def$|_calc$", colnames(a.exit), 
                                                 ignore.case = F, value = T), 
                                            "EnrollmentID", "PersonalID", "ProjectID", "HouseholdID", "HoH_PersonalID", 
                                "ExitID", "ExitDate", 
                                flag_colnames(a.exit))]
 
-colnames(a.project)
 b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(a.project), 
                                                 ignore.case = F, value = T), 
                                            "ProjectID", "OrganizationID", 
@@ -513,7 +463,6 @@ b.project <- a.project[colnames(a.project) %in% c(grep("_def$|_calc$", colnames(
                                            "provider_calc",
                                            flag_colnames(a.project))]
 
-colnames(a.projectcoc)
 b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", colnames(a.projectcoc), 
                                                 ignore.case = F, value = T), 
                                            "ProjectCoCID", "ProjectID", 
@@ -523,7 +472,6 @@ b.projectcoc <- a.projectcoc[colnames(a.projectcoc) %in% c(grep("_def$|_calc$", 
                                            "proj_county",
                                            flag_colnames(a.projectcoc))]
 
-colnames(a.healthanddv)
 b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in% 
                                  c(grep("_def$|_calc$", colnames(a.healthanddv), 
                                         ignore.case = F, value = T), 
@@ -532,7 +480,6 @@ b.healthanddv <- a.healthanddv[colnames(a.healthanddv) %in%
                                    "ExitID", "ExitDate", 
                                    flag_colnames(a.healthanddv))]
 
-colnames(a.inventory)
 b.inventory <- a.inventory[colnames(a.inventory) %in% 
                              c(grep("_def$|_calc$", colnames(a.inventory), 
                                     ignore.case = F, value = T), 
@@ -542,19 +489,7 @@ b.inventory <- a.inventory[colnames(a.inventory) %in%
                                flag_colnames(a.inventory))]
 
 
-c.enrollment              <- b.enrollment
-
-# # the number below should be roughly the same as the total number in the smartsheet tracker:
-# c.enrollment %>%
-#   group_by(HouseholdID, hh_cls, 
-#            hh_cls_infodate) %>%
-#   summarise(n_pid = n_distinct(PersonalID)) %>%
-#   .[.$hh_cls == 16 & 
-#       !is.na(.$hh_cls),] %>%
-#   .[!is.na(.$hh_cls_infodate) & 
-#       .$hh_cls_infodate == pit.night,] %>%
-#   .$n_pid %>% sum
-
+c.enrollment <- b.enrollment
 
 c.exit                   <- b.exit
 c.currentlivingsituation <- b.currentlivingsituation
@@ -565,16 +500,9 @@ c.healthanddv            <- b.healthanddv
 # colnames(c.currentlivingsituation) %>% grep("^hh|^hoh|date", ., value = T, ignore.case = T)
 # get last Information Date prior to or on pit night
 
-
 comp_county <- inner_join(c.enrollment[,c("EnrollmentID", "ProjectID", "NCCounty",
                                           flag_colnames(c.enrollment))],
-           b.projectcoc[,c("ProjectID", "County", flag_colnames(b.projectcoc))]) 
-
-# ls(pattern = "^a\\.") %>%
-#   .[! . %in% c("a.client", "a.enrollment", "a.exit", 
-#                "a.project", "a.projectcoc", "a.disabilities", 
-#                "a.healthanddv")]
-
+                          b.projectcoc[,c("ProjectID", "County", flag_colnames(b.projectcoc))]) 
 
 output <- left_join(c.enrollment, c.client) %>%
   #left_join(., c.exit) %>%
@@ -588,13 +516,12 @@ output <- left_join(c.enrollment, c.client) %>%
   left_join(., b.projectcoc)
 
 
-# reorder to meet andrea's specs----
-# note:  this link below is not the resource for field order (3/30/23)
+# reorder to meet andrea's specs note:  this link below is not the resource for
+# field order (3/30/23)
 "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
-out.cn <- colnames(output)
-
-#grep("cls", out.cn, ignore.case = T, value = T)
+# out.cn <- colnames(output)
+# grep("cls", out.cn, ignore.case = T, value = T)
 
 output$gender_category_calc <- NA
 output$race2_calc <- NA
@@ -602,8 +529,6 @@ output$race_cat_calc <- NA
 #output$CH <- NA
 #output$youth_type_hh <- NA
 #output$veteran_type_hh <- NA
-
-#grep("county|calc", colnames(output), value = T, ignore.case = T)
 
 output2 <- output[,c("PersonalID", 
                      "reltionshiptohoh_def", 
@@ -657,17 +582,15 @@ output2$flag_nmfhh_and_1day_before.after_pitnight <- fun_flag_nmfhh_and_1day_bef
                                                                                                    hh_cls_infodate1 = output2$hh_cls_infodate, 
                                                                                                    pit.night1 = pit.night)
 
-# grep("calc", colnames(output2), value = T, ignore.case = T)
-
-
+# remove duplicates
 output2 <- output2[!duplicated(output2),]
 
+# name output files
 if(year(pit.night) == 2023){
   out.name.andrea <- glue("andrea_output2023__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }else{
   out.name.andrea <- glue("andrea_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }
-
 
 # ANDREA COLUMN CHANGES----
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
