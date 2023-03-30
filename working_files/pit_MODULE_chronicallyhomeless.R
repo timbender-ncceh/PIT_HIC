@@ -57,7 +57,10 @@ client.colnames.txt[client.colnames.txt == "Entry Date"] <- "EntryDate"
 colnames(cldet.df) <- client.colnames.txt
 
 # remove unneeded cols----
-cldet.df <- cldet.df[,c("PersonalID", "HouseholdID", "EntryDate", "ChronicStatus")]
+cldet.df <- cldet.df[,c("PersonalID", 
+                        #"HouseholdID", 
+                        "EntryDate",
+                        "ChronicStatus")]
 
 # convert EntryDate from dbl to date----
 cldet.df$EntryDate <- unlist(lapply(X = cldet.df$EntryDate, 
