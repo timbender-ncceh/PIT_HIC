@@ -715,31 +715,6 @@ for(i in unique(output2$PersonalID)){
 
 # Youth_ and Veteran_type Households----
 
-# cli_enr.join <- a.enrollment[,c("PersonalID", "EnrollmentID", "HouseholdID", 
-#                                     "reltionshiptohoh_def")] %>%
-#   left_join(., 
-#             a.client[,c("PersonalID", "age_calc", "vetStatus_def")])
-# 
-# youth_vet_hhs.df <- data.frame(HouseholdID = unique(cli_enr.join$HouseholdID), 
-#                                youth_vet_hh_type = NA) %>%
-#   .[!is.na(.$HouseholdID),]
-# 
-# for(i in 1:nrow(youth_vet_hhs.df)){
-# try( youth_vet_hhs.df$youth_vet_hh_type[i] <- get_youth.hh.info(hh_pid.ages.v = cli_enr.join$age_calc[cli_enr.join$HouseholdID == 
-#                                                                                                      youth_vet_hhs.df$HouseholdID[i]], 
-#                                                              relations2hoh.v = cli_enr.join$reltionshiptohoh_def[cli_enr.join$HouseholdID == 
-#                                                                                                        youth_vet_hhs.df$HouseholdID[i]], 
-#                                                              vetstatus.v     = cli_enr.join$vetStatus_def[cli_enr.join$HouseholdID == 
-#                                                                                                       youth_vet_hhs.df$HouseholdID[i]]))
-# }
-# 
-# youth_vet_hhs.df <- youth_vet_hhs.df %>% as_tibble()
-# 
-# output2A <- left_join(youth_vet_hhs.df, a.enrollment[,c("HouseholdID", "PersonalID", "EnrollmentID", "HoH_PersonalID")]) %>%
-#   right_join(., output2A)
-
-gc()
-
 # run youth_vet_hh_type code module
 devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
 
@@ -764,30 +739,14 @@ rm(cldet.df)
 write.xlsx(x = output2A[!duplicated(output2A),], 
            file = out.name.andrea)
 
-
-
 # # identify data issues----
-# colnames(output2) %>%
-#   .[!. %in% c("age_calc", "DOBDataQuality_def", 
-#               #"Region", 
-#               "calc_region",
-#               "hud_age_calc",
-#               "NCCounty", "County", "county_matches", 
-#               "domesticViolenceVictim_def", 
-#               "currentlyFleeingDV_def")]
-# 
-# grep("type", 
-#      colnames(output2), value = T, ignore.case = T)
-# 
-# 
+ 
 # # issue - HOH living situation vs Person livins situation
 # output2
 
 
 # # issue - fleeing but not domestic violence victim
 # 
-# output2$domesticViolenceVictim_def %>% unique()
-# output2$currentlyFleeingDV_def %>% unique()
 
 output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in%
                                             c("Client refused", "No") & 
@@ -802,13 +761,8 @@ output2[is.na(output2$age_calc) &
   output2$DOBDataQuality_def %in% 
   c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
 
-#table(output2$issue.DOB_vs_DOBDataQuality, useNA = "always")  
-
 output2$issue_race <- output2$race_calc == "[unknown]"
 output2$householdType_def %>% unique()
-
-# #output2$livingSituation_def %>% unique()
-# output2$reltionshiptohoh_def
 
 output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_PersonalID & 
   output2$reltionshiptohoh_def != "Self (head of household)")
@@ -823,9 +777,8 @@ output3 <- output2 %>%
                         upper =  pit.week_end) & #  -- this is fine (3.22.23 - nicole asked for this filter)
       !is.na(.$hh_cls_infodate),] %>%  #  -- this is fine (3.22.23 - nicole asked for this filter)
   # / 
-  
   group_by(client_id = PersonalID, 
-           EnrollmentID, # THIS NEEDS TO BE REMOVED
+           EnrollmentID, 
            ProjectName,
            EntryDate,
            #calc_location_county_flag,
@@ -855,15 +808,11 @@ output3 <- output2 %>%
            flag_dv,
            flag_nmfhh_and_1day_before.after_pitnight) %>%
   summarise() %>%
-  # left_join(., 
-  #           read_csv("regionscrosswalk.csv"), 
-  #           by = c("County" )) %>%
   as.data.table() %>%
   melt(., 
         id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region", 
                     "hh_cls", "hh_cls_infodate") , 
        variable.name = "DQ_flag_type") %>%
-  #.$calc_location_county %>% is.na() %>% table()
   as.data.frame() %>%
   as_tibble() %>%
   .[.$value == T,] %>%
@@ -872,17 +821,15 @@ output3 <- output2 %>%
   
 output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
 
-# # narrow donw to just 1 field with a county in it
-# grep("county", colnames(output3), value = T, ignore.case = T)
+# # narrow down to just 1 field with a county in it
 
 output3 <- output3[!colnames(output3) %in% c("proj_county")]
 
 
 # change names----
+
+# DQ_flag_type----
 output3$DQ_flag_type <- output3$DQ_flag_type  %>% as.character()
-
-#unique(output3$DQ_flag_type) %>% grep("^flag", ., value = T)
-
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.reltohoh_na", 
                                "missing RelationshipToHoh", output3$DQ_flag_type)
 
@@ -909,17 +856,6 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.DOB_na",
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race", 
        "missing race", output3$DQ_flag_type)
 
-colnames(output3)
-
-# # spot check nicole to andrea
-# spot.check3 <- output3[sample(1:nrow(output3), size = 10),]
-# spot.check2 <- output2 %>%
-#   .[#.$EnrollmentID %in% spot.check3$EnrollmentID & 
-#       .$PersonalID %in% spot.check3$client_id,] %>% 
-#   group_by(#EnrollmentID, 
-#            PersonalID, calc_location_county, 
-#            calc_region) %>%
-#   summarise(n = n())
 
 # nicole changes----
 # remove enrolllmentID
@@ -928,12 +864,9 @@ output3 <- output3[!colnames(output3) %in% c("EnrollmentID")]
 # remove dv flag
 output3 <- output3[output3$DQ_flag_type != "verify DV-fleeing and DV-victim",]
 
-
 # write to file----
 getwd()
 library(glue)
-
-#grep("calc", colnames(output3), value = T, ignore.case = T)
 
 # Nicole final filter-----
 nicole_filter1 <- output3$hh_cls == 16 & 
@@ -959,15 +892,13 @@ output3$hh_cls <- lapply(X = output3$hh_cls,
 
 # / nicole final filter----
 
-
-
 if(year(pit.night) == 2023){
   out.name <- glue("DQ_Flag2023__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }else{
   out.name <- glue("nicole_output2022__{Sys.Date()}_HR{hour(Sys.time())}.xlsx")
 }
 
-
+# nicole output----
 write.xlsx(x = output3, 
            file = out.name)
 
