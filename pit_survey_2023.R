@@ -51,9 +51,7 @@ csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/Januar
 csv.file.dir <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
 
 # Functions----
-#devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
-# updated to reflect dev branch ^^^
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/pit_survey_calculations.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/pit_survey_calculations.R?raw=TRUE")
 
 hmis_join <- function(x.file,
                       y.file,
@@ -712,14 +710,14 @@ for(i in unique(output2$PersonalID)){
 # Youth_ and Veteran_type Households----
 
 # run youth_vet_hh_type code module
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
 
 # join to future output
 output2A <- left_join(output2A, yvhh.df)
 rm(yvhh.df)
 
 # CHRONICALLY HOMELESS----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
 
 # temporarily add new joinby col
 output2A <- mutate(output2A, 
@@ -1018,5 +1016,3 @@ colname.emtpy.check %>%
          pct_NA = scales::percent(count_NA/count_Total,
                                   accuracy = 0.01)) %>%
   .[order(.$count_NA),]
-
-   
