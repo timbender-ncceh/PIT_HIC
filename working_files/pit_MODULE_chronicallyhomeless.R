@@ -100,6 +100,9 @@ cldet.df$EntryDate <- datetimeutils::convert_date(x = cldet.df$EntryDate,
 # add a new join_by row for date that's class(character)
 cldet.df$EntryDate_char <- as.character(cldet.df$EntryDate)
 
+# remove EntryDate col
+cldet.df <- cldet.df[!colnames(cldet.df) %in% "EntryDate"]
+
 # cleanup ----
 rm(ch.input.name, 
    client.colnames.txt, 
