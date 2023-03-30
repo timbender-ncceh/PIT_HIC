@@ -1018,3 +1018,5 @@ colname.emtpy.check %>%
          pct_NA = scales::percent(count_NA/count_Total,
                                   accuracy = 0.01)) %>%
   .[order(.$count_NA),]
+
+   
