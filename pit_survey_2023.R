@@ -15,7 +15,7 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230323)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230330)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
@@ -822,6 +822,10 @@ devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PI
 # join to future output
 output2A <- left_join(output2A, 
           yvhh.df)
+
+
+# CHRONICALLY HOMELESS----
+source("https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev-PIT_week_12/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
 
 # To-Do: Reorder Columns (added 3/23/2023; note here when complete)
 # To-Do: Remove Unused Columns (added 3/23/2023; note here when complete)
