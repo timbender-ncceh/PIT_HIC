@@ -589,6 +589,7 @@ output <- left_join(c.enrollment, c.client) %>%
 
 
 # reorder to meet andrea's specs----
+# note:  this link below is not the resource for field order (3/30/23)
 "https://ncceh.sharepoint.com/:x:/s/DataCenter/EdQERAgSu5pGsBcN5VNGD20B3qlfQ7iOCFz9BPJi2xoADQ?e=zOvaac"
 
 out.cn <- colnames(output)
@@ -598,9 +599,9 @@ out.cn <- colnames(output)
 output$gender_category_calc <- NA
 output$race2_calc <- NA
 output$race_cat_calc <- NA
-output$CH <- NA
-output$youth_type_hh <- NA
-output$veteran_type_hh <- NA
+#output$CH <- NA
+#output$youth_type_hh <- NA
+#output$veteran_type_hh <- NA
 
 #grep("county|calc", colnames(output), value = T, ignore.case = T)
 
@@ -631,11 +632,11 @@ output2 <- output[,c("PersonalID",
                      #"County", 
                      "NCCounty", 
                      #"county_matches", 
-                     "CH", 
+                     #"CH", 
                      "domesticViolenceVictim_def", 
                      "currentlyFleeingDV_def",
                      "householdType_def", 
-                     "youth_type_hh", "veteran_type_hh", 
+                     #"youth_type_hh", "veteran_type_hh", 
                      #'HoH_CLS_date',
                      "HoH_PersonalID", 
                      "hh_cls"   ,
@@ -668,7 +669,7 @@ if(year(pit.night) == 2023){
 }
 
 
-# 2023-02-07: change col orders for andrea: 
+# ANDREA COLUMN CHANGES----
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
 PersonalID	1	1			
 reltionshiptohoh_def	2	2			
@@ -1134,3 +1135,31 @@ if(length(backup.these.files) > 0){
 }
   
 setwd(csv.file.dir)
+
+
+# check for completely empty cols----
+
+colname.emtpy.check <- NULL
+
+for(i in colnames(output2A)){
+  temp.v <- output2A[,i] %>% 
+    unlist() %>%
+    unname()
+  
+  colname.emtpy.check <- rbind(colname.emtpy.check, 
+                               data.frame(colname = i, 
+                                          count_NA = sum(is.na(temp.v)),
+                                          count_Total = nrow(output2A),
+                                          pct_NA = NA,
+                                          all_NA = all(is.na(temp.v))))
+  rm(temp.v)
+  
+  
+}
+
+colname.emtpy.check %>% 
+  #as_tibble() %>%
+  mutate(., 
+         pct_NA = scales::percent(count_NA/count_Total,
+                                  accuracy = 0.01)) %>%
+  .[order(.$count_NA),]
