@@ -835,7 +835,6 @@ output2A <- left_join(output2A,
 rm(cldet.df)
 
 # To-Do: Reorder Columns (added 3/23/2023; note here when complete)
-# To-Do: Remove Unused Columns (added 3/23/2023; note here when complete)
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
