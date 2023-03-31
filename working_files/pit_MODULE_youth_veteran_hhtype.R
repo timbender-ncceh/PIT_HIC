@@ -64,7 +64,7 @@ yvhh.df <- yvhh.df %>%
          py1_18.24       = ifelse(py1_18.24, "py_18to24", ""),
          uy1             = ifelse(uy1, "unaccomp_youth", "")) %>%
   mutate(.,
-         out_hh_type = paste(hh1_youth,
+         YV_hh_type = paste(hh1_youth,
                              hh1_age.unknown,
                              hh1_vet,
                              hh1_w.o.C,
@@ -75,11 +75,11 @@ yvhh.df <- yvhh.df %>%
                              uy1,
                              sep = "-")) %>%
   mutate(.,
-         out_hh_type = gsub(pattern = "^-{1,}|-{1,}$", "", out_hh_type),
-         out_hh_type = gsub(pattern = "-{1,}", ", ", out_hh_type))
+         YV_hh_type = gsub(pattern = "^-{1,}|-{1,}$", "", YV_hh_type),
+         YV_hh_type = gsub(pattern = "-{1,}", ", ", YV_hh_type))
 
 
 
 # minimum colums
 yvhh.df <- yvhh.df[,c("PersonalID", "EnrollmentID", "HouseholdID", 
-                      "out_hh_type")]
+                      "YV_hh_type")]
