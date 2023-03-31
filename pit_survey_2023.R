@@ -554,6 +554,7 @@ for(i in unique(output2$PersonalID)){
 
 # Youth_ and Veteran_type Households----
 # run youth_vet_hh_type code module
+
 devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
 
 # join to future output
@@ -575,6 +576,39 @@ output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(cldet.df)
 
 # ANDREA COLUMN CHANGES----
+
+
+col.order.output2A <- data.frame(varname = "output2A", 
+                                 colname = colnames(output2A), 
+                                 col.order = 1:length(colnames(output2A))) %>% as_tibble()
+col.order.output2A
+
+# check for completely empty cols----
+colname.emtpy.check <- NULL
+
+for(i in colnames(output2A)){
+  temp.v <- output2A[,i] %>% 
+    unlist() %>%
+    unname()
+  colname.emtpy.check <- rbind(colname.emtpy.check, 
+                               data.frame(colname = i, 
+                                          count_NA = sum(is.na(temp.v)),
+                                          count_Total = nrow(output2A),
+                                          pct_NA = NA,
+                                          all_NA = all(is.na(temp.v))))
+  rm(temp.v)
+}
+
+colname.emtpy.check %>% 
+  #as_tibble() %>%
+  mutate(., 
+         pct_NA = scales::percent(count_NA/count_Total,
+                                  accuracy = 0.01)) %>%
+  .[order(.$count_NA),]
+
+
+
+
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
 PersonalID	1	1
 reltionshiptohoh_def	2	2
