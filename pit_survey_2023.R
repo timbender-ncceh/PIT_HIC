@@ -574,32 +574,7 @@ output2A <- left_join(output2A,
 output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(cldet.df)
 
-# To-Do: Reorder Columns (added 3/23/2023; note here when complete)----
 # ANDREA COLUMN CHANGES----
-# 
-# # check for completely empty cols----
-# colname.emtpy.check <- NULL
-# 
-# for(i in colnames(output2A)){
-#   temp.v <- output2A[,i] %>% 
-#     unlist() %>%
-#     unname()
-#   colname.emtpy.check <- rbind(colname.emtpy.check, 
-#                                data.frame(colname = i, 
-#                                           count_NA = sum(is.na(temp.v)),
-#                                           count_Total = nrow(output2A),
-#                                           pct_NA = NA,
-#                                           all_NA = all(is.na(temp.v))))
-#   rm(temp.v)
-# }
-# 
-# colname.emtpy.check %>% 
-#   #as_tibble() %>%
-#   mutate(., 
-#          pct_NA = scales::percent(count_NA/count_Total,
-#                                   accuracy = 0.01)) %>%
-#   .[order(.$count_NA),]
-
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
 PersonalID	1	1
 reltionshiptohoh_def	2	2
@@ -662,14 +637,6 @@ andrea_cols_changes <- andrea_cols_changes[!colnames(andrea_cols_changes) %in%
                                              c("NEED_TO_FINISH", 
                                                "RENAME_to_this_from_column_A")]
 
-
-# andrea_cols_changes$in_output2A <- F
-# 
-# for(i in 1:nrow(andrea_cols_changes)){
-#   andrea_cols_changes$in_output2A[i] <- andrea_cols_changes$COLUMN_NAME[i] %in%
-#     col.order.output2A$colname
-# }
-
 # remove fields
 andrea_cols_changes <- andrea_cols_changes[!(andrea_cols_changes$REMOVE_COLUMN & 
                         !is.na(andrea_cols_changes$REMOVE_COLUMN)),]
@@ -696,49 +663,21 @@ fun_comp.cols <- function(cur.colnames.ord = colnames(output2A),
     as_tibble()
   return(out)
 }
-comp.cols <- fun_comp.cols()
 
-colname.greps.lose <- c("^CH$", 
-                        "^.*_type_hh$", 
-                        "^ChronicStatus$", 
-                        "household") %>% paste(., sep = "|", collapse = "|")
+comp.cols <- fun_comp.cols(colnames(output2A), 
+                           andrea_cols_changes$COLUMN_NAME[order(andrea_cols_changes$New_Order_Requested)])
 
-andrea_cols_changes[grepl(colname.greps.lose,
-                          x = andrea_cols_changes$COLUMN_NAME),]
+comp.cols[comp.cols$col_name == "ChronicStatus",]$future <- 19.5
+comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
 
+comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
 
-comp.cols[is.na(comp.cols$current) | 
-            is.na(comp.cols$future) |
-            grepl(colname.greps.lose,
-                  x = comp.cols$col_name),]
+comp.cols <- comp.cols %>%
+  .[order(.$future),]
 
-comp.cols$col_name
-# o2a_cols <- data.frame(name.o2a = colnames(output2A),
-#                        order.o2a = 1:ncol(output2A)) %>%
-#   as_tibble()
-# andrea_join <- full_join(andrea_cols_changes,
-#                          o2a_cols,
-#                          by = c("COLUMN_NAME" = "name.o2a"))
+output2A <- output2A[,comp.cols$col_name]
 
 
-
-andrea_join$Original_Order2 <- NA
-for(i in 1:nrow(andrea_join)){
-  # get colnumber of corresponding column in output2a
-  andrea_join$Original_Order2[i] <- which(colnames(output2A) == andrea_join[i,]$COLUMN_NAME)
-}
-andrea_join <- andrea_join[order(andrea_join$Original_Order2),]
-#andrea_join$order.o2a
-
-output2A <- output2A[,andrea_join$Original_Order2[order(andrea_join$New_Order_Requested)]]
-
-# rename
-colnames(output2A)[colnames(output2A) %in%
-                     andrea_join$COLUMN_NAME[!is.na(andrea_join$RENAME_to_this_from_column_A)]] <-
-  andrea_join$RENAME_to_this_from_column_A[!is.na(andrea_join$RENAME_to_this_from_column_A)]
-
-# andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
-#              "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
@@ -746,7 +685,7 @@ write.xlsx(x = output2A[!duplicated(output2A),],
 
 # # identify data issues----
  
-# # issue - HOH living situation vs Person livins situation
+# # issue - HOH living situation vs Person living situation
 # output2
 
 
