@@ -19,4 +19,4 @@ The location of outdated and no-longer-needed files, scripts, docs, etc.
 
 # Notes #
 
-# Branche Organization #
+# Branch Organization #
