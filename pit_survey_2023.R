@@ -554,14 +554,15 @@ for(i in unique(output2$PersonalID)){
 
 # Youth_ and Veteran_type Households----
 # run youth_vet_hh_type code module
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
+
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
 
 # join to future output
 output2A <- left_join(output2A, yvhh.df)
 rm(yvhh.df)
 
 # CHRONICALLY HOMELESS----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/main/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
 # temporarily add new joinby col
 output2A <- mutate(output2A, 
                    EntryDate_char = as.character(EntryDate))
@@ -574,7 +575,6 @@ output2A <- left_join(output2A,
 output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(cldet.df)
 
-# To-Do: Reorder Columns (added 3/23/2023; note here when complete)----
 # ANDREA COLUMN CHANGES----
 
 
@@ -661,37 +661,57 @@ InformationDate_cls	newER_column	39			pid_cls_infodate
 currentLivingSituation_def	newER_column	38			pid_cls
 flag_nmfhh_and_1day_before.after_pitnight	49	49			")
 
-o2a_cols <- data.frame(name.o2a = colnames(output2A),
-                       order.o2a = 1:ncol(output2A)) %>%
-  as_tibble()
-andrea_join <- full_join(andrea_cols_changes,
-                         o2a_cols,
-                         by = c("COLUMN_NAME" = "name.o2a"))
+andrea_cols_changes$REMOVE_COLUMN[andrea_cols_changes$COLUMN_NAME %in%
+                                    c("CH", 
+                                      "veteran_type_hh", 
+                                      "youth_type_hh", 
+                                      "HouseholdID")] <- T
+
+andrea_cols_changes <- andrea_cols_changes[!colnames(andrea_cols_changes) %in% 
+                                             c("NEED_TO_FINISH", 
+                                               "RENAME_to_this_from_column_A")]
 
 # remove fields
-andrea_join <- andrea_join[is.na(andrea_join$REMOVE_COLUMN) |
-                             andrea_join$REMOVE_COLUMN == F,]
+andrea_cols_changes <- andrea_cols_changes[!(andrea_cols_changes$REMOVE_COLUMN & 
+                        !is.na(andrea_cols_changes$REMOVE_COLUMN)),]
 
-# reorder fields
-andrea_join <- andrea_join[order(andrea_join$order.o2a),]
 
-andrea_join$Original_Order2 <- NA
-for(i in 1:nrow(andrea_join)){
-  # get colnumber of corresponding column in output2a
-  andrea_join$Original_Order2[i] <- which(colnames(output2A) == andrea_join[i,]$COLUMN_NAME)
+fun_comp.cols <- function(cur.colnames.ord = colnames(output2A), 
+                          fut.colnames.ord = andrea_cols_changes$COLUMN_NAME[order(andrea_cols_changes$New_Order_Requested)]){
+  require(data.table)
+  require(dplyr)
+  sum.cur <- data.frame(col_order = 1:length(cur.colnames.ord), 
+                        col_name  = cur.colnames.ord,
+                        type      = "current") 
+  sum.fut <- data.frame(col_order = 1:length(fut.colnames.ord), 
+                        col_name  = fut.colnames.ord,
+                        type      = "future") 
+  
+  out <- rbind(sum.cur, sum.fut) %>% 
+    as_tibble() %>%
+    as.data.table() %>%
+    dcast(., 
+          col_name ~ type, 
+          value.var = "col_order") %>%
+    as.data.frame() %>%
+    as_tibble()
+  return(out)
 }
-andrea_join <- andrea_join[order(andrea_join$Original_Order2),]
-#andrea_join$order.o2a
 
-output2A <- output2A[,andrea_join$Original_Order2[order(andrea_join$New_Order_Requested)]]
+comp.cols <- fun_comp.cols(colnames(output2A), 
+                           andrea_cols_changes$COLUMN_NAME[order(andrea_cols_changes$New_Order_Requested)])
 
-# rename
-colnames(output2A)[colnames(output2A) %in%
-                     andrea_join$COLUMN_NAME[!is.na(andrea_join$RENAME_to_this_from_column_A)]] <-
-  andrea_join$RENAME_to_this_from_column_A[!is.na(andrea_join$RENAME_to_this_from_column_A)]
+comp.cols[comp.cols$col_name == "ChronicStatus",]$future <- 19.5
+comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
 
-# andrea_join[,c("COLUMN_NAME", "Original_Order2", "New_Order_Requested",
-#              "REMOVE_COLUMN", "NEED_TO_FINISH", "RENAME_to_this_from_column_A")]
+comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
+
+comp.cols <- comp.cols %>%
+  .[order(.$future),]
+
+output2A <- output2A[,comp.cols$col_name]
+
+
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
@@ -699,7 +719,7 @@ write.xlsx(x = output2A[!duplicated(output2A),],
 
 # # identify data issues----
  
-# # issue - HOH living situation vs Person livins situation
+# # issue - HOH living situation vs Person living situation
 # output2
 
 
