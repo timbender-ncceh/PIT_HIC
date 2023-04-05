@@ -1345,7 +1345,7 @@ hud_age_category <- function(age_yrs,
                               upper = breaks_upper[i]))
     }
     bac <- mutate(bac, name = paste(lower, upper, sep = "-"))
-    bac$in_cat <- between(x = rep(age_yrs, nrow(bac)), 
+    bac$in_cat <- data.table::between(x = rep(age_yrs, nrow(bac)), 
                           bac$lower, 
                           bac$upper)
     out <- bac[bac$in_cat,]$name
