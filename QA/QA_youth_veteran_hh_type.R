@@ -1,57 +1,106 @@
-library(devtools)
+library(shiny)
 library(dplyr)
-library(readr)
+library(data.table)
+library(glue)
 
-rm(list=ls());cat('\f');gc()
+rm(list=ls())
 
-# setwd----
-a.wd <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023"
-d.wd <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/real_data"
-setwd(a.wd)
+ui <- fluidPage(h3("Person #1:"),
+  sidebarLayout(
+    sidebarPanel(
+      selectizeInput(inputId = 'vet_input01', 
+                     label = 'Veteran Status', 
+                     choices = c("Yes", "No", NA), 
+                     multiple = F),
+      shiny::sliderInput(inputId = "age_input01", 
+                         label = "Age", 
+                         min = 0, max = 80, step = 1, 
+                         value = 0)),
+    mainPanel(
+      verbatimTextOutput('values1')
+    )
+  ), 
+  h3("Person #2:"),
+  sidebarLayout(
+    sidebarPanel(
+      selectizeInput(inputId = 'vet_input02', 
+                     label = 'Veteran Status', 
+                     choices = c("Yes", "No", NA), 
+                     multiple = F),
+      shiny::sliderInput(inputId = "age_input02", 
+                         label = "Age", 
+                         min = 0, max = 80, step = 1, 
+                         value = 0)),
+    
+    mainPanel(label = "Output Results:",
+      verbatimTextOutput('values2')
+    )
+  ),
+  h3("Person #3:"),
+  sidebarLayout(
+    sidebarPanel(
+      selectizeInput(inputId = 'vet_input03', 
+                     label = 'Veteran Status', 
+                     choices = c("Yes", "No", NA), 
+                     multiple = F),
+      shiny::sliderInput(inputId = "age_input03", 
+                         label = "Age", 
+                         min = 0, max = 80, step = 1, 
+                         value = 0)),
+    mainPanel(
+      verbatimTextOutput('values3')
+    )
+  )#, 
+  #title = 'Options groups for select(ize) input'
+)
 
-# Vars----
-pit.night     <- ymd(20230125)
-vars_QA       <- c("hh_age.unknown", 
-                   "hh_wal1a1c", 
-                   "hh_wo.c",
-                   "hh_w.o.C",
-                   "py_u18",
-                   "py_18.24",
-                   "uy", 
-                   "hh_vet",
-                   "hh_youth", 
-                   "calc_age", 
-                   "hud_age_category", 
-                   "fun_rel2hoh",
-                   "fun_1.8_def")
+server <- function(input,output,session){
+  updateSelectizeInput(session, 'x2', choices = list(
+    Eastern = c(`Rhode Island` = 'RI', `New Jersey` = 'NJ'),
+    Western = c(`Oregon` = 'OR', `Washington` = 'WA'),
+    Middle = list(Iowa = 'IA')
+  ), selected = 'IA')
+  
+  # Funs here----
+  hh_vet <- function(vet.statuses){
+    #Households with one or more veterans who might be presenting with other
+    #persons.
+    if(any(vet.statuses == "Yes", na.rm = T) |
+       any(vet.statuses == T, na.rm = T) |
+       any(vet.statuses == 1, na.rm = T)){
+      out <- "Yes"
+    }else{
+      out <- "No"
+    }
+    return(out)
+  }
+  hh_youth <- function(ages, age.upperlim = 24){
+    # all household members are 24 or under
+    if(any(is.na(ages))){
+      out <- F
+    }else{
+      if(all(ages <= age.upperlim)){
+        out <- T
+      }else
+        out <- F
+    }
+    return(out)
+  }
+  
+  # Outputs here----
+  output$values1 <- renderPrint({
+    cat("ARGUMENT INPUTS:\n\n")
+    #paste("Ages:", )
+  })
+  
+  output$values2 <- renderPrint({
+    cat(bold(inverse("LOGIC OUTPUTS:\n\n")))
+    cat(glue("hh_vet():\t[1] {hh_vet(c(input$vet_input01,input$vet_input02,input$vet_input03))}\n\n"))
+    cat(glue("hh_youth():\t[1] {hh_vet(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
+   
+  })
+}
 
-# Load Funs----
-vars_prior <- ls()
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_survey_calculations.R?raw=TRUE")
-vars_funs <- ls()[!ls() %in% vars_prior]
-vars_post <- c(vars_prior, vars_QA)
 
-# Remove vars----
-rm(list = ls()[!ls() %in% c(vars_post)])
-vars_post <- ls()
-
-# Identify Data----
-setwd(d.wd)
-
-files_all        <- list.files()
-files_is.csv     <- grepl(pattern = "\\.csv$", files_all)
-files_is.FLupper <- unlist(lapply(strsplit(files_all, ""), first)) %in% LETTERS
-files_csv        <- files_all[files_is.csv & files_is.FLupper]
-
-# Remove vars----
-rm(list = ls()[!ls() %in% c(vars_post, "files_csv")])
-vars_post <- ls()
-
-# Load Data----
-client     <- read_csv("Client.csv")
-enrollment <- read_csv("Enrollment.csv")
-
-# Tidy Data----
-client$age <- unlist(lapply(X = client$DOB, 
-                            FUN = calc_age, 
-                            age_on_date = pit.night))
+# app----
+shinyApp(ui = ui, server = server)
