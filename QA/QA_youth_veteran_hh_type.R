@@ -52,6 +52,9 @@ client     <- read_csv("Client.csv")
 enrollment <- read_csv("Enrollment.csv")
 
 # Tidy Data----
-client$age <- unlist(lapply(X = client$DOB, 
-                            FUN = calc_age, 
-                            age_on_date = pit.night))
+client$age         <- unlist(lapply(X = client$DOB, 
+                                    FUN = calc_age, 
+                                    age_on_date = pit.night))
+client$hud_age_cat <- unlist(lapply(X = client$age, 
+                                    FUN = hud_age_category))
+
