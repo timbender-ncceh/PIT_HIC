@@ -61,7 +61,7 @@ hmis_join <- function(x.file,
   # remove cols
   x.file <- x.file[!colnames(x.file) %in% dropcols]
   y.file <- y.file[!colnames(y.file) %in% dropcols]
-
+  
   # join
   if(jtype == "full"){
     out <- full_join(x.file, y.file)
@@ -193,13 +193,13 @@ a.projectcoc <- read_csv(file = "ProjectCoC.csv") %>%
 a.projectcoc2 <- read_csv(file = "ProjectCoC.csv") %>%
   .[,c("ProjectID", "City", "State", "ZIP")] %>% 
   left_join(., 
-          zip_co.cw[,c("ZIP", "County", "City")]) %>%
+            zip_co.cw[,c("ZIP", "County", "City")]) %>%
   left_join(., 
             get_coc_region())
 
 a.enrollment2 <- left_join(a.enrollment[,c("EnrollmentID", "PersonalID", "ProjectID", 
-                "NCCounty")], 
-          get_coc_region(), by = c("NCCounty" = "County"))
+                                           "NCCounty")], 
+                           get_coc_region(), by = c("NCCounty" = "County"))
 
 rm(zip_co.cw)
 
@@ -285,7 +285,7 @@ for(i in 1:nrow(a.enrollment)){
     # figure out which is better - method 1 or method 2
     
     if(identical(x = temp, y = temp2) & # ... if temp and temp2 are identical AND length == 1
-      identical(length(temp) == 1, length(temp2) == 1)) {
+       identical(length(temp) == 1, length(temp2) == 1)) {
       a.enrollment$calc_region[i] <- temp
     }else if( !is.na(temp) & length(temp) == 1 ){ # ... if temp is not NA AND temp is length == 1
       a.enrollment$calc_region[i] <- temp
@@ -554,7 +554,6 @@ for(i in unique(output2$PersonalID)){
 
 # Youth_ and Veteran_type Households----
 # run youth_vet_hh_type code module
-
 devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_youth_veteran_hhtype.R?raw=TRUE")
 
 # join to future output
@@ -576,39 +575,6 @@ output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(cldet.df)
 
 # ANDREA COLUMN CHANGES----
-
-
-col.order.output2A <- data.frame(varname = "output2A", 
-                                 colname = colnames(output2A), 
-                                 col.order = 1:length(colnames(output2A))) %>% as_tibble()
-col.order.output2A
-
-# check for completely empty cols----
-colname.emtpy.check <- NULL
-
-for(i in colnames(output2A)){
-  temp.v <- output2A[,i] %>% 
-    unlist() %>%
-    unname()
-  colname.emtpy.check <- rbind(colname.emtpy.check, 
-                               data.frame(colname = i, 
-                                          count_NA = sum(is.na(temp.v)),
-                                          count_Total = nrow(output2A),
-                                          pct_NA = NA,
-                                          all_NA = all(is.na(temp.v))))
-  rm(temp.v)
-}
-
-colname.emtpy.check %>% 
-  #as_tibble() %>%
-  mutate(., 
-         pct_NA = scales::percent(count_NA/count_Total,
-                                  accuracy = 0.01)) %>%
-  .[order(.$count_NA),]
-
-
-
-
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
 PersonalID	1	1
 reltionshiptohoh_def	2	2
@@ -673,7 +639,7 @@ andrea_cols_changes <- andrea_cols_changes[!colnames(andrea_cols_changes) %in%
 
 # remove fields
 andrea_cols_changes <- andrea_cols_changes[!(andrea_cols_changes$REMOVE_COLUMN & 
-                        !is.na(andrea_cols_changes$REMOVE_COLUMN)),]
+                                               !is.na(andrea_cols_changes$REMOVE_COLUMN)),]
 
 
 fun_comp.cols <- function(cur.colnames.ord = colnames(output2A), 
@@ -718,7 +684,7 @@ write.xlsx(x = output2A[!duplicated(output2A),],
            file = out.name.andrea)
 
 # # identify data issues----
- 
+
 # # issue - HOH living situation vs Person living situation
 # output2
 
@@ -733,17 +699,17 @@ output2$issue_dv.victim_vs_dv.fleeing <- (output2$domesticViolenceVictim_def %in
 # DOB vs DOB Data Quality
 output2$issue.DOB_vs_DOBDataQuality <- F
 output2[output2$DOBDataQuality_def %in% c("Client refused", "Data not collected") & 
-  !is.na(output2$age_calc),]$issue.DOB_vs_DOBDataQuality <- T
+          !is.na(output2$age_calc),]$issue.DOB_vs_DOBDataQuality <- T
 
 output2[is.na(output2$age_calc) & 
-  output2$DOBDataQuality_def %in% 
-  c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
+          output2$DOBDataQuality_def %in% 
+          c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
 
 output2$issue_race <- output2$race_calc == "[unknown]"
 output2$householdType_def %>% unique()
 
 output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_PersonalID & 
-  output2$reltionshiptohoh_def != "Self (head of household)")
+                                            output2$reltionshiptohoh_def != "Self (head of household)")
 
 
 output3 <- output2 %>%
@@ -788,15 +754,15 @@ output3 <- output2 %>%
   summarise() %>%
   as.data.table() %>%
   melt(., 
-        id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region", 
-                    "hh_cls", "hh_cls_infodate") , 
+       id.vars = c("EnrollmentID", "client_id", "ProjectName", "EntryDate", "calc_location_county", "calc_region", 
+                   "hh_cls", "hh_cls_infodate") , 
        variable.name = "DQ_flag_type") %>%
   as.data.frame() %>%
   as_tibble() %>%
   .[.$value == T,] %>%
   .[!is.na(.$EnrollmentID),] %>%
   .[!colnames(.) %in% c("value","EnrollmentID")]
-  
+
 output3 <- output3[grepl("^flag", output3$DQ_flag_type, ignore.case = T),]
 
 # # narrow down to just 1 field with a county in it
@@ -824,15 +790,15 @@ output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.vetstatus",
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag_dv", 
                                "verify DV-fleeing and DV-victim", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.nccounty_na", 
-       "verify NCCounty", output3$DQ_flag_type)
+                               "verify NCCounty", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.child_hoh", 
-       "Head Of Household aged 16 or under", output3$DQ_flag_type)
+                               "Head Of Household aged 16 or under", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.age_too_old", 
-       "older than 80 years old", output3$DQ_flag_type)
+                               "older than 80 years old", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.DOB_na", 
-       "missing Date of Birth or DOB_quality", output3$DQ_flag_type)
+                               "missing Date of Birth or DOB_quality", output3$DQ_flag_type)
 output3$DQ_flag_type <- ifelse((output3$DQ_flag_type) == "flag.race", 
-       "missing race", output3$DQ_flag_type)
+                               "missing race", output3$DQ_flag_type)
 
 
 # nicole changes----
@@ -866,7 +832,7 @@ nicole_filter2 <- output3$hh_cls == 16 &
 output3 <- output3[nicole_filter1 | nicole_filter2,]
 
 output3$hh_cls <- lapply(X = output3$hh_cls, 
-       FUN = fun_livingsituation_def) %>% unlist()
+                         FUN = fun_livingsituation_def) %>% unlist()
 
 # / nicole final filter----
 
@@ -950,7 +916,7 @@ csv.file.dir
 setwd(backup.dir)
 
 already.backed.up.files <- list.files(pattern = "\\.xlsx$")
-  
+
 setwd(csv.file.dir)
 backup.these.files <- list.files(pattern = "\\.xlsx$")
 
@@ -958,14 +924,14 @@ if(length(already.backed.up.files) > 0){
   # select files which aren't already there
   backup.these.files <- backup.these.files[!backup.these.files %in% already.backed.up.files]
 }
-  # move files
-  #getwd() == csv.file.dir
+# move files
+#getwd() == csv.file.dir
 
 if(length(backup.these.files) > 0){
   file.copy(backup.these.files, 
             paste(backup.dir, backup.these.files, sep = "/"), overwrite = T)
 }
-  
+
 setwd(csv.file.dir)
 
 
