@@ -40,8 +40,9 @@ hh_wo.c <- function(ages, age.upperlim = 18){
   if(any(is.na(ages))){
     out <- F
   }else{
-    out <- sum(ages >= age.upperlim) >= 1 & 
-      sum(ages < age.upperlim) == 0
+    # out <- sum(ages >= age.upperlim) >= 1 & 
+    #   sum(ages < age.upperlim) == 0
+    out <- all(ages >= age.upperlim)
   }
   return(out)
 }
@@ -264,8 +265,8 @@ ui <- navbarPage(title = "Household Size:",
                             sidebarPanel(
                               shiny::sliderInput(inputId = "age_input02", 
                                                  label = "Age", 
-                                                 min = 0, max = 80, step = 1, 
-                                                 value = 0),
+                                                 min = 1, max = 80, step = 1, 
+                                                 value = 1),
                               selectizeInput(inputId = 'rel_input02', 
                                              label = 'Relationship To HoH', 
                                              choices = c(NA, 
@@ -287,8 +288,8 @@ ui <- navbarPage(title = "Household Size:",
                             sidebarPanel(
                               shiny::sliderInput(inputId = "age_input03", 
                                                  label = "Age", 
-                                                 min = 0, max = 80, step = 1, 
-                                                 value = 0),
+                                                 min = 1, max = 80, step = 1, 
+                                                 value = 1),
                               selectizeInput(inputId = 'rel_input03', 
                                              label = 'Relationship To HoH', 
                                              choices = c(NA, 
@@ -333,7 +334,7 @@ server <- function(input,output,session){
     #hh_vet
     cat(glue("hh_vet():\t\t[1] {hh_vet(c(input$vet_input00))}\n\n"))
     #hh_youth
-    cat(glue("hh_youth():\t\t[1] {hh_vet(c(input$age_input00))}\n\n"))
+    cat(glue("hh_youth():\t\t[1] {hh_youth(c(input$age_input00))}\n\n"))
     #hh_age.unknown
     cat(glue("hh_age.unknown():\t[1] {hh_age.unknown(c(input$age_input00))}\n\n"))
     #hh_wal1a1c
@@ -364,7 +365,7 @@ server <- function(input,output,session){
     #hh_vet
     cat(glue("hh_vet():\t\t[1] {hh_vet(c(input$vet_input01,input$vet_input02,input$vet_input03))}\n\n"))
     #hh_youth
-    cat(glue("hh_youth():\t\t[1] {hh_vet(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
+    cat(glue("hh_youth():\t\t[1] {hh_youth(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
     #hh_age.unknown
     cat(glue("hh_age.unknown():\t[1] {hh_age.unknown(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
     #hh_wal1a1c
