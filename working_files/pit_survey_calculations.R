@@ -76,7 +76,7 @@ py_u18 <- function(ages, rel2hohs){
       all(ages < 18) &  
       
       # rel2hoh as child
-      any(grepl(pattern = "^Head of Household.*Child$",
+      any(grepl(pattern = "^Head of Household's child$",
                 x = rel2hohs), 
           na.rm = T)
   }
@@ -106,7 +106,7 @@ py_18.24 <- function(ages, rel2hohs,
       min(ages) < 18 &
       
     # rel2hoh as child
-      any(grepl(pattern = "^Head of Household.*Child$",
+      any(grepl(pattern = "^Head of Household's child$",
           x = rel2hohs), 
           na.rm = T)
   }
@@ -224,20 +224,20 @@ get_github.url <- function(repo.file = NULL,
 #               yes = F, 
 #               no = any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T)) & 
 #        length(hh_pid.ages.v) > 1 & 
-#        any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+#        any(relations2hoh.v == "Head of household's Child", na.rm = T)){
 #       out <- c(out, "YOUTH - Parenting youth - households with at least 1 adult and 1 child")
 #     }
 #     # Parenting youth - households with only children----
 #     if(all(hh_pid.ages.v < 18) & 
 #        length(hh_pid.ages.v) > 1 & 
-#        any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+#        any(relations2hoh.v == "Head of household's Child", na.rm = T)){
 #       out <- c(out, "YOUTH - Parenting youth - households with only children")
 #     }
 #     # Unaccompanied youth - households without children----
 #     if(ifelse(any(is.logical(hh_pid.ages.v)), 
 #               yes = F, 
 #               no = any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T)) & 
-#        !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+#        !any(relations2hoh.v == "Head of household's Child", na.rm = T)){
 #       out <- c(out, "YOUTH - Unaccompanied youth - households without children")
 #     }
 #     # Unaccompanied youth - households with a least 1 adult and 1 child----
@@ -247,12 +247,12 @@ get_github.url <- function(repo.file = NULL,
 #               yes = F, 
 #               no = any(data.table::between(hh_pid.ages.v, 18, 24), na.rm = T)) & 
 #        length(hh_pid.ages.v) > 1  & 
-#        !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+#        !any(relations2hoh.v == "Head of household's Child", na.rm = T)){
 #       out <- c(out, "YOUTH - Unaccompanied youth - households with a least 1 adult and 1 child")
 #     }
 #     # Unaccompanied youth - households with only children----
 #     if(all(hh_pid.ages.v < 18, na.rm = T) & 
-#        !any(relations2hoh.v == "Head of household’s Child", na.rm = T)){
+#        !any(relations2hoh.v == "Head of household's Child", na.rm = T)){
 #       out <- c(out, "YOUTH - Unaccompanied youth - households with only children")
 #     }
 #     # if out is null
@@ -861,7 +861,7 @@ fun_livingsituation_def <- function(x){
                               "Staying or living in a friend's room, apartment, or house",
                               "Staying or living with family, temporary tenure", 
                               "Staying or living with family, permanent tenure", 
-                              "Staying or living in a family member’s room, apartment or house", 
+                              "Staying or living in a family member's room, apartment or house", 
                               "Staying or living with friends, permanent tenure", 
                               "Moved from one HOPWA funded project to HOPWA PH", 
                               "Moved from one HOPWA funded project to HOPWA TH", 
@@ -905,11 +905,11 @@ fun_rel2hoh <- function(x){
   if(is.na(x)){
     out <- NA
   }else if(x == 2){
-    out <- "Head of household’s Child"
+    out <- "Head of household's child"
   }else if(x == 3){
-    out <- "Head of household’s spouse or partner"
+    out <- "Head of household's spouse or partner"
   }else if(x == 4){
-    out <- "Head of household’s other relation member"
+    out <- "Head of household's other relation member"
   }else if(x == 5){
     out <- "Other: non-relation member"
   }else if(x == 99){
@@ -1005,7 +1005,7 @@ fun_ethnicity_def <- function(x){
   }else if(x == 1 & !is.na(x) ){
     out <- "Hispanic/Latin(a)(o)(x)"
   }else if(x  == 8 & !is.na(x) ){
-    out <- "Client doesn’t know"
+    out <- "Client doesn't know"
   }else if(x  == 9 & !is.na(x) ){
     out <- "Client refused"
   }else if(x == 99 & !is.na(x) ){
@@ -1105,7 +1105,7 @@ screened_positive_disability2 <- function(dis_df){
   # disorder, Drug use disorder, or Both alcohol and drug use disorders for
   # “Substance Use Disorder”, THEN... Expected to be of long–continued and
   # indefinite duration and substantially impairs ability to live independently
-  # (https://files.hudexchange.info/resources/documents/FY-2022-HMIS-Data-Dictionary.pdf)
+  # (https://files.hudexchange.info/resources/documents/FY-2022-HMIS-Data-Dictionary.pdf) ’
   
   dis_df$IndefiniteAndImpairs_txt <- unlist(lapply(X = dis_df$IndefiniteAndImpairs, 
                                                    FUN = fun_1.8_def)) %>%
