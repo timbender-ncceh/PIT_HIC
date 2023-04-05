@@ -273,12 +273,17 @@ server <- function(input,output,session){
     #hh_age.unknown
     cat(glue("hh_age.unknown():\t[1] {hh_age.unknown(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
     #hh_wal1a1c
+    cat(glue("hh_wal1a1c():\t[1] {hh_wal1a1c(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
     #hh_wo.c
+    cat(glue("hh_wo.c():\t[1] {hh_wo.c(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
     #hh_w.o.C
+    cat(glue("hh_w.o.C():\t[1] {hh_wo.c(c(input$age_input01,input$age_input02,input$age_input03))}\n\n"))
     #py_u18
+    cat(glue("py_u18():\t[1] {py_u18(ages=c(input$age_input01,input$age_input02,input$age_input03),rel2hohs=c(input$rel_input01,input$rel_input02,input$rel_input03))}\n\n"))
     #py_18.24
+    cat(glue("py_18.24():\t[1] {py_18.24(ages=c(input$age_input01,input$age_input02,input$age_input03),rel2hohs=c(input$rel_input01,input$rel_input02,input$rel_input03))}\n\n"))
     #uy
-    
+    cat(glue("uy():\t[1] {uy(ages=c(input$age_input01,input$age_input02,input$age_input03),rel2hohs=c(input$rel_input01,input$rel_input02,input$rel_input03))}\n\n"))
   })
 }
 
