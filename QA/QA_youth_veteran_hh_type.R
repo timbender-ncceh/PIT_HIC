@@ -80,10 +80,9 @@ py_u18 <- function(ages, rel2hohs){
   if(any(is.na(ages))){
     out <- F
   }else{
-    # oldest hh member is 18-24
+    
     out <- #between(max(ages), 18, age_ul) & 
       all(ages < 18) &  
-      
       # rel2hoh as child
       any(grepl(pattern = "^Head of Household's child$",
                 x = rel2hohs), 
@@ -122,7 +121,7 @@ py_18.24 <- function(ages, rel2hohs,
   return(out)
 }
 
-uy <- function(ages, rel2hohs){
+uy <- function(ages1, rel2hohs1){
   #are persons under age 25 who are not presenting or sleeping in the same place
   #as their parent or legal guardian, any household member over age 24, or their
   #own children. Unaccompanied youth may be a subset of any household type: they
@@ -132,17 +131,17 @@ uy <- function(ages, rel2hohs){
   #one member between 18 and 24, and no members over age 24. They are a subset
   #of households with only children if all household members are under 18.
   age.upperlim = 24
-  if(any(is.na(ages)) | 
+  if(any(is.na(ages1)) | 
      # this cannot be households 25+
-     any(ages > 24) | 
+     any(ages1 > 24) | 
      # this cannot be age_NA
-     any(is.na(ages)) | 
+     any(is.na(ages1)) | 
      # this cannot be... pu
-     py_18.24(ages=ages, rel2hohs=rel2hohs)|
-     py_u18(ages=ages,rel2hohs=rel2hohs)){
+     py_18.24(ages=ages1, rel2hohs=rel2hohs1)|
+     py_u18(ages=ages1,rel2hohs=rel2hohs1)){
     out <- F
   }else{
-    if(all(ages <= 24)){
+    if(all(ages1 <= 24)){
       out <- T
     }else{
       out <- F
@@ -348,7 +347,7 @@ server <- function(input,output,session){
     #py_18.24
     cat(glue("py_18.24():\t\t[1] {py_18.24(ages=c(input$age_input00),rel2hohs=c(input$rel_input00))}\n\n"))
     #uy
-    cat(glue("uy():\t\t\t[1] {uy(ages=c(input$age_input00),rel2hohs=c(input$rel_input00))}\n\n"))
+    cat(glue("uy():\t\t\t[1] {uy(ages1=c(input$age_input00),rel2hohs1=c(input$rel_input00))}\n\n"))
     #cat(glue("\n\n#### SELECTED FUNCTION LOGIC: ####\n{input$print_fun_hh00}\n\n"))
   })
   #output$hhs_1_values2 <- renderPrint()
@@ -379,7 +378,7 @@ server <- function(input,output,session){
     #py_18.24
     cat(glue("py_18.24():\t\t[1] {py_18.24(ages=c(input$age_input01,input$age_input02,input$age_input03),rel2hohs=c(input$rel_input01,input$rel_input02,input$rel_input03))}\n\n"))
     #uy
-    cat(glue("uy():\t\t\t[1] {uy(ages=c(input$age_input01,input$age_input02,input$age_input03),rel2hohs=c(input$rel_input01,input$rel_input02,input$rel_input03))}\n\n"))
+    cat(glue("uy():\t\t\t[1] {uy(ages1=c(input$age_input01,input$age_input02,input$age_input03),rel2hohs1=c(input$rel_input01,input$rel_input02,input$rel_input03))}\n\n"))
     #cat(glue("\n\n#### SELECTED FUNCTION LOGIC: ####\n{input$print_fun_hh01}\n\n"))
   })
   #output$hhs_3_values2 <- renderPrint()

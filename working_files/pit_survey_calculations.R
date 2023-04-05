@@ -32,8 +32,9 @@ hh_wo.c <- function(ages, age.upperlim = 18){
   if(any(is.na(ages))){
     out <- F
   }else{
-    out <- sum(ages >= age.upperlim) >= 1 & 
-      sum(ages < age.upperlim) == 0
+    # out <- sum(ages >= age.upperlim) >= 1 & 
+    #   sum(ages < age.upperlim) == 0
+    out <- all(ages >= age.upperlim)
   }
   return(out)
 }
@@ -71,10 +72,9 @@ py_u18 <- function(ages, rel2hohs){
   if(any(is.na(ages))){
     out <- F
   }else{
-    # oldest hh member is 18-24
+    
     out <- #between(max(ages), 18, age_ul) & 
       all(ages < 18) &  
-      
       # rel2hoh as child
       any(grepl(pattern = "^Head of Household's child$",
                 x = rel2hohs), 
@@ -105,15 +105,15 @@ py_18.24 <- function(ages, rel2hohs,
       # min age < 18
       min(ages) < 18 &
       
-    # rel2hoh as child
+      # rel2hoh as child
       any(grepl(pattern = "^Head of Household's child$",
-          x = rel2hohs), 
+                x = rel2hohs), 
           na.rm = T)
   }
   return(out)
 }
 
-uy <- function(ages, rel2hohs){
+uy <- function(ages1, rel2hohs1){
   #are persons under age 25 who are not presenting or sleeping in the same place
   #as their parent or legal guardian, any household member over age 24, or their
   #own children. Unaccompanied youth may be a subset of any household type: they
@@ -123,17 +123,17 @@ uy <- function(ages, rel2hohs){
   #one member between 18 and 24, and no members over age 24. They are a subset
   #of households with only children if all household members are under 18.
   age.upperlim = 24
-  if(any(is.na(ages)) | 
+  if(any(is.na(ages1)) | 
      # this cannot be households 25+
-     any(ages > 24) | 
+     any(ages1 > 24) | 
      # this cannot be age_NA
-     any(is.na(ages)) | 
+     any(is.na(ages1)) | 
      # this cannot be... pu
-     py_18.24(ages=ages, rel2hohs=rel2hohs)|
-     py_u18(ages=ages,rel2hohs=rel2hohs)){
+     py_18.24(ages=ages1, rel2hohs=rel2hohs1)|
+     py_u18(ages=ages1,rel2hohs=rel2hohs1)){
     out <- F
   }else{
-    if(all(ages <= 24)){
+    if(all(ages1 <= 24)){
       out <- T
     }else{
       out <- F
@@ -141,12 +141,11 @@ uy <- function(ages, rel2hohs){
   }
   return(out)
 }
-
 hh_vet <- function(vet.statuses){
   #Households with one or more veterans who might be presenting with other
   #persons.
-  if(any(vet.statuses == "Yes", na.rm = T) | 
-     any(vet.statuses == T, na.rm = T) | 
+  if(any(vet.statuses == "Yes", na.rm = T) |
+     any(vet.statuses == T, na.rm = T) |
      any(vet.statuses == 1, na.rm = T)){
     out <- "Yes"
   }else{
@@ -154,7 +153,6 @@ hh_vet <- function(vet.statuses){
   }
   return(out)
 }
-
 hh_youth <- function(ages, age.upperlim = 24){
   # all household members are 24 or under
   if(any(is.na(ages))){
@@ -162,8 +160,9 @@ hh_youth <- function(ages, age.upperlim = 24){
   }else{
     if(all(ages <= age.upperlim)){
       out <- T
-    }else
+    }else{
       out <- F
+    }
   }
   return(out)
 }
