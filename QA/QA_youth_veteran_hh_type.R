@@ -73,7 +73,14 @@ if("client" %in% ls()){
 }
 
 # enrollment
-enrollment <- read_csv("Enrollment.csv")
-enrollment$RelationshipToHoH_def <- unlist(lapply(X = enrollment$RelationshipToHoH, 
-                                                  FUN = fun_rel2hoh))
+if(!"enrollment" %in% ls()){
+  enrollment <- read_csv("Enrollment.csv")
+}
+if(!"RelationshipToHoH_def" %in% names(enrollment)){
+  enrollment$RelationshipToHoH_def <- unlist(lapply(X = enrollment$RelationshipToHoH, 
+                                                    FUN = fun_rel2hoh))
+}
+
+
+
 
