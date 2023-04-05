@@ -2,7 +2,9 @@ library(devtools)
 library(dplyr)
 library(readr)
 
-rm(list=ls());cat('\f');gc()
+rm(list=ls()[!ls() %in% 
+               c("client", 
+                 "enrollment")]);cat('\f');gc()
 
 # setwd----
 a.wd <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023"
@@ -24,6 +26,7 @@ vars_QA       <- c("hh_age.unknown",
                    "hud_age_category", 
                    "fun_rel2hoh",
                    "fun_1.8_def")
+
 
 # Load Funs----
 vars_prior <- ls()
@@ -47,14 +50,30 @@ files_csv        <- files_all[files_is.csv & files_is.FLupper]
 rm(list = ls()[!ls() %in% c(vars_post, "files_csv")])
 vars_post <- ls()
 
-# Load Data----
-client     <- read_csv("Client.csv")
-enrollment <- read_csv("Enrollment.csv")
+# Load and Tidy Data----
+# client
+if(!"client" %in% ls()){
+  client     <- read_csv("Client.csv")
+}
 
-# Tidy Data----
-client$age         <- unlist(lapply(X = client$DOB, 
-                                    FUN = calc_age, 
-                                    age_on_date = pit.night))
-client$hud_age_cat <- unlist(lapply(X = client$age, 
-                                    FUN = hud_age_category))
+if("client" %in% ls()){
+  if(!"age" %in% names(client)){
+    client$age         <- unlist(lapply(X = client$DOB, 
+                                        FUN = calc_age, 
+                                        age_on_date = pit.night))
+  }
+  if(!"hud_age_cat" %in% names(client)){
+    client$hud_age_cat <- unlist(lapply(X = client$age, 
+                                        FUN = hud_age_category))
+  }
+  if(!"VeteranStatus_def" %in% names(client)){
+    client$VeteranStatus_def <- unlist(lapply(X = client$VeteranStatus, 
+                                              FUN = fun_1.8_def))
+  }
+}
+
+# enrollment
+enrollment <- read_csv("Enrollment.csv")
+enrollment$RelationshipToHoH_def <- unlist(lapply(X = enrollment$RelationshipToHoH, 
+                                                  FUN = fun_rel2hoh))
 
