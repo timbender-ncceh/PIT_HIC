@@ -10,19 +10,20 @@ d.wd <- "C:/Users/TimBender/Documents/R/ncceh/projects/pit_survey/January_2023/r
 setwd(a.wd)
 
 # Vars----
-vars_QA <- c("hh_age.unknown", 
-             "hh_wal1a1c", 
-             "hh_wo.c",
-             "hh_w.o.C",
-             "py_u18",
-             "py_18.24",
-             "uy", 
-             "hh_vet",
-             "hh_youth", 
-             "calc_age", 
-             "hud_age_category", 
-             "fun_rel2hoh",
-             "fun_1.8_def")
+pit.night     <- ymd(20230125)
+vars_QA       <- c("hh_age.unknown", 
+                   "hh_wal1a1c", 
+                   "hh_wo.c",
+                   "hh_w.o.C",
+                   "py_u18",
+                   "py_18.24",
+                   "uy", 
+                   "hh_vet",
+                   "hh_youth", 
+                   "calc_age", 
+                   "hud_age_category", 
+                   "fun_rel2hoh",
+                   "fun_1.8_def")
 
 # Load Funs----
 vars_prior <- ls()
@@ -49,3 +50,8 @@ vars_post <- ls()
 # Load Data----
 client     <- read_csv("Client.csv")
 enrollment <- read_csv("Enrollment.csv")
+
+# Tidy Data----
+client$age <- unlist(lapply(X = client$DOB, 
+                            FUN = calc_age, 
+                            age_on_date = pit.night))
