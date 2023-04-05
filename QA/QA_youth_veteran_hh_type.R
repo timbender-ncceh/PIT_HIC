@@ -7,6 +7,7 @@ rm(list=ls())
 
 # ui----
 ui <- navbarPage(title = "Household Size:", 
+                 header = shiny::titlePanel(title = "QA Check Logic for Youth_Veteran_Households"), 
                  tabPanel(title = "1-Person",
                           
                           sidebarLayout(
@@ -33,7 +34,7 @@ ui <- navbarPage(title = "Household Size:",
                             )
                           )
                           
-                          ), 
+                 ), 
                  tabPanel(title = "3-Person",
                           
                           sidebarLayout(
@@ -106,8 +107,8 @@ ui <- navbarPage(title = "Household Size:",
                             )
                           )
                           
-                          )
                  )
+)
 
 # server----
 server <- function(input,output,session){
