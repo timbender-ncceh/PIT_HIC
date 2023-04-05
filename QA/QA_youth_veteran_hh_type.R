@@ -182,8 +182,7 @@ ui <- navbarPage(title = "Household Size:",
                             sidebarPanel(
                               selectInput(inputId = "print_fun_hh00", 
                                           label = "Show Function Logic", 
-                                          choices = list("None Selected" = "",
-                                                         "hh_youth()" = hh_youth, 
+                                          choices = list("hh_youth()" = hh_youth, 
                                                          "hh_vet()"         = hh_vet, 
                                                          "hh_age.unknown()" = hh_age.unknown, 
                                                          "hh_w.o.C() (with only children)" = hh_w.o.C, 
@@ -318,10 +317,10 @@ server <- function(input,output,session){
   # inputs
   # outputs
   output$hhs_1_values.fun <- renderPrint({
-    cat(glue("#### SELECTED FUNCTION LOGIC: ####\n(for display only; no ineractive functionality)\n\n{input$print_fun_hh00}\n\n"))
+    cat(glue("#### SELECTED FUNCTION LOGIC: ####  (for display only; no ineractive functionality)\n\n{input$print_fun_hh00}\n\n"))
   })
   output$hhs_3_values.fun <- renderPrint({
-    cat(glue("#### SELECTED FUNCTION LOGIC: ####\n(for display only; no ineractive functionality)\n\n{input$print_fun_hh01}\n\n"))
+    cat(glue("#### SELECTED FUNCTION LOGIC: ####  (for display only; no ineractive functionality)\n\n{input$print_fun_hh01}\n\n"))
   })
   
   output$hhs_1_values1 <- renderPrint({
