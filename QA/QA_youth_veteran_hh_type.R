@@ -20,7 +20,9 @@ vars_QA <- c("hh_age.unknown",
              "hh_vet",
              "hh_youth", 
              "calc_age", 
-             "hud_age_category")
+             "hud_age_category", 
+             "fun_rel2hoh",
+             "fun_1.8_def")
 
 # Load Funs----
 vars_prior <- ls()
