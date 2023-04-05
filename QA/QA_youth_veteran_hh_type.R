@@ -1,5 +1,6 @@
 library(devtools)
 library(dplyr)
+library(readr)
 
 rm(list=ls());cat('\f');gc()
 
@@ -31,7 +32,7 @@ vars_post <- c(vars_prior, vars_QA)
 rm(list = ls()[!ls() %in% c(vars_post)])
 vars_post <- ls()
 
-# Load Data----
+# Identify Data----
 setwd(d.wd)
 
 files_all        <- list.files()
@@ -43,5 +44,6 @@ files_csv        <- files_all[files_is.csv & files_is.FLupper]
 rm(list = ls()[!ls() %in% c(vars_post, "files_csv")])
 vars_post <- ls()
 
-
-# 
+# Load Data----
+client     <- read_csv("Client.csv")
+enrollment <- read_csv("Enrollment.csv")
