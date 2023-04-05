@@ -1,7 +1,6 @@
 library(devtools)
 library(dplyr)
 
-
 rm(list=ls());cat('\f');gc()
 
 # setwd----
@@ -18,7 +17,9 @@ vars_QA <- c("hh_age.unknown",
              "py_18.24",
              "uy", 
              "hh_vet",
-             "hh_youth")
+             "hh_youth", 
+             "calc_age", 
+             "hud_age_category")
 
 # Load Funs----
 vars_prior <- ls()
@@ -41,3 +42,6 @@ files_csv        <- files_all[files_is.csv & files_is.FLupper]
 # Remove vars----
 rm(list = ls()[!ls() %in% c(vars_post, "files_csv")])
 vars_post <- ls()
+
+
+# 
