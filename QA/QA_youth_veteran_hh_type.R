@@ -168,8 +168,9 @@ hh_youth <- function(ages, age.upperlim = 24){
   }else{
     if(all(ages <= age.upperlim)){
       out <- T
-    }else
+    }else{
       out <- F
+    }
   }
   return(out)
 }
