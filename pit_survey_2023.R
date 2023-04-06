@@ -595,7 +595,16 @@ mini_rpt.ch <- output2A %>%
   summarise(n_pid = n_distinct(PersonalID)) %>%
   ungroup() %>%
   mutate(., 
-         pct_total = n_pid / sum(n_pid))
+         pct_pit = n_pid / sum(n_pid))
+
+output2A %>%
+  group_by(HouseholdID) %>%
+  summarise(any_chronic = sum(ChronicStatus == "Chronic", na.rm = T) > 0) %>%
+  group_by(any_chronic) %>%
+  summarise(n_hhid = n_distinct(HouseholdID)) %>%
+  ungroup() %>%
+  mutate(., 
+         ptc_hhid = n_hhid/sum(n_hhid))
 
 # ANDREA COLUMN CHANGES----
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
@@ -704,7 +713,7 @@ comp.cols$future[comp.cols$col_name %in%
 
 #comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
 
-comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
+#comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
 
 comp.cols <- comp.cols %>%
   .[order(.$future),]
