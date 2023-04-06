@@ -589,6 +589,14 @@ output2A <- left_join(output2A,
 output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(cldet.df)
 
+# chronic homelessness mini-report----
+mini_rpt.ch <- output2A %>%
+  group_by(ChronicStatus) %>%
+  summarise(n_pid = n_distinct(PersonalID)) %>%
+  ungroup() %>%
+  mutate(., 
+         pct_total = n_pid / sum(n_pid))
+
 # ANDREA COLUMN CHANGES----
 andrea_cols_changes <- read_tsv("COLUMN_NAME	Original_Order	New_Order_Requested	REMOVE_COLUMN	NEED_TO_FINISH	RENAME_to_this_from_column_A
 PersonalID	1	1
