@@ -15,7 +15,7 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230330)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230406)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
    !Sys.Date() %in% thurs.hmis.pulls.complete){
@@ -186,20 +186,33 @@ rm(flag.child.hoh)
 # NC County of Service & Region
 zip_co.cw <- read_tsv(file = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/crosswalks/zip_county_crosswalk.txt")
 
+# load co-region crosswalk
+co_reg.cw <- read_csv("https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/crosswalks/county_district_region_crosswalk.csv")
+# tidy crosswalk
+co_reg.cw <- co_reg.cw[,c("Coc/Region", "County")]
+colnames(co_reg.cw) <- c("Region", "County")
+co_reg.cw <- co_reg.cw[grepl(pattern = "BoS Region", co_reg.cw$Region),]
+co_reg.cw$Region <- gsub("^BoS ", "", co_reg.cw$Region)
+
 a.projectcoc <- read_csv(file = "ProjectCoC.csv") %>%
   left_join(., zip_co.cw[,c("ZIP", "County", "City")]) %>%
-  left_join(., get_coc_region())
+  #left_join(., get_coc_region())
+  left_join(., co_reg.cw)
 
 a.projectcoc2 <- read_csv(file = "ProjectCoC.csv") %>%
   .[,c("ProjectID", "City", "State", "ZIP")] %>% 
   left_join(., 
             zip_co.cw[,c("ZIP", "County", "City")]) %>%
-  left_join(., 
-            get_coc_region())
+  # left_join(., 
+  #           get_coc_region())
+  left_join(., co_reg.cw)
 
 a.enrollment2 <- left_join(a.enrollment[,c("EnrollmentID", "PersonalID", "ProjectID", 
                                            "NCCounty")], 
-                           get_coc_region(), by = c("NCCounty" = "County"))
+                           #get_coc_region(), by = c("NCCounty" = "County"))
+                           co_reg.cw, 
+                           by = c("NCCounty" = "County"))
+                           
 
 rm(zip_co.cw)
 
@@ -667,7 +680,7 @@ fun_comp.cols <- function(cur.colnames.ord = colnames(output2A),
 comp.cols <- fun_comp.cols(colnames(output2A), 
                            andrea_cols_changes$COLUMN_NAME[order(andrea_cols_changes$New_Order_Requested)])
 
-comp.cols[comp.cols$col_name == "ChronicStatus",]$future <- 19.5
+comp.cols[comp.cols$col_name == "ChronicStatus",]$future <- 20
 comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
 
 comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
