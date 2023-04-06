@@ -667,88 +667,89 @@ get.proj_county <- function(proj_zip = c(27704, 27626, 27829, 45036),
   return(out)
 }
 
-get.calc_region <- function(calc_location_county = NA){
-  require(dplyr)
-  out <- NA
-  # case_correct
-  clc <- tolower(calc_location_county)
-  if(!is.na(clc)){
-    clc <- paste(toupper(substr(clc,1,1)), substr(clc,2,nchar(clc)), 
-                 sep = "", collapse = "")
-  }
-  try(calc_location_county <- clc)
-  # Region 13
-  if(calc_location_county %in%
-     c("Carteret", "Craven", "Jones", "Onslow", "Pamlico") ){
-    out <- "Region 13"
-  }
-  # Region 12
-  if(calc_location_county %in%
-     c("Beaufort", "Bertie", "Hyde", "Martin", "Pitt", "Washington") ){
-    out <- "Region 12"
-  }
-  # Region 11
-  if(calc_location_county %in%
-     c("Camden", "Chowan", "Currituck", "Dare", "Gates", "Hertford", "Pasquotank", "Perquimans", "Tyrrell") ){
-    out <- "Region 11"
-  }
-  # Region 10
-  if(calc_location_county %in%
-     c("Duplin", "Greene", "Lenoir", "Sampson", "Wayne", "Wilson") ){
-    out <- "Region 10"
-  }
-  # Region 9
-  if(calc_location_county %in%
-     c("Edgecombe", "Franklin", "Granville", "Halifax", "Nash", "Northampton", "Vance", "Warren") ){
-    out <- "Region 9"
-  }
-  # Region 8
-  if(calc_location_county %in%
-     c("Bladen", "Columbus", "Robeson", "Scotland") ){
-    out <- "Region 8"
-  }
-  # Region 7
-  if(calc_location_county %in%
-     c("Anson", "Harnett", "Hoke", "Johnston", "Lee", "Montgomery", "Moore", "Randolph", "Richmond") ){
-    out <- "Region 7"
-  }
-  # Region 6
-  if(calc_location_county %in%
-     c("Alamance", "Caswell", "Chatham", "Person", "Rockingham") ){
-    out <- "Region 6"
-  }
-  # Region 5
-  if(calc_location_county %in%
-     c("Cabarrus", "Davidson", "Rowan", "Stanly", "Union") ){
-    out <- "Region 5"
-  }
-  # Region 4
-  if(calc_location_county %in%
-     c("Davie", "Iredell", "Stokes", "Surry", "Yadkin") ){
-    out <- "Region 4"
-  }
-  # Region 3
-  if(calc_location_county %in%
-     c("Alexander", "Burke", "Caldwell", "Catawba", "Mcdowell") ){
-    out <- "Region 3"
-  }
-  # Region 2
-  if(calc_location_county %in%
-     c("Henderson", "Polk", "Rutherford", "Transylvania") ){
-    out <- "Region 2"
-  }
-  # Region 1
-  if(calc_location_county %in%
-     c("Cherokee", "Clay", "Graham", "Haywood", "Jackson", "Macon", "Madison", "Swain") ){
-    out <- "Region 1"
-  }
-  out1 <- NULL
-  try(out1 <- out)
-  if(length(out1) != 1){
-    out1 <- NA
-  }
-  return(out1)
-}
+# # depreceate this too and use crosswalk: 
+# get.calc_region <- function(calc_location_county = NA){
+#   require(dplyr)
+#   out <- NA
+#   # case_correct
+#   clc <- tolower(calc_location_county)
+#   if(!is.na(clc)){
+#     clc <- paste(toupper(substr(clc,1,1)), substr(clc,2,nchar(clc)), 
+#                  sep = "", collapse = "")
+#   }
+#   try(calc_location_county <- clc)
+#   # Region 13
+#   if(calc_location_county %in%
+#      c("Carteret", "Craven", "Jones", "Onslow", "Pamlico") ){
+#     out <- "Region 13"
+#   }
+#   # Region 12
+#   if(calc_location_county %in%
+#      c("Beaufort", "Bertie", "Hyde", "Martin", "Pitt", "Washington") ){
+#     out <- "Region 12"
+#   }
+#   # Region 11
+#   if(calc_location_county %in%
+#      c("Camden", "Chowan", "Currituck", "Dare", "Gates", "Hertford", "Pasquotank", "Perquimans", "Tyrrell") ){
+#     out <- "Region 11"
+#   }
+#   # Region 10
+#   if(calc_location_county %in%
+#      c("Duplin", "Greene", "Lenoir", "Sampson", "Wayne", "Wilson") ){
+#     out <- "Region 10"
+#   }
+#   # Region 9
+#   if(calc_location_county %in%
+#      c("Edgecombe", "Franklin", "Granville", "Halifax", "Nash", "Northampton", "Vance", "Warren") ){
+#     out <- "Region 9"
+#   }
+#   # Region 8
+#   if(calc_location_county %in%
+#      c("Bladen", "Columbus", "Robeson", "Scotland") ){
+#     out <- "Region 8"
+#   }
+#   # Region 7
+#   if(calc_location_county %in%
+#      c("Anson", "Harnett", "Hoke", "Johnston", "Lee", "Montgomery", "Moore", "Randolph", "Richmond") ){
+#     out <- "Region 7"
+#   }
+#   # Region 6
+#   if(calc_location_county %in%
+#      c("Alamance", "Caswell", "Chatham", "Person", "Rockingham") ){
+#     out <- "Region 6"
+#   }
+#   # Region 5
+#   if(calc_location_county %in%
+#      c("Cabarrus", "Davidson", "Rowan", "Stanly", "Union") ){
+#     out <- "Region 5"
+#   }
+#   # Region 4
+#   if(calc_location_county %in%
+#      c("Davie", "Iredell", "Stokes", "Surry", "Yadkin") ){
+#     out <- "Region 4"
+#   }
+#   # Region 3
+#   if(calc_location_county %in%
+#      c("Alexander", "Burke", "Caldwell", "Catawba", "Mcdowell") ){
+#     out <- "Region 3"
+#   }
+#   # Region 2
+#   if(calc_location_county %in%
+#      c("Henderson", "Polk", "Rutherford", "Transylvania") ){
+#     out <- "Region 2"
+#   }
+#   # Region 1
+#   if(calc_location_county %in%
+#      c("Cherokee", "Clay", "Graham", "Haywood", "Jackson", "Macon", "Madison", "Swain") ){
+#     out <- "Region 1"
+#   }
+#   out1 <- NULL
+#   try(out1 <- out)
+#   if(length(out1) != 1){
+#     out1 <- NA
+#   }
+#   return(out1)
+# }
 
 search_region.names <- function(projname = "Greenville Community Shelters - (Region 1) Pitt County - Emergency Shelter - ES - State ESG CV"){
   out <- gsub(pattern = "Region {1,}", "Region_", projname)
