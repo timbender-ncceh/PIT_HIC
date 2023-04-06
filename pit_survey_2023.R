@@ -683,7 +683,18 @@ comp.cols <- fun_comp.cols(colnames(output2A),
                            andrea_cols_changes$COLUMN_NAME[order(andrea_cols_changes$New_Order_Requested)])
 
 comp.cols[comp.cols$col_name == "ChronicStatus",]$future <- 20
-comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
+
+comp.cols <- comp.cols[order(comp.cols$future),]
+
+comp.cols$future <- comp.cols$future %>% as.numeric
+comp.cols$future[comp.cols$future == 20 & 
+                   !is.na(comp.cols$future)] <- c(20, 20.1)
+
+comp.cols$future[comp.cols$col_name %in%
+                   grep(pattern = "^hh1_|^py1_|^uy1", comp.cols$col_name, value = T)] <- seq(from = 20.21, to = 20.29, 
+    length.out = length(grep(pattern = "^hh1_|^py1_|^uy1", comp.cols$col_name, value = T)))
+
+#comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
 
 comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
 
