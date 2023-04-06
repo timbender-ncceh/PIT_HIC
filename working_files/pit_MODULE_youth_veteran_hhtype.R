@@ -5,19 +5,19 @@ temp.client     <- read_csv("Client.csv")
 
 # tidy----
 temp.client$age                       <- calc_age(temp.client$DOB, 
-                                               decimal.month = F,
-                                               age_on_date = pit.night)
+                                                  decimal.month = F,
+                                                  age_on_date = pit.night)
 temp.client$VeteranStatus_def         <- unlist(lapply(X = temp.client$VeteranStatus, 
-                                                    FUN = fun_1.8_def))
+                                                       FUN = fun_1.8_def))
 temp.enrollment$RelationshipToHoH_def <- unlist(lapply(X = temp.enrollment$RelationshipToHoH, 
-                                                    FUN = fun_rel2hoh))
+                                                       FUN = fun_rel2hoh))
 
 
 # REAL DATA----
 yvhh.df <- left_join(temp.enrollment[,c("HouseholdID", "PersonalID", "EnrollmentID", 
-                                     "RelationshipToHoH_def")], 
+                                        "RelationshipToHoH_def")], 
                      temp.client[,c("PersonalID", "age", 
-                                 "VeteranStatus_def")]) %>%
+                                    "VeteranStatus_def")]) %>%
   mutate(., 
          hh1_age.unknown = NA,
          hh1_vet         = NA,
@@ -34,7 +34,7 @@ rm(temp.client,temp.enrollment)
 
 
 for(i in unique(yvhh.df$HouseholdID)){
- #print(i)
+  #print(i)
   if(!is.na(i)){
     yvhh.df$hh1_age.unknown[yvhh.df$HouseholdID == i] <- hh_age.unknown(ages = yvhh.df$age[yvhh.df$HouseholdID == i])
     yvhh.df$hh1_vet[yvhh.df$HouseholdID == i]         <- hh_vet(vet.statuses = yvhh.df$VeteranStatus_def[yvhh.df$HouseholdID == i])
@@ -52,34 +52,36 @@ for(i in unique(yvhh.df$HouseholdID)){
 }
 rm(i)
 
-yvhh.df <- yvhh.df %>%
-  mutate(.,
-         hh1_youth       = ifelse(hh1_youth, "YOUTH", ""),
-         hh1_age.unknown = ifelse(hh1_age.unknown, "AGE_UNKNOWN", ""),
-         hh1_vet         = ifelse(hh1_vet == "Yes", "VETERAN", ""),
-         hh1_w.o.C       = ifelse(hh1_w.o.C, "hh_with_only_children", ""),
-         hh1_wal1a1c     = ifelse(hh1_wal1a1c, "hh_with_1adult1child", ""),
-         hh1_wo.c        = ifelse(hh1_wo.c, "hh_without_children", ""),
-         py1_u18         = ifelse(py1_u18, "py_under18", ""),
-         py1_18.24       = ifelse(py1_18.24, "py_18to24", ""),
-         uy1             = ifelse(uy1, "unaccomp_youth", "")) %>%
-  mutate(.,
-         YV_hh_type = paste(hh1_youth,
-                             hh1_age.unknown,
-                             hh1_vet,
-                             hh1_w.o.C,
-                             hh1_wal1a1c,
-                             hh1_wo.c,
-                             py1_u18,
-                             py1_18.24,
-                             uy1,
-                             sep = "-")) %>%
-  mutate(.,
-         YV_hh_type = gsub(pattern = "^-{1,}|-{1,}$", "", YV_hh_type),
-         YV_hh_type = gsub(pattern = "-{1,}", ", ", YV_hh_type))
+# yvhh.df <- yvhh.df %>%
+#   mutate(.,
+#          hh1_youth       = ifelse(hh1_youth, "YOUTH", ""),
+#          hh1_age.unknown = ifelse(hh1_age.unknown, "AGE_UNKNOWN", ""),
+#          hh1_vet         = ifelse(hh1_vet == "Yes", "VETERAN", ""),
+#          hh1_w.o.C       = ifelse(hh1_w.o.C, "hh_with_only_children", ""),
+#          hh1_wal1a1c     = ifelse(hh1_wal1a1c, "hh_with_1adult1child", ""),
+#          hh1_wo.c        = ifelse(hh1_wo.c, "hh_without_children", ""),
+#          py1_u18         = ifelse(py1_u18, "py_under18", ""),
+#          py1_18.24       = ifelse(py1_18.24, "py_18to24", ""),
+#          uy1             = ifelse(uy1, "unaccomp_youth", "")) %>%
+#   mutate(.,
+#          YV_hh_type = paste(hh1_youth,
+#                             hh1_age.unknown,
+#                             hh1_vet,
+#                             hh1_w.o.C,
+#                             hh1_wal1a1c,
+#                             hh1_wo.c,
+#                             py1_u18,
+#                             py1_18.24,
+#                             uy1,
+#                             sep = "-")) %>%
+#   mutate(.,
+#          YV_hh_type = gsub(pattern = "^-{1,}|-{1,}$", "", YV_hh_type),
+#          YV_hh_type = gsub(pattern = "-{1,}", ", ", YV_hh_type))
 
 
 
 # minimum colums
 yvhh.df <- yvhh.df[,c("PersonalID", "EnrollmentID", "HouseholdID", 
-                      "YV_hh_type")]
+                      grep(pattern = "^hh1_|^py1_|^uy1", 
+                           x = colnames(yvhh.df), ignore.case = T, 
+                           value = T))]

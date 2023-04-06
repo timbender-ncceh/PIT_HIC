@@ -275,7 +275,7 @@ for(i in 1:nrow(a.enrollment)){
   }
   
   # Regions
-  a.enrollment$calc_region[i] <- get.calc_region(a.enrollment$calc_location_county[i])
+  try(a.enrollment$calc_region[i] <- unique(co_reg.cw$Region[co_reg.cw$County == a.enrollment$calc_location_county[i]]))
   # if you don't get a region back (i.e. NA returned above)
   if(is.na(a.enrollment$calc_region[i])){
     # see if you can extract county from project name, then join region<-->county table
@@ -287,8 +287,10 @@ for(i in 1:nrow(a.enrollment)){
     temp <- search_county.names(a.project$ProjectName[a.project$ProjectID %in% a.enrollment$ProjectID[i]]) %>%
       unique() %>%
       gsub("county$|co$| co.*$", "", ., ignore.case = T) %>%
-      trimws() %>%
-      get.calc_region()
+      trimws() 
+    if(!is.na(temp)){
+      try(temp <- co_reg.cw$Region[co_reg.cw$County %in% temp])
+    }
     
     # the other way is to skip county name altogether and search for region name
     # in project name as below vvv
@@ -681,7 +683,18 @@ comp.cols <- fun_comp.cols(colnames(output2A),
                            andrea_cols_changes$COLUMN_NAME[order(andrea_cols_changes$New_Order_Requested)])
 
 comp.cols[comp.cols$col_name == "ChronicStatus",]$future <- 20
-comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
+
+comp.cols <- comp.cols[order(comp.cols$future),]
+
+comp.cols$future <- comp.cols$future %>% as.numeric
+comp.cols$future[comp.cols$future == 20 & 
+                   !is.na(comp.cols$future)] <- c(20, 20.1)
+
+comp.cols$future[comp.cols$col_name %in%
+                   grep(pattern = "^hh1_|^py1_|^uy1", comp.cols$col_name, value = T)] <- seq(from = 20.21, to = 20.29, 
+    length.out = length(grep(pattern = "^hh1_|^py1_|^uy1", comp.cols$col_name, value = T)))
+
+#comp.cols[comp.cols$col_name == "YV_hh_type",]$future <- 23
 
 comp.cols <- comp.cols[!comp.cols$col_name %in% c("HouseholdID"),]
 
@@ -719,11 +732,10 @@ output2[is.na(output2$age_calc) &
           c("Full DOB reported", "Approximate or partial DOB reported"),]$issue.DOB_vs_DOBDataQuality <- T
 
 output2$issue_race <- output2$race_calc == "[unknown]"
-output2$householdType_def %>% unique()
+
 
 output2$issue_no_HeadOfHousehold <- is.na(output2$PersonalID == output2$HoH_PersonalID & 
                                             output2$reltionshiptohoh_def != "Self (head of household)")
-
 
 output3 <- output2 %>%
   .[!duplicated(.),] %>%
@@ -881,21 +893,18 @@ for(i in dqfiles){
   
 }
 
-
 dq.file.info <- pit_xls_info(dqfiles) %>%
   .[.$which_file == "DQ_Flag",]
 
-
 plot.data <- as_tibble(dq.flag.count) %>%
-  group_by(filename, 
-           #calc_region
-  ) %>%
+  group_by(filename) %>%
   summarise(t_flags = sum(n)) %>%
   right_join(., dq.file.info, 
              by = c("filename" = "file_name")) %>%
   .[.$dow == "Thu",] %>%
   group_by(file_date) %>%
-  slice_max(., order_by = file_datetime, n = 1)
+  slice_max(., order_by = file_datetime, n = 1) 
+
 
 ggplot() +
   geom_vline(aes(xintercept = ymd_hm("20230125 12:00"), 
