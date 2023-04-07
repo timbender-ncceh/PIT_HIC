@@ -1,4 +1,3 @@
-
 # Libraries----
 library(dplyr)
 library(readr)
@@ -576,18 +575,18 @@ output2A <- left_join(output2A, yvhh.df)
 rm(yvhh.df)
 
 # CHRONICALLY HOMELESS----
-devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_chronicallyhomeless.R?raw=TRUE")
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_chronicallyhomeless_ind.R?raw=TRUE")
 # temporarily add new joinby col
 output2A <- mutate(output2A, 
                    EntryDate_char = as.character(EntryDate))
 # join to future output
 output2A <- left_join(output2A, 
-                      cldet.df, 
+                      CH.status.ind, 
                       by = c("PersonalID", "EntryDate_char"))
 # cleanup
 # remove temp entrydate_char col
 output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
-rm(cldet.df)
+rm(CH.status.ind)
 
 # chronic homelessness mini-report----
 mini_rpt.ch <- output2A %>%
