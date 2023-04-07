@@ -1,8 +1,7 @@
 library(devtools)
 library(dplyr)
 
-# creates an dataframe output that shows clients who are living in a household
-# with at least 1 person who has a CH condition
+# returns a vector of households with at least 1 ch pid
 
 # Run pit_MODULE_chronicallyhomeless_ind.R ----
 devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_chronicallyhomeless_ind.R?raw=TRUE")
