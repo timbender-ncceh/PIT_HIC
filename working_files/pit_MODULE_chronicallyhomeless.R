@@ -1,4 +1,6 @@
 # CHRONIC HOMELESSNESS MODULE
+# this produces a data frame of all individuals in report A003...xlsx and their
+# reported Chronic Status at time of enrollment.
 
 library(openxlsx)
 library(datetimeutils)
@@ -103,9 +105,14 @@ cldet.df$EntryDate_char <- as.character(cldet.df$EntryDate)
 # remove EntryDate col
 cldet.df <- cldet.df[!colnames(cldet.df) %in% "EntryDate"]
 
+# set output of this module to a variable named CH.status.ind
+CH.status.ind <- cldet.df
+
+
 # cleanup ----
 rm(ch.input.name, 
    client.colnames.txt, 
-   loadrows)
+   loadrows,
+   cldet.df)
 
 
