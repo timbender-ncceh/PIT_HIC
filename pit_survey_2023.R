@@ -588,6 +588,10 @@ output2A <- left_join(output2A,
 output2A <- output2A[!colnames(output2A) %in% "EntryDate_char"]
 rm(CH.status.ind)
 
+# identify households with at least 1 CH pid----
+devtools::source_url(url = "https://raw.githubusercontent.com/timbender-ncceh/PIT_HIC/dev/working_files/pit_MODULE_chronicallyhomeless_byHH.R?raw=TRUE")
+output2A$pid_in_hh_wal1_CH <- output2A$HouseholdID %in% CH_hhid
+
 # chronic homelessness mini-report----
 mini_rpt.ch <- output2A %>%
   group_by(ChronicStatus) %>%
