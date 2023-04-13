@@ -725,7 +725,16 @@ comp.cols <- comp.cols %>%
 output2A <- output2A[,comp.cols$col_name]
 
 # find out how many rows per unique pid
-
+output2A %>%
+  .[.$hh_cls == 16 &  
+      !is.na(.$hh_cls),] %>%
+      .[.$hh_cls_infodate == ymd(20230125) & 
+          !is.na(.$hh_cls_infodate),] %>%
+  group_by(PersonalID) %>%
+  summarise(n = n()) %>%
+   .$n %>% table()
+  # group_by(only_1_row_per_PID = n == 1) %>%
+  # summarise(n = n())
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
