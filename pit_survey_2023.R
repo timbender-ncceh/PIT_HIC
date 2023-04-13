@@ -732,7 +732,11 @@ output2A %>%
           !is.na(.$hh_cls_infodate),] %>%
   group_by(PersonalID) %>%
   summarise(n = n()) %>%
-   .$n %>% table()
+  .[.$n > 1,] %>%
+  write_csv(., 
+            file = "dup_pid_report.csv")
+
+#.$n %>% table()
   # group_by(only_1_row_per_PID = n == 1) %>%
   # summarise(n = n())
 
