@@ -14,10 +14,11 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230406)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230413)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
-   !Sys.Date() %in% thurs.hmis.pulls.complete){
+   !Sys.Date() %in% thurs.hmis.pulls.complete & 
+   Sys.Date() <= ymd(20230413)){
   # build hmis search: 
   
   # NAME: Unsheltered PIT Custom CSV 1/22/23 - 2/4/23 (For Tim!)
@@ -723,6 +724,7 @@ comp.cols <- comp.cols %>%
 
 output2A <- output2A[,comp.cols$col_name]
 
+# find out how many rows per unique pid
 
 
 # write output2A to .xlsx----
