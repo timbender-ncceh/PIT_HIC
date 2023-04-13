@@ -14,10 +14,11 @@ gc()
 
 # re-run 2023 pit data every Thursday morning until 3/31/2023
 
-thurs.hmis.pulls.complete <- ymd(c(20230406)) # update this after you pull and export new data each thursday
+thurs.hmis.pulls.complete <- ymd(c(20230413)) # update this after you pull and export new data each thursday
 
 if(as.character(lubridate::wday(Sys.Date(),label=T,abbr=F))=="Thursday" & 
-   !Sys.Date() %in% thurs.hmis.pulls.complete){
+   !Sys.Date() %in% thurs.hmis.pulls.complete & 
+   Sys.Date() <= ymd(20230413)){
   # build hmis search: 
   
   # NAME: Unsheltered PIT Custom CSV 1/22/23 - 2/4/23 (For Tim!)
@@ -723,7 +724,21 @@ comp.cols <- comp.cols %>%
 
 output2A <- output2A[,comp.cols$col_name]
 
+# find out how many rows per unique pid
+output2A %>%
+  .[.$hh_cls == 16 &  
+      !is.na(.$hh_cls),] %>%
+      .[.$hh_cls_infodate == ymd(20230125) & 
+          !is.na(.$hh_cls_infodate),] %>%
+  group_by(PersonalID) %>%
+  summarise(n = n()) %>%
+  .[.$n > 1,] %>%
+  write_csv(., 
+            file = "dup_pid_report.csv")
 
+#.$n %>% table()
+  # group_by(only_1_row_per_PID = n == 1) %>%
+  # summarise(n = n())
 
 # write output2A to .xlsx----
 write.xlsx(x = output2A[!duplicated(output2A),], 
